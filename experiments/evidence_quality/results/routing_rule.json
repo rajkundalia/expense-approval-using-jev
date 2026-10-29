@@ -1,0 +1,360 @@
+{
+  "rule": {
+    "name": "balanced",
+    "noul_min": 0.8,
+    "score_min": 1.5
+  },
+  "basis": "development-primary-only selection",
+  "candidate_comparison": [
+    {
+      "rule": {
+        "name": "balanced",
+        "noul_min": 0.8,
+        "score_min": 1.5
+      },
+      "D_development_primary": {
+        "planned_trials": 87,
+        "evaluable_trials": 87,
+        "j2_false_supported": 3,
+        "false_continue_trials": 0,
+        "false_continue_cases": [],
+        "unnecessary_hold_trials": 0,
+        "unnecessary_hold_cases": [],
+        "incremental_unnecessary_holds": 0,
+        "wrong_excluded_purpose_routes": 0,
+        "route_counts": {
+          "CONTINUE": 57,
+          "EXCLUDED_PURPOSE": 9,
+          "CLARIFY": 12,
+          "REVIEW": 9,
+          "API_FAILURE": 0,
+          "NOT_MEASURED": 0
+        }
+      },
+      "loss": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "all_configurations": {
+        "A": {
+          "planned_trials": 87,
+          "evaluable_trials": 87,
+          "j2_false_supported": 3,
+          "false_continue_trials": 3,
+          "false_continue_cases": [
+            "J2-30"
+          ],
+          "unnecessary_hold_trials": 0,
+          "unnecessary_hold_cases": [],
+          "incremental_unnecessary_holds": 0,
+          "wrong_excluded_purpose_routes": 0,
+          "route_counts": {
+            "CONTINUE": 60,
+            "EXCLUDED_PURPOSE": 9,
+            "CLARIFY": 12,
+            "REVIEW": 6,
+            "API_FAILURE": 0,
+            "NOT_MEASURED": 0
+          }
+        },
+        "B": {
+          "planned_trials": 87,
+          "evaluable_trials": 87,
+          "j2_false_supported": 3,
+          "false_continue_trials": 0,
+          "false_continue_cases": [],
+          "unnecessary_hold_trials": 0,
+          "unnecessary_hold_cases": [],
+          "incremental_unnecessary_holds": 0,
+          "wrong_excluded_purpose_routes": 0,
+          "route_counts": {
+            "CONTINUE": 57,
+            "EXCLUDED_PURPOSE": 9,
+            "CLARIFY": 12,
+            "REVIEW": 9,
+            "API_FAILURE": 0,
+            "NOT_MEASURED": 0
+          }
+        },
+        "C": {
+          "planned_trials": 87,
+          "evaluable_trials": 87,
+          "j2_false_supported": 3,
+          "false_continue_trials": 0,
+          "false_continue_cases": [],
+          "unnecessary_hold_trials": 0,
+          "unnecessary_hold_cases": [],
+          "incremental_unnecessary_holds": 0,
+          "wrong_excluded_purpose_routes": 0,
+          "route_counts": {
+            "CONTINUE": 57,
+            "EXCLUDED_PURPOSE": 9,
+            "CLARIFY": 15,
+            "REVIEW": 6,
+            "API_FAILURE": 0,
+            "NOT_MEASURED": 0
+          }
+        },
+        "D": {
+          "planned_trials": 87,
+          "evaluable_trials": 87,
+          "j2_false_supported": 3,
+          "false_continue_trials": 0,
+          "false_continue_cases": [],
+          "unnecessary_hold_trials": 0,
+          "unnecessary_hold_cases": [],
+          "incremental_unnecessary_holds": 0,
+          "wrong_excluded_purpose_routes": 0,
+          "route_counts": {
+            "CONTINUE": 57,
+            "EXCLUDED_PURPOSE": 9,
+            "CLARIFY": 12,
+            "REVIEW": 9,
+            "API_FAILURE": 0,
+            "NOT_MEASURED": 0
+          }
+        }
+      }
+    },
+    {
+      "rule": {
+        "name": "lenient",
+        "noul_min": 0.7,
+        "score_min": 1.25
+      },
+      "D_development_primary": {
+        "planned_trials": 87,
+        "evaluable_trials": 87,
+        "j2_false_supported": 3,
+        "false_continue_trials": 0,
+        "false_continue_cases": [],
+        "unnecessary_hold_trials": 0,
+        "unnecessary_hold_cases": [],
+        "incremental_unnecessary_holds": 0,
+        "wrong_excluded_purpose_routes": 0,
+        "route_counts": {
+          "CONTINUE": 57,
+          "EXCLUDED_PURPOSE": 9,
+          "CLARIFY": 12,
+          "REVIEW": 9,
+          "API_FAILURE": 0,
+          "NOT_MEASURED": 0
+        }
+      },
+      "loss": [
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "all_configurations": {
+        "A": {
+          "planned_trials": 87,
+          "evaluable_trials": 87,
+          "j2_false_supported": 3,
+          "false_continue_trials": 3,
+          "false_continue_cases": [
+            "J2-30"
+          ],
+          "unnecessary_hold_trials": 0,
+          "unnecessary_hold_cases": [],
+          "incremental_unnecessary_holds": 0,
+          "wrong_excluded_purpose_routes": 0,
+          "route_counts": {
+            "CONTINUE": 60,
+            "EXCLUDED_PURPOSE": 9,
+            "CLARIFY": 12,
+            "REVIEW": 6,
+            "API_FAILURE": 0,
+            "NOT_MEASURED": 0
+          }
+        },
+        "B": {
+          "planned_trials": 87,
+          "evaluable_trials": 87,
+          "j2_false_supported": 3,
+          "false_continue_trials": 0,
+          "false_continue_cases": [],
+          "unnecessary_hold_trials": 0,
+          "unnecessary_hold_cases": [],
+          "incremental_unnecessary_holds": 0,
+          "wrong_excluded_purpose_routes": 0,
+          "route_counts": {
+            "CONTINUE": 57,
+            "EXCLUDED_PURPOSE": 9,
+            "CLARIFY": 12,
+            "REVIEW": 9,
+            "API_FAILURE": 0,
+            "NOT_MEASURED": 0
+          }
+        },
+        "C": {
+          "planned_trials": 87,
+          "evaluable_trials": 87,
+          "j2_false_supported": 3,
+          "false_continue_trials": 0,
+          "false_continue_cases": [],
+          "unnecessary_hold_trials": 0,
+          "unnecessary_hold_cases": [],
+          "incremental_unnecessary_holds": 0,
+          "wrong_excluded_purpose_routes": 0,
+          "route_counts": {
+            "CONTINUE": 57,
+            "EXCLUDED_PURPOSE": 9,
+            "CLARIFY": 15,
+            "REVIEW": 6,
+            "API_FAILURE": 0,
+            "NOT_MEASURED": 0
+          }
+        },
+        "D": {
+          "planned_trials": 87,
+          "evaluable_trials": 87,
+          "j2_false_supported": 3,
+          "false_continue_trials": 0,
+          "false_continue_cases": [],
+          "unnecessary_hold_trials": 0,
+          "unnecessary_hold_cases": [],
+          "incremental_unnecessary_holds": 0,
+          "wrong_excluded_purpose_routes": 0,
+          "route_counts": {
+            "CONTINUE": 57,
+            "EXCLUDED_PURPOSE": 9,
+            "CLARIFY": 12,
+            "REVIEW": 9,
+            "API_FAILURE": 0,
+            "NOT_MEASURED": 0
+          }
+        }
+      }
+    },
+    {
+      "rule": {
+        "name": "cautious",
+        "noul_min": 0.9,
+        "score_min": 1.75
+      },
+      "D_development_primary": {
+        "planned_trials": 87,
+        "evaluable_trials": 87,
+        "j2_false_supported": 3,
+        "false_continue_trials": 0,
+        "false_continue_cases": [],
+        "unnecessary_hold_trials": 3,
+        "unnecessary_hold_cases": [
+          "J2-14"
+        ],
+        "incremental_unnecessary_holds": 3,
+        "wrong_excluded_purpose_routes": 0,
+        "route_counts": {
+          "CONTINUE": 54,
+          "EXCLUDED_PURPOSE": 9,
+          "CLARIFY": 15,
+          "REVIEW": 9,
+          "API_FAILURE": 0,
+          "NOT_MEASURED": 0
+        }
+      },
+      "loss": [
+        0,
+        1,
+        0,
+        3,
+        2
+      ],
+      "all_configurations": {
+        "A": {
+          "planned_trials": 87,
+          "evaluable_trials": 87,
+          "j2_false_supported": 3,
+          "false_continue_trials": 3,
+          "false_continue_cases": [
+            "J2-30"
+          ],
+          "unnecessary_hold_trials": 0,
+          "unnecessary_hold_cases": [],
+          "incremental_unnecessary_holds": 0,
+          "wrong_excluded_purpose_routes": 0,
+          "route_counts": {
+            "CONTINUE": 60,
+            "EXCLUDED_PURPOSE": 9,
+            "CLARIFY": 12,
+            "REVIEW": 6,
+            "API_FAILURE": 0,
+            "NOT_MEASURED": 0
+          }
+        },
+        "B": {
+          "planned_trials": 87,
+          "evaluable_trials": 87,
+          "j2_false_supported": 3,
+          "false_continue_trials": 0,
+          "false_continue_cases": [],
+          "unnecessary_hold_trials": 3,
+          "unnecessary_hold_cases": [
+            "J2-14"
+          ],
+          "incremental_unnecessary_holds": 3,
+          "wrong_excluded_purpose_routes": 0,
+          "route_counts": {
+            "CONTINUE": 54,
+            "EXCLUDED_PURPOSE": 9,
+            "CLARIFY": 15,
+            "REVIEW": 9,
+            "API_FAILURE": 0,
+            "NOT_MEASURED": 0
+          }
+        },
+        "C": {
+          "planned_trials": 87,
+          "evaluable_trials": 87,
+          "j2_false_supported": 3,
+          "false_continue_trials": 0,
+          "false_continue_cases": [],
+          "unnecessary_hold_trials": 3,
+          "unnecessary_hold_cases": [
+            "J2-14"
+          ],
+          "incremental_unnecessary_holds": 3,
+          "wrong_excluded_purpose_routes": 0,
+          "route_counts": {
+            "CONTINUE": 54,
+            "EXCLUDED_PURPOSE": 9,
+            "CLARIFY": 18,
+            "REVIEW": 6,
+            "API_FAILURE": 0,
+            "NOT_MEASURED": 0
+          }
+        },
+        "D": {
+          "planned_trials": 87,
+          "evaluable_trials": 87,
+          "j2_false_supported": 3,
+          "false_continue_trials": 0,
+          "false_continue_cases": [],
+          "unnecessary_hold_trials": 3,
+          "unnecessary_hold_cases": [
+            "J2-14"
+          ],
+          "incremental_unnecessary_holds": 3,
+          "wrong_excluded_purpose_routes": 0,
+          "route_counts": {
+            "CONTINUE": 54,
+            "EXCLUDED_PURPOSE": 9,
+            "CLARIFY": 15,
+            "REVIEW": 9,
+            "API_FAILURE": 0,
+            "NOT_MEASURED": 0
+          }
+        }
+      }
+    }
+  ],
+  "selection_input_scope": "development primary only; no held-out results or annotations consulted",
+  "frozen_at": "2026-10-29T15:42:49.661666+00:00",
+  "specification_sha256": "14a3fb5ce720fb84841e6dd41aad3974ca9af511643d9511a9ca7381bf09b184"
+}

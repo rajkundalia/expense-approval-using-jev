@@ -1,0 +1,347 @@
+{
+  "sdk_version": "0.7.5",
+  "python_version": "3.12.14",
+  "signatures": {
+    "TypeSafeClient": "(*, api_key: str | None = None, model: str | None = None, retry: typesafe_sdk._core.retry.RetryPolicy | None = None, timeout: float | httpx2.Timeout | None = None, headers: collections.abc.Mapping[str, str] | None = None, transport: httpx2.BaseTransport | None = None, http_client: httpx2.Client | None = None, base_url: str | None = None, compression: Optional[Literal['zstd', False]] = None) -> None",
+    "TypeSafeClient.system_one": "(self, state: Content, questions: collections.abc.Mapping[str, typesafe_sdk._core.question_types.Noul | typesafe_sdk._core.question_types.Choice | typesafe_sdk._core.question_types.Score | typesafe_sdk._core.question_types.Box | typesafe_sdk._core.question_types.NoulModel | typesafe_sdk._core.question_types.ChoiceModel | typesafe_sdk._core.question_types.ScoreModel | typesafe_sdk._core.question_types.BoxModel], *, model: str | None = None, assets: collections.abc.Mapping[str, typesafe_sdk._core.assets.Image] | None = None, retry: typesafe_sdk._core.retry.RetryPolicy | None = None, timeout: float | httpx2.Timeout | None = None, extra_headers: collections.abc.Mapping[str, str] | None = None, extra_body: collections.abc.Mapping[str, typing.Optional[JSONValue]] | None = None, response_model: type[~ResponseT] | None = None) -> Union[typesafe_sdk._core.response_types.SystemOneResponse, ~ResponseT]",
+    "Models.list": "(self, *, retry: typesafe_sdk._core.retry.RetryPolicy | None = None, timeout: float | httpx2.Timeout | None = None, extra_headers: collections.abc.Mapping[str, str] | None = None) -> typesafe_sdk._core.response_types.ListModelsResponse",
+    "Noul": "(*, type: Literal['noul'] = 'noul', instructions: Optional[Content] = None, criteria: typesafe_sdk._core.question_types.NoulCriteria | None = None) -> None",
+    "Choice": "(*, type: Literal['choice'] = 'choice', instructions: Optional[Content] = None, criteria: collections.abc.Mapping[str, typing.Optional[Content]]) -> None",
+    "RetryPolicy": "(max_retries: int = 2, backoff_initial: float = 0.5, backoff_max: float = 5.0, backoff_jitter: float = 0.25, http_statuses: set[int] = <factory>, respect_retry_after: bool = True, api_connection_error: bool = True, api_timeout_error: bool = True, exceptions: set[type[BaseException]] = <factory>, predicate: collections.abc.Callable[[BaseException], bool] | None = None, timeout: float | None = 30.0) -> None"
+  },
+  "response_schemas": {
+    "SystemOneResponse": {
+      "$defs": {
+        "BoxAnswer": {
+          "description": "A located box with its confidence.",
+          "properties": {
+            "type": {
+              "const": "box",
+              "default": "box",
+              "title": "Type",
+              "type": "string"
+            },
+            "box": {
+              "$ref": "#/$defs/BoxCoordinates"
+            },
+            "confidence": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Confidence"
+            }
+          },
+          "required": [
+            "box",
+            "confidence"
+          ],
+          "title": "BoxAnswer",
+          "type": "object"
+        },
+        "BoxCoordinates": {
+          "description": "A box's edges as fractions of the image's height (`top`, `bottom`) and width (`left`, `right`).",
+          "properties": {
+            "top": {
+              "description": "Top edge of the box, as a fraction of image height from the top (0-1).",
+              "examples": [
+                0.2
+              ],
+              "title": "Top",
+              "type": "number"
+            },
+            "bottom": {
+              "description": "Bottom edge of the box, as a fraction of image height from the top (0-1).",
+              "examples": [
+                0.66
+              ],
+              "title": "Bottom",
+              "type": "number"
+            },
+            "left": {
+              "description": "Left edge of the box, as a fraction of image width from the left (0-1).",
+              "examples": [
+                0.19
+              ],
+              "title": "Left",
+              "type": "number"
+            },
+            "right": {
+              "description": "Right edge of the box, as a fraction of image width from the left (0-1).",
+              "examples": [
+                0.68
+              ],
+              "title": "Right",
+              "type": "number"
+            }
+          },
+          "required": [
+            "top",
+            "bottom",
+            "left",
+            "right"
+          ],
+          "title": "BoxCoordinates",
+          "type": "object"
+        },
+        "ChoiceAnswer": {
+          "description": "A selected label and its probabilities.\n\nSee the [choice primitive](https://docs.typesafe.ai/go/choice) for details.",
+          "properties": {
+            "type": {
+              "const": "choice",
+              "default": "choice",
+              "title": "Type",
+              "type": "string"
+            },
+            "choice": {
+              "description": "The name of the choice with the highest probability among the question's criteria.",
+              "examples": [
+                "angry"
+              ],
+              "title": "Choice",
+              "type": "string"
+            },
+            "confidence": {
+              "description": "Confidence in the selected choice, from 0 to 1. Higher values indicate greater certainty; use lower values to flag uncertain selections for review.",
+              "examples": [
+                0.9
+              ],
+              "title": "Confidence",
+              "type": "number"
+            },
+            "probabilities": {
+              "additionalProperties": {
+                "type": "number"
+              },
+              "description": "Probability of each choice in criteria, keyed by choice name, from 0 to 1. Shows how likely the alternatives are; values sum to approximately 1.",
+              "examples": [
+                {
+                  "angry": 0.8,
+                  "calm": 0.1,
+                  "excited": 0.1
+                }
+              ],
+              "title": "Probabilities",
+              "type": "object"
+            }
+          },
+          "required": [
+            "choice",
+            "confidence",
+            "probabilities"
+          ],
+          "title": "ChoiceAnswer",
+          "type": "object"
+        },
+        "NoulAnswer": {
+          "description": "A yes/no answer.\n\nSee the [noul primitive](https://docs.typesafe.ai/go/noul) for details.",
+          "properties": {
+            "type": {
+              "const": "noul",
+              "default": "noul",
+              "title": "Type",
+              "type": "string"
+            },
+            "noul": {
+              "description": "Probability of a yes answer or a true statement, from 0 to 1. Values near 1 favor yes or true, values near 0 favor no or false, and values near 0.5 indicate uncertainty.",
+              "examples": [
+                0.98
+              ],
+              "title": "Noul",
+              "type": "number"
+            }
+          },
+          "required": [
+            "noul"
+          ],
+          "title": "NoulAnswer",
+          "type": "object"
+        },
+        "ScoreAnswer": {
+          "description": "An expected score with its rubric and probabilities.\n\nSee the [score primitive](https://docs.typesafe.ai/go/score) for details.",
+          "properties": {
+            "type": {
+              "const": "score",
+              "default": "score",
+              "title": "Type",
+              "type": "string"
+            },
+            "score": {
+              "description": "Expected score: the probability-weighted average of the rubric levels. May fall between integer levels.",
+              "examples": [
+                1.7
+              ],
+              "title": "Score",
+              "type": "number"
+            },
+            "confidence": {
+              "description": "Confidence in the score, from 0 to 1. Higher values indicate greater certainty; use lower values to flag uncertain ratings for review.",
+              "examples": [
+                0.9
+              ],
+              "title": "Confidence",
+              "type": "number"
+            },
+            "legend": {
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  {
+                    "items": {},
+                    "type": "array"
+                  }
+                ]
+              },
+              "title": "Legend",
+              "type": "object"
+            },
+            "probabilities": {
+              "additionalProperties": {
+                "type": "number"
+              },
+              "title": "Probabilities",
+              "type": "object"
+            }
+          },
+          "required": [
+            "score",
+            "confidence",
+            "legend",
+            "probabilities"
+          ],
+          "title": "ScoreAnswer",
+          "type": "object"
+        },
+        "Usage": {
+          "description": "Token counts for a request, when reported by the API.",
+          "properties": {
+            "input_tokens": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Input Tokens"
+            },
+            "output_tokens": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Output Tokens"
+            }
+          },
+          "title": "Usage",
+          "type": "object"
+        }
+      },
+      "description": "Answers grouped by question type with model and usage metadata.\n\nSee [System One](https://docs.typesafe.ai/go/system-one) for details.",
+      "properties": {
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "usage": {
+          "$ref": "#/$defs/Usage"
+        },
+        "answers": {
+          "additionalProperties": {
+            "discriminator": {
+              "mapping": {
+                "box": "#/$defs/BoxAnswer",
+                "choice": "#/$defs/ChoiceAnswer",
+                "noul": "#/$defs/NoulAnswer",
+                "score": "#/$defs/ScoreAnswer"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/NoulAnswer"
+              },
+              {
+                "$ref": "#/$defs/ChoiceAnswer"
+              },
+              {
+                "$ref": "#/$defs/ScoreAnswer"
+              },
+              {
+                "$ref": "#/$defs/BoxAnswer"
+              }
+            ]
+          },
+          "title": "Answers",
+          "type": "object"
+        }
+      },
+      "required": [
+        "model",
+        "usage"
+      ],
+      "title": "SystemOneResponse",
+      "type": "object"
+    },
+    "ListModelsResponse": {
+      "$defs": {
+        "ModelMetadata": {
+          "description": "Metadata describing a single available model.",
+          "properties": {
+            "name": {
+              "title": "Name",
+              "type": "string"
+            },
+            "description": {
+              "title": "Description",
+              "type": "string"
+            },
+            "release_date": {
+              "title": "Release Date",
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "description",
+            "release_date"
+          ],
+          "title": "ModelMetadata",
+          "type": "object"
+        }
+      },
+      "description": "The models available to the account.",
+      "properties": {
+        "models": {
+          "items": {
+            "$ref": "#/$defs/ModelMetadata"
+          },
+          "title": "Models",
+          "type": "array"
+        }
+      },
+      "required": [
+        "models"
+      ],
+      "title": "ListModelsResponse",
+      "type": "object"
+    }
+  }
+}

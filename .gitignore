@@ -1,0 +1,8 @@
+.venv/
+__pycache__/
+.env
+.env.*
+# Frozen fictional experiment responses are intentional versioned evidence.
+# Keep transient atomic-write files and the old root output location ignored.
+/results/
+*.json.tmp

@@ -1,0 +1,4480 @@
+{
+  "selected_rule": {
+    "rule": {
+      "name": "balanced",
+      "noul_min": 0.8,
+      "score_min": 1.5
+    },
+    "basis": "development-primary-only selection",
+    "candidate_comparison": [
+      {
+        "rule": {
+          "name": "balanced",
+          "noul_min": 0.8,
+          "score_min": 1.5
+        },
+        "D_development_primary": {
+          "planned_trials": 87,
+          "evaluable_trials": 87,
+          "j2_false_supported": 3,
+          "false_continue_trials": 0,
+          "false_continue_cases": [],
+          "unnecessary_hold_trials": 0,
+          "unnecessary_hold_cases": [],
+          "incremental_unnecessary_holds": 0,
+          "wrong_excluded_purpose_routes": 0,
+          "route_counts": {
+            "CONTINUE": 57,
+            "EXCLUDED_PURPOSE": 9,
+            "CLARIFY": 12,
+            "REVIEW": 9,
+            "API_FAILURE": 0,
+            "NOT_MEASURED": 0
+          }
+        },
+        "loss": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "all_configurations": {
+          "A": {
+            "planned_trials": 87,
+            "evaluable_trials": 87,
+            "j2_false_supported": 3,
+            "false_continue_trials": 3,
+            "false_continue_cases": [
+              "J2-30"
+            ],
+            "unnecessary_hold_trials": 0,
+            "unnecessary_hold_cases": [],
+            "incremental_unnecessary_holds": 0,
+            "wrong_excluded_purpose_routes": 0,
+            "route_counts": {
+              "CONTINUE": 60,
+              "EXCLUDED_PURPOSE": 9,
+              "CLARIFY": 12,
+              "REVIEW": 6,
+              "API_FAILURE": 0,
+              "NOT_MEASURED": 0
+            }
+          },
+          "B": {
+            "planned_trials": 87,
+            "evaluable_trials": 87,
+            "j2_false_supported": 3,
+            "false_continue_trials": 0,
+            "false_continue_cases": [],
+            "unnecessary_hold_trials": 0,
+            "unnecessary_hold_cases": [],
+            "incremental_unnecessary_holds": 0,
+            "wrong_excluded_purpose_routes": 0,
+            "route_counts": {
+              "CONTINUE": 57,
+              "EXCLUDED_PURPOSE": 9,
+              "CLARIFY": 12,
+              "REVIEW": 9,
+              "API_FAILURE": 0,
+              "NOT_MEASURED": 0
+            }
+          },
+          "C": {
+            "planned_trials": 87,
+            "evaluable_trials": 87,
+            "j2_false_supported": 3,
+            "false_continue_trials": 0,
+            "false_continue_cases": [],
+            "unnecessary_hold_trials": 0,
+            "unnecessary_hold_cases": [],
+            "incremental_unnecessary_holds": 0,
+            "wrong_excluded_purpose_routes": 0,
+            "route_counts": {
+              "CONTINUE": 57,
+              "EXCLUDED_PURPOSE": 9,
+              "CLARIFY": 15,
+              "REVIEW": 6,
+              "API_FAILURE": 0,
+              "NOT_MEASURED": 0
+            }
+          },
+          "D": {
+            "planned_trials": 87,
+            "evaluable_trials": 87,
+            "j2_false_supported": 3,
+            "false_continue_trials": 0,
+            "false_continue_cases": [],
+            "unnecessary_hold_trials": 0,
+            "unnecessary_hold_cases": [],
+            "incremental_unnecessary_holds": 0,
+            "wrong_excluded_purpose_routes": 0,
+            "route_counts": {
+              "CONTINUE": 57,
+              "EXCLUDED_PURPOSE": 9,
+              "CLARIFY": 12,
+              "REVIEW": 9,
+              "API_FAILURE": 0,
+              "NOT_MEASURED": 0
+            }
+          }
+        }
+      },
+      {
+        "rule": {
+          "name": "lenient",
+          "noul_min": 0.7,
+          "score_min": 1.25
+        },
+        "D_development_primary": {
+          "planned_trials": 87,
+          "evaluable_trials": 87,
+          "j2_false_supported": 3,
+          "false_continue_trials": 0,
+          "false_continue_cases": [],
+          "unnecessary_hold_trials": 0,
+          "unnecessary_hold_cases": [],
+          "incremental_unnecessary_holds": 0,
+          "wrong_excluded_purpose_routes": 0,
+          "route_counts": {
+            "CONTINUE": 57,
+            "EXCLUDED_PURPOSE": 9,
+            "CLARIFY": 12,
+            "REVIEW": 9,
+            "API_FAILURE": 0,
+            "NOT_MEASURED": 0
+          }
+        },
+        "loss": [
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        "all_configurations": {
+          "A": {
+            "planned_trials": 87,
+            "evaluable_trials": 87,
+            "j2_false_supported": 3,
+            "false_continue_trials": 3,
+            "false_continue_cases": [
+              "J2-30"
+            ],
+            "unnecessary_hold_trials": 0,
+            "unnecessary_hold_cases": [],
+            "incremental_unnecessary_holds": 0,
+            "wrong_excluded_purpose_routes": 0,
+            "route_counts": {
+              "CONTINUE": 60,
+              "EXCLUDED_PURPOSE": 9,
+              "CLARIFY": 12,
+              "REVIEW": 6,
+              "API_FAILURE": 0,
+              "NOT_MEASURED": 0
+            }
+          },
+          "B": {
+            "planned_trials": 87,
+            "evaluable_trials": 87,
+            "j2_false_supported": 3,
+            "false_continue_trials": 0,
+            "false_continue_cases": [],
+            "unnecessary_hold_trials": 0,
+            "unnecessary_hold_cases": [],
+            "incremental_unnecessary_holds": 0,
+            "wrong_excluded_purpose_routes": 0,
+            "route_counts": {
+              "CONTINUE": 57,
+              "EXCLUDED_PURPOSE": 9,
+              "CLARIFY": 12,
+              "REVIEW": 9,
+              "API_FAILURE": 0,
+              "NOT_MEASURED": 0
+            }
+          },
+          "C": {
+            "planned_trials": 87,
+            "evaluable_trials": 87,
+            "j2_false_supported": 3,
+            "false_continue_trials": 0,
+            "false_continue_cases": [],
+            "unnecessary_hold_trials": 0,
+            "unnecessary_hold_cases": [],
+            "incremental_unnecessary_holds": 0,
+            "wrong_excluded_purpose_routes": 0,
+            "route_counts": {
+              "CONTINUE": 57,
+              "EXCLUDED_PURPOSE": 9,
+              "CLARIFY": 15,
+              "REVIEW": 6,
+              "API_FAILURE": 0,
+              "NOT_MEASURED": 0
+            }
+          },
+          "D": {
+            "planned_trials": 87,
+            "evaluable_trials": 87,
+            "j2_false_supported": 3,
+            "false_continue_trials": 0,
+            "false_continue_cases": [],
+            "unnecessary_hold_trials": 0,
+            "unnecessary_hold_cases": [],
+            "incremental_unnecessary_holds": 0,
+            "wrong_excluded_purpose_routes": 0,
+            "route_counts": {
+              "CONTINUE": 57,
+              "EXCLUDED_PURPOSE": 9,
+              "CLARIFY": 12,
+              "REVIEW": 9,
+              "API_FAILURE": 0,
+              "NOT_MEASURED": 0
+            }
+          }
+        }
+      },
+      {
+        "rule": {
+          "name": "cautious",
+          "noul_min": 0.9,
+          "score_min": 1.75
+        },
+        "D_development_primary": {
+          "planned_trials": 87,
+          "evaluable_trials": 87,
+          "j2_false_supported": 3,
+          "false_continue_trials": 0,
+          "false_continue_cases": [],
+          "unnecessary_hold_trials": 3,
+          "unnecessary_hold_cases": [
+            "J2-14"
+          ],
+          "incremental_unnecessary_holds": 3,
+          "wrong_excluded_purpose_routes": 0,
+          "route_counts": {
+            "CONTINUE": 54,
+            "EXCLUDED_PURPOSE": 9,
+            "CLARIFY": 15,
+            "REVIEW": 9,
+            "API_FAILURE": 0,
+            "NOT_MEASURED": 0
+          }
+        },
+        "loss": [
+          0,
+          1,
+          0,
+          3,
+          2
+        ],
+        "all_configurations": {
+          "A": {
+            "planned_trials": 87,
+            "evaluable_trials": 87,
+            "j2_false_supported": 3,
+            "false_continue_trials": 3,
+            "false_continue_cases": [
+              "J2-30"
+            ],
+            "unnecessary_hold_trials": 0,
+            "unnecessary_hold_cases": [],
+            "incremental_unnecessary_holds": 0,
+            "wrong_excluded_purpose_routes": 0,
+            "route_counts": {
+              "CONTINUE": 60,
+              "EXCLUDED_PURPOSE": 9,
+              "CLARIFY": 12,
+              "REVIEW": 6,
+              "API_FAILURE": 0,
+              "NOT_MEASURED": 0
+            }
+          },
+          "B": {
+            "planned_trials": 87,
+            "evaluable_trials": 87,
+            "j2_false_supported": 3,
+            "false_continue_trials": 0,
+            "false_continue_cases": [],
+            "unnecessary_hold_trials": 3,
+            "unnecessary_hold_cases": [
+              "J2-14"
+            ],
+            "incremental_unnecessary_holds": 3,
+            "wrong_excluded_purpose_routes": 0,
+            "route_counts": {
+              "CONTINUE": 54,
+              "EXCLUDED_PURPOSE": 9,
+              "CLARIFY": 15,
+              "REVIEW": 9,
+              "API_FAILURE": 0,
+              "NOT_MEASURED": 0
+            }
+          },
+          "C": {
+            "planned_trials": 87,
+            "evaluable_trials": 87,
+            "j2_false_supported": 3,
+            "false_continue_trials": 0,
+            "false_continue_cases": [],
+            "unnecessary_hold_trials": 3,
+            "unnecessary_hold_cases": [
+              "J2-14"
+            ],
+            "incremental_unnecessary_holds": 3,
+            "wrong_excluded_purpose_routes": 0,
+            "route_counts": {
+              "CONTINUE": 54,
+              "EXCLUDED_PURPOSE": 9,
+              "CLARIFY": 18,
+              "REVIEW": 6,
+              "API_FAILURE": 0,
+              "NOT_MEASURED": 0
+            }
+          },
+          "D": {
+            "planned_trials": 87,
+            "evaluable_trials": 87,
+            "j2_false_supported": 3,
+            "false_continue_trials": 0,
+            "false_continue_cases": [],
+            "unnecessary_hold_trials": 3,
+            "unnecessary_hold_cases": [
+              "J2-14"
+            ],
+            "incremental_unnecessary_holds": 3,
+            "wrong_excluded_purpose_routes": 0,
+            "route_counts": {
+              "CONTINUE": 54,
+              "EXCLUDED_PURPOSE": 9,
+              "CLARIFY": 15,
+              "REVIEW": 9,
+              "API_FAILURE": 0,
+              "NOT_MEASURED": 0
+            }
+          }
+        }
+      }
+    ],
+    "selection_input_scope": "development primary only; no held-out results or annotations consulted",
+    "frozen_at": "2026-10-29T15:42:49.661666+00:00",
+    "specification_sha256": "14a3fb5ce720fb84841e6dd41aad3974ca9af511643d9511a9ca7381bf09b184"
+  },
+  "status": "complete",
+  "splits": {
+    "development": {
+      "primary": {
+        "trial_pairs": [
+          {
+            "case_id": "J2-01",
+            "trial": 1,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.98,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-01",
+            "trial": 2,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.98,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-01",
+            "trial": 3,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.98,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-02",
+            "trial": 1,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.98,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-02",
+            "trial": 2,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.98,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-02",
+            "trial": 3,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.98,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-03",
+            "trial": 1,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.98,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-03",
+            "trial": 2,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.99,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-03",
+            "trial": 3,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.99,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-04",
+            "trial": 1,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.98,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-04",
+            "trial": 2,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.98,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-04",
+            "trial": 3,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.98,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-05",
+            "trial": 1,
+            "expected_j2": "UNRELATED",
+            "expected_j3": "LOW",
+            "expected_j4": 2,
+            "j2": "UNRELATED",
+            "j3": 0.01,
+            "j4": 2.0,
+            "routes": {
+              "A": "EXCLUDED_PURPOSE",
+              "B": "EXCLUDED_PURPOSE",
+              "C": "EXCLUDED_PURPOSE",
+              "D": "EXCLUDED_PURPOSE"
+            }
+          },
+          {
+            "case_id": "J2-05",
+            "trial": 2,
+            "expected_j2": "UNRELATED",
+            "expected_j3": "LOW",
+            "expected_j4": 2,
+            "j2": "UNRELATED",
+            "j3": 0.01,
+            "j4": 2.0,
+            "routes": {
+              "A": "EXCLUDED_PURPOSE",
+              "B": "EXCLUDED_PURPOSE",
+              "C": "EXCLUDED_PURPOSE",
+              "D": "EXCLUDED_PURPOSE"
+            }
+          },
+          {
+            "case_id": "J2-05",
+            "trial": 3,
+            "expected_j2": "UNRELATED",
+            "expected_j3": "LOW",
+            "expected_j4": 2,
+            "j2": "UNRELATED",
+            "j3": 0.01,
+            "j4": 2.0,
+            "routes": {
+              "A": "EXCLUDED_PURPOSE",
+              "B": "EXCLUDED_PURPOSE",
+              "C": "EXCLUDED_PURPOSE",
+              "D": "EXCLUDED_PURPOSE"
+            }
+          },
+          {
+            "case_id": "J2-06",
+            "trial": 1,
+            "expected_j2": "UNCLEAR",
+            "expected_j3": "LOW",
+            "expected_j4": 1,
+            "j2": "UNCLEAR",
+            "j3": 0.03,
+            "j4": 0.45,
+            "routes": {
+              "A": "CLARIFY",
+              "B": "CLARIFY",
+              "C": "CLARIFY",
+              "D": "CLARIFY"
+            }
+          },
+          {
+            "case_id": "J2-06",
+            "trial": 2,
+            "expected_j2": "UNCLEAR",
+            "expected_j3": "LOW",
+            "expected_j4": 1,
+            "j2": "UNCLEAR",
+            "j3": 0.03,
+            "j4": 0.5,
+            "routes": {
+              "A": "CLARIFY",
+              "B": "CLARIFY",
+              "C": "CLARIFY",
+              "D": "CLARIFY"
+            }
+          },
+          {
+            "case_id": "J2-06",
+            "trial": 3,
+            "expected_j2": "UNCLEAR",
+            "expected_j3": "LOW",
+            "expected_j4": 1,
+            "j2": "UNCLEAR",
+            "j3": 0.03,
+            "j4": 0.5,
+            "routes": {
+              "A": "CLARIFY",
+              "B": "CLARIFY",
+              "C": "CLARIFY",
+              "D": "CLARIFY"
+            }
+          },
+          {
+            "case_id": "J2-09",
+            "trial": 1,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.97,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-09",
+            "trial": 2,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.97,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-09",
+            "trial": 3,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.97,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-10",
+            "trial": 1,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.99,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-10",
+            "trial": 2,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.99,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-10",
+            "trial": 3,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.99,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-11",
+            "trial": 1,
+            "expected_j2": "UNCLEAR",
+            "expected_j3": "LOW",
+            "expected_j4": 0,
+            "j2": "UNCLEAR",
+            "j3": 0.12,
+            "j4": 0.35,
+            "routes": {
+              "A": "CLARIFY",
+              "B": "CLARIFY",
+              "C": "CLARIFY",
+              "D": "CLARIFY"
+            }
+          },
+          {
+            "case_id": "J2-11",
+            "trial": 2,
+            "expected_j2": "UNCLEAR",
+            "expected_j3": "LOW",
+            "expected_j4": 0,
+            "j2": "UNCLEAR",
+            "j3": 0.16,
+            "j4": 0.45,
+            "routes": {
+              "A": "CLARIFY",
+              "B": "CLARIFY",
+              "C": "CLARIFY",
+              "D": "CLARIFY"
+            }
+          },
+          {
+            "case_id": "J2-11",
+            "trial": 3,
+            "expected_j2": "UNCLEAR",
+            "expected_j3": "LOW",
+            "expected_j4": 0,
+            "j2": "UNCLEAR",
+            "j3": 0.14,
+            "j4": 0.39,
+            "routes": {
+              "A": "CLARIFY",
+              "B": "CLARIFY",
+              "C": "CLARIFY",
+              "D": "CLARIFY"
+            }
+          },
+          {
+            "case_id": "J2-12",
+            "trial": 1,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.98,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-12",
+            "trial": 2,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.98,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-12",
+            "trial": 3,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.98,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-13",
+            "trial": 1,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.99,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-13",
+            "trial": 2,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.99,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-13",
+            "trial": 3,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.99,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-14",
+            "trial": 1,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.85,
+            "j4": 1.7,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-14",
+            "trial": 2,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.85,
+            "j4": 1.65,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-14",
+            "trial": 3,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.84,
+            "j4": 1.72,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-15",
+            "trial": 1,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.98,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-15",
+            "trial": 2,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.98,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-15",
+            "trial": 3,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.98,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-16",
+            "trial": 1,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.98,
+            "j4": 1.98,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-16",
+            "trial": 2,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.98,
+            "j4": 1.97,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-16",
+            "trial": 3,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.98,
+            "j4": 1.96,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-17",
+            "trial": 1,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.99,
+            "j4": 1.97,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-17",
+            "trial": 2,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.99,
+            "j4": 1.98,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-17",
+            "trial": 3,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.99,
+            "j4": 1.97,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-19",
+            "trial": 1,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.98,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-19",
+            "trial": 2,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.98,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-19",
+            "trial": 3,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.99,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-20",
+            "trial": 1,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.99,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-20",
+            "trial": 2,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.99,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-20",
+            "trial": 3,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.99,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-21",
+            "trial": 1,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.98,
+            "j4": 1.99,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-21",
+            "trial": 2,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.99,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-21",
+            "trial": 3,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.99,
+            "j4": 1.99,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-22",
+            "trial": 1,
+            "expected_j2": "UNRELATED",
+            "expected_j3": "LOW",
+            "expected_j4": 2,
+            "j2": "UNRELATED",
+            "j3": 0.01,
+            "j4": 2.0,
+            "routes": {
+              "A": "EXCLUDED_PURPOSE",
+              "B": "EXCLUDED_PURPOSE",
+              "C": "EXCLUDED_PURPOSE",
+              "D": "EXCLUDED_PURPOSE"
+            }
+          },
+          {
+            "case_id": "J2-22",
+            "trial": 2,
+            "expected_j2": "UNRELATED",
+            "expected_j3": "LOW",
+            "expected_j4": 2,
+            "j2": "UNRELATED",
+            "j3": 0.01,
+            "j4": 2.0,
+            "routes": {
+              "A": "EXCLUDED_PURPOSE",
+              "B": "EXCLUDED_PURPOSE",
+              "C": "EXCLUDED_PURPOSE",
+              "D": "EXCLUDED_PURPOSE"
+            }
+          },
+          {
+            "case_id": "J2-22",
+            "trial": 3,
+            "expected_j2": "UNRELATED",
+            "expected_j3": "LOW",
+            "expected_j4": 2,
+            "j2": "UNRELATED",
+            "j3": 0.01,
+            "j4": 2.0,
+            "routes": {
+              "A": "EXCLUDED_PURPOSE",
+              "B": "EXCLUDED_PURPOSE",
+              "C": "EXCLUDED_PURPOSE",
+              "D": "EXCLUDED_PURPOSE"
+            }
+          },
+          {
+            "case_id": "J2-23",
+            "trial": 1,
+            "expected_j2": "UNCLEAR",
+            "expected_j3": "LOW",
+            "expected_j4": 1,
+            "j2": "UNCLEAR",
+            "j3": 0.02,
+            "j4": 0.26,
+            "routes": {
+              "A": "CLARIFY",
+              "B": "CLARIFY",
+              "C": "CLARIFY",
+              "D": "CLARIFY"
+            }
+          },
+          {
+            "case_id": "J2-23",
+            "trial": 2,
+            "expected_j2": "UNCLEAR",
+            "expected_j3": "LOW",
+            "expected_j4": 1,
+            "j2": "UNCLEAR",
+            "j3": 0.03,
+            "j4": 0.31,
+            "routes": {
+              "A": "CLARIFY",
+              "B": "CLARIFY",
+              "C": "CLARIFY",
+              "D": "CLARIFY"
+            }
+          },
+          {
+            "case_id": "J2-23",
+            "trial": 3,
+            "expected_j2": "UNCLEAR",
+            "expected_j3": "LOW",
+            "expected_j4": 1,
+            "j2": "UNCLEAR",
+            "j3": 0.02,
+            "j4": 0.25,
+            "routes": {
+              "A": "CLARIFY",
+              "B": "CLARIFY",
+              "C": "CLARIFY",
+              "D": "CLARIFY"
+            }
+          },
+          {
+            "case_id": "J2-24",
+            "trial": 1,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.98,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-24",
+            "trial": 2,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.98,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-24",
+            "trial": 3,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.98,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-25",
+            "trial": 1,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.98,
+            "j4": 1.99,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-25",
+            "trial": 2,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.98,
+            "j4": 1.99,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-25",
+            "trial": 3,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.98,
+            "j4": 1.99,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-26",
+            "trial": 1,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.99,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-26",
+            "trial": 2,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.99,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-26",
+            "trial": 3,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.99,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-27",
+            "trial": 1,
+            "expected_j2": "UNRELATED",
+            "expected_j3": "LOW",
+            "expected_j4": 2,
+            "j2": "UNRELATED",
+            "j3": 0.01,
+            "j4": 2.0,
+            "routes": {
+              "A": "EXCLUDED_PURPOSE",
+              "B": "EXCLUDED_PURPOSE",
+              "C": "EXCLUDED_PURPOSE",
+              "D": "EXCLUDED_PURPOSE"
+            }
+          },
+          {
+            "case_id": "J2-27",
+            "trial": 2,
+            "expected_j2": "UNRELATED",
+            "expected_j3": "LOW",
+            "expected_j4": 2,
+            "j2": "UNRELATED",
+            "j3": 0.01,
+            "j4": 2.0,
+            "routes": {
+              "A": "EXCLUDED_PURPOSE",
+              "B": "EXCLUDED_PURPOSE",
+              "C": "EXCLUDED_PURPOSE",
+              "D": "EXCLUDED_PURPOSE"
+            }
+          },
+          {
+            "case_id": "J2-27",
+            "trial": 3,
+            "expected_j2": "UNRELATED",
+            "expected_j3": "LOW",
+            "expected_j4": 2,
+            "j2": "UNRELATED",
+            "j3": 0.01,
+            "j4": 2.0,
+            "routes": {
+              "A": "EXCLUDED_PURPOSE",
+              "B": "EXCLUDED_PURPOSE",
+              "C": "EXCLUDED_PURPOSE",
+              "D": "EXCLUDED_PURPOSE"
+            }
+          },
+          {
+            "case_id": "J2-28",
+            "trial": 1,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.98,
+            "j4": 1.99,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-28",
+            "trial": 2,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.99,
+            "j4": 1.99,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-28",
+            "trial": 3,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.98,
+            "j4": 1.99,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "J2-29",
+            "trial": 1,
+            "expected_j2": "UNCLEAR",
+            "expected_j3": "LOW",
+            "expected_j4": 0,
+            "j2": "UNCLEAR",
+            "j3": 0.03,
+            "j4": 0.27,
+            "routes": {
+              "A": "CLARIFY",
+              "B": "CLARIFY",
+              "C": "CLARIFY",
+              "D": "CLARIFY"
+            }
+          },
+          {
+            "case_id": "J2-29",
+            "trial": 2,
+            "expected_j2": "UNCLEAR",
+            "expected_j3": "LOW",
+            "expected_j4": 0,
+            "j2": "UNCLEAR",
+            "j3": 0.03,
+            "j4": 0.3,
+            "routes": {
+              "A": "CLARIFY",
+              "B": "CLARIFY",
+              "C": "CLARIFY",
+              "D": "CLARIFY"
+            }
+          },
+          {
+            "case_id": "J2-29",
+            "trial": 3,
+            "expected_j2": "UNCLEAR",
+            "expected_j3": "LOW",
+            "expected_j4": 0,
+            "j2": "UNCLEAR",
+            "j3": 0.03,
+            "j4": 0.3,
+            "routes": {
+              "A": "CLARIFY",
+              "B": "CLARIFY",
+              "C": "CLARIFY",
+              "D": "CLARIFY"
+            }
+          },
+          {
+            "case_id": "J2-30",
+            "trial": 1,
+            "expected_j2": "UNCLEAR",
+            "expected_j3": "AMBIGUOUS",
+            "expected_j4": 1,
+            "j2": "SUPPORTED",
+            "j3": 0.22,
+            "j4": 1.01,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "REVIEW",
+              "C": "CLARIFY",
+              "D": "REVIEW"
+            }
+          },
+          {
+            "case_id": "J2-30",
+            "trial": 2,
+            "expected_j2": "UNCLEAR",
+            "expected_j3": "AMBIGUOUS",
+            "expected_j4": 1,
+            "j2": "SUPPORTED",
+            "j3": 0.24,
+            "j4": 1.02,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "REVIEW",
+              "C": "CLARIFY",
+              "D": "REVIEW"
+            }
+          },
+          {
+            "case_id": "J2-30",
+            "trial": 3,
+            "expected_j2": "UNCLEAR",
+            "expected_j3": "AMBIGUOUS",
+            "expected_j4": 1,
+            "j2": "SUPPORTED",
+            "j3": 0.21,
+            "j4": 1.01,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "REVIEW",
+              "C": "CLARIFY",
+              "D": "REVIEW"
+            }
+          },
+          {
+            "case_id": "J2-31",
+            "trial": 1,
+            "expected_j2": "INCONSISTENT",
+            "expected_j3": "LOW",
+            "expected_j4": 2,
+            "j2": "INCONSISTENT",
+            "j3": 0.08,
+            "j4": 2.0,
+            "routes": {
+              "A": "REVIEW",
+              "B": "REVIEW",
+              "C": "REVIEW",
+              "D": "REVIEW"
+            }
+          },
+          {
+            "case_id": "J2-31",
+            "trial": 2,
+            "expected_j2": "INCONSISTENT",
+            "expected_j3": "LOW",
+            "expected_j4": 2,
+            "j2": "INCONSISTENT",
+            "j3": 0.06,
+            "j4": 2.0,
+            "routes": {
+              "A": "REVIEW",
+              "B": "REVIEW",
+              "C": "REVIEW",
+              "D": "REVIEW"
+            }
+          },
+          {
+            "case_id": "J2-31",
+            "trial": 3,
+            "expected_j2": "INCONSISTENT",
+            "expected_j3": "LOW",
+            "expected_j4": 2,
+            "j2": "INCONSISTENT",
+            "j3": 0.08,
+            "j4": 2.0,
+            "routes": {
+              "A": "REVIEW",
+              "B": "REVIEW",
+              "C": "REVIEW",
+              "D": "REVIEW"
+            }
+          },
+          {
+            "case_id": "J2-32",
+            "trial": 1,
+            "expected_j2": "INCONSISTENT",
+            "expected_j3": "LOW",
+            "expected_j4": 2,
+            "j2": "INCONSISTENT",
+            "j3": 0.03,
+            "j4": 1.99,
+            "routes": {
+              "A": "REVIEW",
+              "B": "REVIEW",
+              "C": "REVIEW",
+              "D": "REVIEW"
+            }
+          },
+          {
+            "case_id": "J2-32",
+            "trial": 2,
+            "expected_j2": "INCONSISTENT",
+            "expected_j3": "LOW",
+            "expected_j4": 2,
+            "j2": "INCONSISTENT",
+            "j3": 0.03,
+            "j4": 1.99,
+            "routes": {
+              "A": "REVIEW",
+              "B": "REVIEW",
+              "C": "REVIEW",
+              "D": "REVIEW"
+            }
+          },
+          {
+            "case_id": "J2-32",
+            "trial": 3,
+            "expected_j2": "INCONSISTENT",
+            "expected_j3": "LOW",
+            "expected_j4": 2,
+            "j2": "INCONSISTENT",
+            "j3": 0.03,
+            "j4": 1.99,
+            "routes": {
+              "A": "REVIEW",
+              "B": "REVIEW",
+              "C": "REVIEW",
+              "D": "REVIEW"
+            }
+          }
+        ],
+        "summaries": {
+          "A": {
+            "planned_trials": 87,
+            "evaluable_trials": 87,
+            "j2_false_supported": 3,
+            "false_continue_trials": 3,
+            "false_continue_cases": [
+              "J2-30"
+            ],
+            "unnecessary_hold_trials": 0,
+            "unnecessary_hold_cases": [],
+            "incremental_unnecessary_holds": 0,
+            "wrong_excluded_purpose_routes": 0,
+            "route_counts": {
+              "CONTINUE": 60,
+              "EXCLUDED_PURPOSE": 9,
+              "CLARIFY": 12,
+              "REVIEW": 6,
+              "API_FAILURE": 0,
+              "NOT_MEASURED": 0
+            }
+          },
+          "B": {
+            "planned_trials": 87,
+            "evaluable_trials": 87,
+            "j2_false_supported": 3,
+            "false_continue_trials": 0,
+            "false_continue_cases": [],
+            "unnecessary_hold_trials": 0,
+            "unnecessary_hold_cases": [],
+            "incremental_unnecessary_holds": 0,
+            "wrong_excluded_purpose_routes": 0,
+            "route_counts": {
+              "CONTINUE": 57,
+              "EXCLUDED_PURPOSE": 9,
+              "CLARIFY": 12,
+              "REVIEW": 9,
+              "API_FAILURE": 0,
+              "NOT_MEASURED": 0
+            }
+          },
+          "C": {
+            "planned_trials": 87,
+            "evaluable_trials": 87,
+            "j2_false_supported": 3,
+            "false_continue_trials": 0,
+            "false_continue_cases": [],
+            "unnecessary_hold_trials": 0,
+            "unnecessary_hold_cases": [],
+            "incremental_unnecessary_holds": 0,
+            "wrong_excluded_purpose_routes": 0,
+            "route_counts": {
+              "CONTINUE": 57,
+              "EXCLUDED_PURPOSE": 9,
+              "CLARIFY": 15,
+              "REVIEW": 6,
+              "API_FAILURE": 0,
+              "NOT_MEASURED": 0
+            }
+          },
+          "D": {
+            "planned_trials": 87,
+            "evaluable_trials": 87,
+            "j2_false_supported": 3,
+            "false_continue_trials": 0,
+            "false_continue_cases": [],
+            "unnecessary_hold_trials": 0,
+            "unnecessary_hold_cases": [],
+            "incremental_unnecessary_holds": 0,
+            "wrong_excluded_purpose_routes": 0,
+            "route_counts": {
+              "CONTINUE": 57,
+              "EXCLUDED_PURPOSE": 9,
+              "CLARIFY": 12,
+              "REVIEW": 9,
+              "API_FAILURE": 0,
+              "NOT_MEASURED": 0
+            }
+          }
+        },
+        "utility": {
+          "common_evaluable_trials": 87,
+          "common_configuration_summaries": {
+            "A": {
+              "planned_trials": 87,
+              "evaluable_trials": 87,
+              "j2_false_supported": 3,
+              "false_continue_trials": 3,
+              "false_continue_cases": [
+                "J2-30"
+              ],
+              "unnecessary_hold_trials": 0,
+              "unnecessary_hold_cases": [],
+              "incremental_unnecessary_holds": 0,
+              "wrong_excluded_purpose_routes": 0,
+              "route_counts": {
+                "CONTINUE": 60,
+                "EXCLUDED_PURPOSE": 9,
+                "CLARIFY": 12,
+                "REVIEW": 6,
+                "API_FAILURE": 0,
+                "NOT_MEASURED": 0
+              }
+            },
+            "B": {
+              "planned_trials": 87,
+              "evaluable_trials": 87,
+              "j2_false_supported": 3,
+              "false_continue_trials": 0,
+              "false_continue_cases": [],
+              "unnecessary_hold_trials": 0,
+              "unnecessary_hold_cases": [],
+              "incremental_unnecessary_holds": 0,
+              "wrong_excluded_purpose_routes": 0,
+              "route_counts": {
+                "CONTINUE": 57,
+                "EXCLUDED_PURPOSE": 9,
+                "CLARIFY": 12,
+                "REVIEW": 9,
+                "API_FAILURE": 0,
+                "NOT_MEASURED": 0
+              }
+            },
+            "C": {
+              "planned_trials": 87,
+              "evaluable_trials": 87,
+              "j2_false_supported": 3,
+              "false_continue_trials": 0,
+              "false_continue_cases": [],
+              "unnecessary_hold_trials": 0,
+              "unnecessary_hold_cases": [],
+              "incremental_unnecessary_holds": 0,
+              "wrong_excluded_purpose_routes": 0,
+              "route_counts": {
+                "CONTINUE": 57,
+                "EXCLUDED_PURPOSE": 9,
+                "CLARIFY": 15,
+                "REVIEW": 6,
+                "API_FAILURE": 0,
+                "NOT_MEASURED": 0
+              }
+            },
+            "D": {
+              "planned_trials": 87,
+              "evaluable_trials": 87,
+              "j2_false_supported": 3,
+              "false_continue_trials": 0,
+              "false_continue_cases": [],
+              "unnecessary_hold_trials": 0,
+              "unnecessary_hold_cases": [],
+              "incremental_unnecessary_holds": 0,
+              "wrong_excluded_purpose_routes": 0,
+              "route_counts": {
+                "CONTINUE": 57,
+                "EXCLUDED_PURPOSE": 9,
+                "CLARIFY": 12,
+                "REVIEW": 9,
+                "API_FAILURE": 0,
+                "NOT_MEASURED": 0
+              }
+            }
+          },
+          "counts": {
+            "noul_catches_false_support": 3,
+            "score_catches_false_support": 3,
+            "score_adds_beyond_noul": 0,
+            "score_extra_legitimate_hold_beyond_noul": 0,
+            "both_hold_same_false_support": 3,
+            "both_allow_same_false_support": 0,
+            "same_B_C_D_route": 57
+          },
+          "cases": {
+            "noul_catches_false_support": [
+              "J2-30"
+            ],
+            "score_catches_false_support": [
+              "J2-30"
+            ],
+            "score_adds_beyond_noul": [],
+            "score_extra_legitimate_hold_beyond_noul": [],
+            "both_hold_same_false_support": [
+              "J2-30"
+            ],
+            "both_allow_same_false_support": [],
+            "same_B_C_D_route": [
+              "J2-01",
+              "J2-02",
+              "J2-03",
+              "J2-04",
+              "J2-09",
+              "J2-10",
+              "J2-12",
+              "J2-13",
+              "J2-14",
+              "J2-15",
+              "J2-16",
+              "J2-17",
+              "J2-19",
+              "J2-20",
+              "J2-21",
+              "J2-24",
+              "J2-25",
+              "J2-26",
+              "J2-28"
+            ]
+          },
+          "details": [
+            {
+              "case_id": "J2-01",
+              "trial": 1,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-01",
+              "trial": 2,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-01",
+              "trial": 3,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-02",
+              "trial": 1,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-02",
+              "trial": 2,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-02",
+              "trial": 3,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-03",
+              "trial": 1,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-03",
+              "trial": 2,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-03",
+              "trial": 3,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-04",
+              "trial": 1,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-04",
+              "trial": 2,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-04",
+              "trial": 3,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-09",
+              "trial": 1,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-09",
+              "trial": 2,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-09",
+              "trial": 3,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-10",
+              "trial": 1,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-10",
+              "trial": 2,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-10",
+              "trial": 3,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-12",
+              "trial": 1,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-12",
+              "trial": 2,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-12",
+              "trial": 3,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-13",
+              "trial": 1,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-13",
+              "trial": 2,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-13",
+              "trial": 3,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-14",
+              "trial": 1,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-14",
+              "trial": 2,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-14",
+              "trial": 3,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-15",
+              "trial": 1,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-15",
+              "trial": 2,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-15",
+              "trial": 3,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-16",
+              "trial": 1,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-16",
+              "trial": 2,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-16",
+              "trial": 3,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-17",
+              "trial": 1,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-17",
+              "trial": 2,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-17",
+              "trial": 3,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-19",
+              "trial": 1,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-19",
+              "trial": 2,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-19",
+              "trial": 3,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-20",
+              "trial": 1,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-20",
+              "trial": 2,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-20",
+              "trial": 3,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-21",
+              "trial": 1,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-21",
+              "trial": 2,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-21",
+              "trial": 3,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-24",
+              "trial": 1,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-24",
+              "trial": 2,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-24",
+              "trial": 3,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-25",
+              "trial": 1,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-25",
+              "trial": 2,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-25",
+              "trial": 3,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-26",
+              "trial": 1,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-26",
+              "trial": 2,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-26",
+              "trial": 3,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-28",
+              "trial": 1,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-28",
+              "trial": 2,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-28",
+              "trial": 3,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "J2-30",
+              "trial": 1,
+              "noul_catches_false_support": true,
+              "score_catches_false_support": true,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": true,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": false
+            },
+            {
+              "case_id": "J2-30",
+              "trial": 2,
+              "noul_catches_false_support": true,
+              "score_catches_false_support": true,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": true,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": false
+            },
+            {
+              "case_id": "J2-30",
+              "trial": 3,
+              "noul_catches_false_support": true,
+              "score_catches_false_support": true,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": true,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": false
+            }
+          ]
+        },
+        "hypothesis_checks": {
+          "j3_region_measured": 87,
+          "j3_region_agreement": 84,
+          "j4_region_measured": 87,
+          "j4_region_agreement": 83,
+          "clear_excluded_purpose_low_noul_high_sufficiency_trials": 9,
+          "clear_excluded_contrast_cases": [
+            "J2-05",
+            "J2-22",
+            "J2-27"
+          ]
+        }
+      },
+      "j1_boundary_probe": {
+        "trial_pairs": [
+          {
+            "case_id": "J2-07",
+            "trial": 1,
+            "expected_j2": "UNCLEAR",
+            "expected_j3": "AMBIGUOUS",
+            "expected_j4": 2,
+            "j2": "UNCLEAR",
+            "j3": 0.93,
+            "j4": 1.99,
+            "routes": {
+              "A": "CLARIFY",
+              "B": "CLARIFY",
+              "C": "CLARIFY",
+              "D": "CLARIFY"
+            }
+          },
+          {
+            "case_id": "J2-07",
+            "trial": 2,
+            "expected_j2": "UNCLEAR",
+            "expected_j3": "AMBIGUOUS",
+            "expected_j4": 2,
+            "j2": "UNCLEAR",
+            "j3": 0.93,
+            "j4": 1.98,
+            "routes": {
+              "A": "CLARIFY",
+              "B": "CLARIFY",
+              "C": "CLARIFY",
+              "D": "CLARIFY"
+            }
+          },
+          {
+            "case_id": "J2-07",
+            "trial": 3,
+            "expected_j2": "UNCLEAR",
+            "expected_j3": "AMBIGUOUS",
+            "expected_j4": 2,
+            "j2": "UNCLEAR",
+            "j3": 0.92,
+            "j4": 1.99,
+            "routes": {
+              "A": "CLARIFY",
+              "B": "CLARIFY",
+              "C": "CLARIFY",
+              "D": "CLARIFY"
+            }
+          },
+          {
+            "case_id": "J2-08",
+            "trial": 1,
+            "expected_j2": "INCONSISTENT",
+            "expected_j3": "AMBIGUOUS",
+            "expected_j4": 2,
+            "j2": "INCONSISTENT",
+            "j3": 0.71,
+            "j4": 1.97,
+            "routes": {
+              "A": "REVIEW",
+              "B": "REVIEW",
+              "C": "REVIEW",
+              "D": "REVIEW"
+            }
+          },
+          {
+            "case_id": "J2-08",
+            "trial": 2,
+            "expected_j2": "INCONSISTENT",
+            "expected_j3": "AMBIGUOUS",
+            "expected_j4": 2,
+            "j2": "INCONSISTENT",
+            "j3": 0.75,
+            "j4": 1.97,
+            "routes": {
+              "A": "REVIEW",
+              "B": "REVIEW",
+              "C": "REVIEW",
+              "D": "REVIEW"
+            }
+          },
+          {
+            "case_id": "J2-08",
+            "trial": 3,
+            "expected_j2": "INCONSISTENT",
+            "expected_j3": "AMBIGUOUS",
+            "expected_j4": 2,
+            "j2": "INCONSISTENT",
+            "j3": 0.72,
+            "j4": 1.97,
+            "routes": {
+              "A": "REVIEW",
+              "B": "REVIEW",
+              "C": "REVIEW",
+              "D": "REVIEW"
+            }
+          },
+          {
+            "case_id": "J2-18",
+            "trial": 1,
+            "expected_j2": "UNRELATED",
+            "expected_j3": "LOW",
+            "expected_j4": 2,
+            "j2": "UNRELATED",
+            "j3": 0.02,
+            "j4": 1.95,
+            "routes": {
+              "A": "EXCLUDED_PURPOSE",
+              "B": "EXCLUDED_PURPOSE",
+              "C": "EXCLUDED_PURPOSE",
+              "D": "EXCLUDED_PURPOSE"
+            }
+          },
+          {
+            "case_id": "J2-18",
+            "trial": 2,
+            "expected_j2": "UNRELATED",
+            "expected_j3": "LOW",
+            "expected_j4": 2,
+            "j2": "UNRELATED",
+            "j3": 0.02,
+            "j4": 1.94,
+            "routes": {
+              "A": "EXCLUDED_PURPOSE",
+              "B": "EXCLUDED_PURPOSE",
+              "C": "EXCLUDED_PURPOSE",
+              "D": "EXCLUDED_PURPOSE"
+            }
+          },
+          {
+            "case_id": "J2-18",
+            "trial": 3,
+            "expected_j2": "UNRELATED",
+            "expected_j3": "LOW",
+            "expected_j4": 2,
+            "j2": "UNRELATED",
+            "j3": 0.02,
+            "j4": 1.95,
+            "routes": {
+              "A": "EXCLUDED_PURPOSE",
+              "B": "EXCLUDED_PURPOSE",
+              "C": "EXCLUDED_PURPOSE",
+              "D": "EXCLUDED_PURPOSE"
+            }
+          }
+        ],
+        "summaries": {
+          "A": {
+            "planned_trials": 9,
+            "evaluable_trials": 9,
+            "j2_false_supported": 0,
+            "false_continue_trials": 0,
+            "false_continue_cases": [],
+            "unnecessary_hold_trials": 0,
+            "unnecessary_hold_cases": [],
+            "incremental_unnecessary_holds": 0,
+            "wrong_excluded_purpose_routes": 0,
+            "route_counts": {
+              "CONTINUE": 0,
+              "EXCLUDED_PURPOSE": 3,
+              "CLARIFY": 3,
+              "REVIEW": 3,
+              "API_FAILURE": 0,
+              "NOT_MEASURED": 0
+            }
+          },
+          "B": {
+            "planned_trials": 9,
+            "evaluable_trials": 9,
+            "j2_false_supported": 0,
+            "false_continue_trials": 0,
+            "false_continue_cases": [],
+            "unnecessary_hold_trials": 0,
+            "unnecessary_hold_cases": [],
+            "incremental_unnecessary_holds": 0,
+            "wrong_excluded_purpose_routes": 0,
+            "route_counts": {
+              "CONTINUE": 0,
+              "EXCLUDED_PURPOSE": 3,
+              "CLARIFY": 3,
+              "REVIEW": 3,
+              "API_FAILURE": 0,
+              "NOT_MEASURED": 0
+            }
+          },
+          "C": {
+            "planned_trials": 9,
+            "evaluable_trials": 9,
+            "j2_false_supported": 0,
+            "false_continue_trials": 0,
+            "false_continue_cases": [],
+            "unnecessary_hold_trials": 0,
+            "unnecessary_hold_cases": [],
+            "incremental_unnecessary_holds": 0,
+            "wrong_excluded_purpose_routes": 0,
+            "route_counts": {
+              "CONTINUE": 0,
+              "EXCLUDED_PURPOSE": 3,
+              "CLARIFY": 3,
+              "REVIEW": 3,
+              "API_FAILURE": 0,
+              "NOT_MEASURED": 0
+            }
+          },
+          "D": {
+            "planned_trials": 9,
+            "evaluable_trials": 9,
+            "j2_false_supported": 0,
+            "false_continue_trials": 0,
+            "false_continue_cases": [],
+            "unnecessary_hold_trials": 0,
+            "unnecessary_hold_cases": [],
+            "incremental_unnecessary_holds": 0,
+            "wrong_excluded_purpose_routes": 0,
+            "route_counts": {
+              "CONTINUE": 0,
+              "EXCLUDED_PURPOSE": 3,
+              "CLARIFY": 3,
+              "REVIEW": 3,
+              "API_FAILURE": 0,
+              "NOT_MEASURED": 0
+            }
+          }
+        },
+        "utility": {
+          "common_evaluable_trials": 9,
+          "common_configuration_summaries": {
+            "A": {
+              "planned_trials": 9,
+              "evaluable_trials": 9,
+              "j2_false_supported": 0,
+              "false_continue_trials": 0,
+              "false_continue_cases": [],
+              "unnecessary_hold_trials": 0,
+              "unnecessary_hold_cases": [],
+              "incremental_unnecessary_holds": 0,
+              "wrong_excluded_purpose_routes": 0,
+              "route_counts": {
+                "CONTINUE": 0,
+                "EXCLUDED_PURPOSE": 3,
+                "CLARIFY": 3,
+                "REVIEW": 3,
+                "API_FAILURE": 0,
+                "NOT_MEASURED": 0
+              }
+            },
+            "B": {
+              "planned_trials": 9,
+              "evaluable_trials": 9,
+              "j2_false_supported": 0,
+              "false_continue_trials": 0,
+              "false_continue_cases": [],
+              "unnecessary_hold_trials": 0,
+              "unnecessary_hold_cases": [],
+              "incremental_unnecessary_holds": 0,
+              "wrong_excluded_purpose_routes": 0,
+              "route_counts": {
+                "CONTINUE": 0,
+                "EXCLUDED_PURPOSE": 3,
+                "CLARIFY": 3,
+                "REVIEW": 3,
+                "API_FAILURE": 0,
+                "NOT_MEASURED": 0
+              }
+            },
+            "C": {
+              "planned_trials": 9,
+              "evaluable_trials": 9,
+              "j2_false_supported": 0,
+              "false_continue_trials": 0,
+              "false_continue_cases": [],
+              "unnecessary_hold_trials": 0,
+              "unnecessary_hold_cases": [],
+              "incremental_unnecessary_holds": 0,
+              "wrong_excluded_purpose_routes": 0,
+              "route_counts": {
+                "CONTINUE": 0,
+                "EXCLUDED_PURPOSE": 3,
+                "CLARIFY": 3,
+                "REVIEW": 3,
+                "API_FAILURE": 0,
+                "NOT_MEASURED": 0
+              }
+            },
+            "D": {
+              "planned_trials": 9,
+              "evaluable_trials": 9,
+              "j2_false_supported": 0,
+              "false_continue_trials": 0,
+              "false_continue_cases": [],
+              "unnecessary_hold_trials": 0,
+              "unnecessary_hold_cases": [],
+              "incremental_unnecessary_holds": 0,
+              "wrong_excluded_purpose_routes": 0,
+              "route_counts": {
+                "CONTINUE": 0,
+                "EXCLUDED_PURPOSE": 3,
+                "CLARIFY": 3,
+                "REVIEW": 3,
+                "API_FAILURE": 0,
+                "NOT_MEASURED": 0
+              }
+            }
+          },
+          "counts": {
+            "noul_catches_false_support": 0,
+            "score_catches_false_support": 0,
+            "score_adds_beyond_noul": 0,
+            "score_extra_legitimate_hold_beyond_noul": 0,
+            "both_hold_same_false_support": 0,
+            "both_allow_same_false_support": 0,
+            "same_B_C_D_route": 0
+          },
+          "cases": {
+            "noul_catches_false_support": [],
+            "score_catches_false_support": [],
+            "score_adds_beyond_noul": [],
+            "score_extra_legitimate_hold_beyond_noul": [],
+            "both_hold_same_false_support": [],
+            "both_allow_same_false_support": [],
+            "same_B_C_D_route": []
+          },
+          "details": []
+        },
+        "hypothesis_checks": {
+          "j3_region_measured": 9,
+          "j3_region_agreement": 3,
+          "j4_region_measured": 9,
+          "j4_region_agreement": 9,
+          "clear_excluded_purpose_low_noul_high_sufficiency_trials": 3,
+          "clear_excluded_contrast_cases": [
+            "J2-18"
+          ]
+        }
+      }
+    },
+    "heldout": {
+      "primary": {
+        "trial_pairs": [
+          {
+            "case_id": "EQ-H01",
+            "trial": 1,
+            "expected_j2": "UNRELATED",
+            "expected_j3": "LOW",
+            "expected_j4": 2,
+            "j2": "UNRELATED",
+            "j3": 0.01,
+            "j4": 1.96,
+            "routes": {
+              "A": "EXCLUDED_PURPOSE",
+              "B": "EXCLUDED_PURPOSE",
+              "C": "EXCLUDED_PURPOSE",
+              "D": "EXCLUDED_PURPOSE"
+            }
+          },
+          {
+            "case_id": "EQ-H01",
+            "trial": 2,
+            "expected_j2": "UNRELATED",
+            "expected_j3": "LOW",
+            "expected_j4": 2,
+            "j2": "UNRELATED",
+            "j3": 0.01,
+            "j4": 1.96,
+            "routes": {
+              "A": "EXCLUDED_PURPOSE",
+              "B": "EXCLUDED_PURPOSE",
+              "C": "EXCLUDED_PURPOSE",
+              "D": "EXCLUDED_PURPOSE"
+            }
+          },
+          {
+            "case_id": "EQ-H01",
+            "trial": 3,
+            "expected_j2": "UNRELATED",
+            "expected_j3": "LOW",
+            "expected_j4": 2,
+            "j2": "UNRELATED",
+            "j3": 0.01,
+            "j4": 1.96,
+            "routes": {
+              "A": "EXCLUDED_PURPOSE",
+              "B": "EXCLUDED_PURPOSE",
+              "C": "EXCLUDED_PURPOSE",
+              "D": "EXCLUDED_PURPOSE"
+            }
+          },
+          {
+            "case_id": "EQ-H02",
+            "trial": 1,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.94,
+            "j4": 1.99,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "EQ-H02",
+            "trial": 2,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.92,
+            "j4": 1.99,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "EQ-H02",
+            "trial": 3,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.94,
+            "j4": 1.99,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "EQ-H03",
+            "trial": 1,
+            "expected_j2": "UNCLEAR",
+            "expected_j3": "AMBIGUOUS",
+            "expected_j4": 1,
+            "j2": "UNCLEAR",
+            "j3": 0.09,
+            "j4": 1.38,
+            "routes": {
+              "A": "CLARIFY",
+              "B": "CLARIFY",
+              "C": "CLARIFY",
+              "D": "CLARIFY"
+            }
+          },
+          {
+            "case_id": "EQ-H03",
+            "trial": 2,
+            "expected_j2": "UNCLEAR",
+            "expected_j3": "AMBIGUOUS",
+            "expected_j4": 1,
+            "j2": "UNCLEAR",
+            "j3": 0.09,
+            "j4": 1.38,
+            "routes": {
+              "A": "CLARIFY",
+              "B": "CLARIFY",
+              "C": "CLARIFY",
+              "D": "CLARIFY"
+            }
+          },
+          {
+            "case_id": "EQ-H03",
+            "trial": 3,
+            "expected_j2": "UNCLEAR",
+            "expected_j3": "AMBIGUOUS",
+            "expected_j4": 1,
+            "j2": "UNCLEAR",
+            "j3": 0.09,
+            "j4": 1.38,
+            "routes": {
+              "A": "CLARIFY",
+              "B": "CLARIFY",
+              "C": "CLARIFY",
+              "D": "CLARIFY"
+            }
+          },
+          {
+            "case_id": "EQ-H04",
+            "trial": 1,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.97,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "EQ-H04",
+            "trial": 2,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.98,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "EQ-H04",
+            "trial": 3,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.97,
+            "j4": 2.0,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "EQ-H05",
+            "trial": 1,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.97,
+            "j4": 1.99,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "EQ-H05",
+            "trial": 2,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.97,
+            "j4": 1.99,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "EQ-H05",
+            "trial": 3,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.97,
+            "j4": 1.99,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "EQ-H06",
+            "trial": 1,
+            "expected_j2": "UNRELATED",
+            "expected_j3": "LOW",
+            "expected_j4": 2,
+            "j2": "UNRELATED",
+            "j3": 0.01,
+            "j4": 2.0,
+            "routes": {
+              "A": "EXCLUDED_PURPOSE",
+              "B": "EXCLUDED_PURPOSE",
+              "C": "EXCLUDED_PURPOSE",
+              "D": "EXCLUDED_PURPOSE"
+            }
+          },
+          {
+            "case_id": "EQ-H06",
+            "trial": 2,
+            "expected_j2": "UNRELATED",
+            "expected_j3": "LOW",
+            "expected_j4": 2,
+            "j2": "UNRELATED",
+            "j3": 0.01,
+            "j4": 2.0,
+            "routes": {
+              "A": "EXCLUDED_PURPOSE",
+              "B": "EXCLUDED_PURPOSE",
+              "C": "EXCLUDED_PURPOSE",
+              "D": "EXCLUDED_PURPOSE"
+            }
+          },
+          {
+            "case_id": "EQ-H06",
+            "trial": 3,
+            "expected_j2": "UNRELATED",
+            "expected_j3": "LOW",
+            "expected_j4": 2,
+            "j2": "UNRELATED",
+            "j3": 0.01,
+            "j4": 2.0,
+            "routes": {
+              "A": "EXCLUDED_PURPOSE",
+              "B": "EXCLUDED_PURPOSE",
+              "C": "EXCLUDED_PURPOSE",
+              "D": "EXCLUDED_PURPOSE"
+            }
+          },
+          {
+            "case_id": "EQ-H07",
+            "trial": 1,
+            "expected_j2": "UNRELATED",
+            "expected_j3": "LOW",
+            "expected_j4": 2,
+            "j2": "UNRELATED",
+            "j3": 0.01,
+            "j4": 2.0,
+            "routes": {
+              "A": "EXCLUDED_PURPOSE",
+              "B": "EXCLUDED_PURPOSE",
+              "C": "EXCLUDED_PURPOSE",
+              "D": "EXCLUDED_PURPOSE"
+            }
+          },
+          {
+            "case_id": "EQ-H07",
+            "trial": 2,
+            "expected_j2": "UNRELATED",
+            "expected_j3": "LOW",
+            "expected_j4": 2,
+            "j2": "UNRELATED",
+            "j3": 0.01,
+            "j4": 2.0,
+            "routes": {
+              "A": "EXCLUDED_PURPOSE",
+              "B": "EXCLUDED_PURPOSE",
+              "C": "EXCLUDED_PURPOSE",
+              "D": "EXCLUDED_PURPOSE"
+            }
+          },
+          {
+            "case_id": "EQ-H07",
+            "trial": 3,
+            "expected_j2": "UNRELATED",
+            "expected_j3": "LOW",
+            "expected_j4": 2,
+            "j2": "UNRELATED",
+            "j3": 0.01,
+            "j4": 2.0,
+            "routes": {
+              "A": "EXCLUDED_PURPOSE",
+              "B": "EXCLUDED_PURPOSE",
+              "C": "EXCLUDED_PURPOSE",
+              "D": "EXCLUDED_PURPOSE"
+            }
+          },
+          {
+            "case_id": "EQ-H08",
+            "trial": 1,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.94,
+            "j4": 1.95,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "EQ-H08",
+            "trial": 2,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.93,
+            "j4": 1.94,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "EQ-H08",
+            "trial": 3,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.95,
+            "j4": 1.96,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "EQ-H09",
+            "trial": 1,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.98,
+            "j4": 1.95,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "EQ-H09",
+            "trial": 2,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.98,
+            "j4": 1.96,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "EQ-H09",
+            "trial": 3,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.98,
+            "j4": 1.95,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "EQ-H10",
+            "trial": 1,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.96,
+            "j4": 1.99,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "EQ-H10",
+            "trial": 2,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.96,
+            "j4": 1.99,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "EQ-H10",
+            "trial": 3,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.97,
+            "j4": 1.99,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "EQ-H11",
+            "trial": 1,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.97,
+            "j4": 1.97,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "EQ-H11",
+            "trial": 2,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.97,
+            "j4": 1.96,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "EQ-H11",
+            "trial": 3,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.97,
+            "j4": 1.97,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "EQ-H12",
+            "trial": 1,
+            "expected_j2": "UNCLEAR",
+            "expected_j3": "LOW",
+            "expected_j4": 0,
+            "j2": "UNCLEAR",
+            "j3": 0.09,
+            "j4": 0.0,
+            "routes": {
+              "A": "CLARIFY",
+              "B": "CLARIFY",
+              "C": "CLARIFY",
+              "D": "CLARIFY"
+            }
+          },
+          {
+            "case_id": "EQ-H12",
+            "trial": 2,
+            "expected_j2": "UNCLEAR",
+            "expected_j3": "LOW",
+            "expected_j4": 0,
+            "j2": "UNCLEAR",
+            "j3": 0.08,
+            "j4": 0.01,
+            "routes": {
+              "A": "CLARIFY",
+              "B": "CLARIFY",
+              "C": "CLARIFY",
+              "D": "CLARIFY"
+            }
+          },
+          {
+            "case_id": "EQ-H12",
+            "trial": 3,
+            "expected_j2": "UNCLEAR",
+            "expected_j3": "LOW",
+            "expected_j4": 0,
+            "j2": "UNCLEAR",
+            "j3": 0.07,
+            "j4": 0.0,
+            "routes": {
+              "A": "CLARIFY",
+              "B": "CLARIFY",
+              "C": "CLARIFY",
+              "D": "CLARIFY"
+            }
+          },
+          {
+            "case_id": "EQ-H13",
+            "trial": 1,
+            "expected_j2": "UNRELATED",
+            "expected_j3": "LOW",
+            "expected_j4": 2,
+            "j2": "INCONSISTENT",
+            "j3": 0.01,
+            "j4": 1.97,
+            "routes": {
+              "A": "REVIEW",
+              "B": "REVIEW",
+              "C": "REVIEW",
+              "D": "REVIEW"
+            }
+          },
+          {
+            "case_id": "EQ-H13",
+            "trial": 2,
+            "expected_j2": "UNRELATED",
+            "expected_j3": "LOW",
+            "expected_j4": 2,
+            "j2": "INCONSISTENT",
+            "j3": 0.02,
+            "j4": 1.97,
+            "routes": {
+              "A": "REVIEW",
+              "B": "REVIEW",
+              "C": "REVIEW",
+              "D": "REVIEW"
+            }
+          },
+          {
+            "case_id": "EQ-H13",
+            "trial": 3,
+            "expected_j2": "UNRELATED",
+            "expected_j3": "LOW",
+            "expected_j4": 2,
+            "j2": "INCONSISTENT",
+            "j3": 0.01,
+            "j4": 1.97,
+            "routes": {
+              "A": "REVIEW",
+              "B": "REVIEW",
+              "C": "REVIEW",
+              "D": "REVIEW"
+            }
+          },
+          {
+            "case_id": "EQ-H14",
+            "trial": 1,
+            "expected_j2": "INCONSISTENT",
+            "expected_j3": "LOW",
+            "expected_j4": 2,
+            "j2": "INCONSISTENT",
+            "j3": 0.12,
+            "j4": 2.0,
+            "routes": {
+              "A": "REVIEW",
+              "B": "REVIEW",
+              "C": "REVIEW",
+              "D": "REVIEW"
+            }
+          },
+          {
+            "case_id": "EQ-H14",
+            "trial": 2,
+            "expected_j2": "INCONSISTENT",
+            "expected_j3": "LOW",
+            "expected_j4": 2,
+            "j2": "INCONSISTENT",
+            "j3": 0.11,
+            "j4": 2.0,
+            "routes": {
+              "A": "REVIEW",
+              "B": "REVIEW",
+              "C": "REVIEW",
+              "D": "REVIEW"
+            }
+          },
+          {
+            "case_id": "EQ-H14",
+            "trial": 3,
+            "expected_j2": "INCONSISTENT",
+            "expected_j3": "LOW",
+            "expected_j4": 2,
+            "j2": "INCONSISTENT",
+            "j3": 0.11,
+            "j4": 1.99,
+            "routes": {
+              "A": "REVIEW",
+              "B": "REVIEW",
+              "C": "REVIEW",
+              "D": "REVIEW"
+            }
+          },
+          {
+            "case_id": "EQ-H15",
+            "trial": 1,
+            "expected_j2": "UNRELATED",
+            "expected_j3": "LOW",
+            "expected_j4": 2,
+            "j2": "UNRELATED",
+            "j3": 0.02,
+            "j4": 1.96,
+            "routes": {
+              "A": "EXCLUDED_PURPOSE",
+              "B": "EXCLUDED_PURPOSE",
+              "C": "EXCLUDED_PURPOSE",
+              "D": "EXCLUDED_PURPOSE"
+            }
+          },
+          {
+            "case_id": "EQ-H15",
+            "trial": 2,
+            "expected_j2": "UNRELATED",
+            "expected_j3": "LOW",
+            "expected_j4": 2,
+            "j2": "UNRELATED",
+            "j3": 0.03,
+            "j4": 1.96,
+            "routes": {
+              "A": "EXCLUDED_PURPOSE",
+              "B": "EXCLUDED_PURPOSE",
+              "C": "EXCLUDED_PURPOSE",
+              "D": "EXCLUDED_PURPOSE"
+            }
+          },
+          {
+            "case_id": "EQ-H15",
+            "trial": 3,
+            "expected_j2": "UNRELATED",
+            "expected_j3": "LOW",
+            "expected_j4": 2,
+            "j2": "UNRELATED",
+            "j3": 0.02,
+            "j4": 1.96,
+            "routes": {
+              "A": "EXCLUDED_PURPOSE",
+              "B": "EXCLUDED_PURPOSE",
+              "C": "EXCLUDED_PURPOSE",
+              "D": "EXCLUDED_PURPOSE"
+            }
+          },
+          {
+            "case_id": "EQ-H16",
+            "trial": 1,
+            "expected_j2": "UNCLEAR",
+            "expected_j3": "AMBIGUOUS",
+            "expected_j4": 1,
+            "j2": "UNCLEAR",
+            "j3": 0.09,
+            "j4": 0.7,
+            "routes": {
+              "A": "CLARIFY",
+              "B": "CLARIFY",
+              "C": "CLARIFY",
+              "D": "CLARIFY"
+            }
+          },
+          {
+            "case_id": "EQ-H16",
+            "trial": 2,
+            "expected_j2": "UNCLEAR",
+            "expected_j3": "AMBIGUOUS",
+            "expected_j4": 1,
+            "j2": "UNCLEAR",
+            "j3": 0.09,
+            "j4": 0.61,
+            "routes": {
+              "A": "CLARIFY",
+              "B": "CLARIFY",
+              "C": "CLARIFY",
+              "D": "CLARIFY"
+            }
+          },
+          {
+            "case_id": "EQ-H16",
+            "trial": 3,
+            "expected_j2": "UNCLEAR",
+            "expected_j3": "AMBIGUOUS",
+            "expected_j4": 1,
+            "j2": "UNCLEAR",
+            "j3": 0.11,
+            "j4": 0.64,
+            "routes": {
+              "A": "CLARIFY",
+              "B": "CLARIFY",
+              "C": "CLARIFY",
+              "D": "CLARIFY"
+            }
+          },
+          {
+            "case_id": "EQ-H17",
+            "trial": 1,
+            "expected_j2": "UNCLEAR",
+            "expected_j3": "AMBIGUOUS",
+            "expected_j4": 1,
+            "j2": "UNCLEAR",
+            "j3": 0.42,
+            "j4": 1.07,
+            "routes": {
+              "A": "CLARIFY",
+              "B": "CLARIFY",
+              "C": "CLARIFY",
+              "D": "CLARIFY"
+            }
+          },
+          {
+            "case_id": "EQ-H17",
+            "trial": 2,
+            "expected_j2": "UNCLEAR",
+            "expected_j3": "AMBIGUOUS",
+            "expected_j4": 1,
+            "j2": "UNCLEAR",
+            "j3": 0.47,
+            "j4": 1.1,
+            "routes": {
+              "A": "CLARIFY",
+              "B": "CLARIFY",
+              "C": "CLARIFY",
+              "D": "CLARIFY"
+            }
+          },
+          {
+            "case_id": "EQ-H17",
+            "trial": 3,
+            "expected_j2": "UNCLEAR",
+            "expected_j3": "AMBIGUOUS",
+            "expected_j4": 1,
+            "j2": "UNCLEAR",
+            "j3": 0.38,
+            "j4": 1.07,
+            "routes": {
+              "A": "CLARIFY",
+              "B": "CLARIFY",
+              "C": "CLARIFY",
+              "D": "CLARIFY"
+            }
+          },
+          {
+            "case_id": "EQ-H18",
+            "trial": 1,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.96,
+            "j4": 1.98,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "EQ-H18",
+            "trial": 2,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.95,
+            "j4": 1.99,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "EQ-H18",
+            "trial": 3,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.95,
+            "j4": 1.98,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "EQ-H19",
+            "trial": 1,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.97,
+            "j4": 1.99,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "EQ-H19",
+            "trial": 2,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.97,
+            "j4": 1.99,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "EQ-H19",
+            "trial": 3,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.97,
+            "j4": 1.99,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "EQ-H20",
+            "trial": 1,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.97,
+            "j4": 1.99,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "EQ-H20",
+            "trial": 2,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.97,
+            "j4": 1.99,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          },
+          {
+            "case_id": "EQ-H20",
+            "trial": 3,
+            "expected_j2": "SUPPORTED",
+            "expected_j3": "HIGH",
+            "expected_j4": 2,
+            "j2": "SUPPORTED",
+            "j3": 0.97,
+            "j4": 1.99,
+            "routes": {
+              "A": "CONTINUE",
+              "B": "CONTINUE",
+              "C": "CONTINUE",
+              "D": "CONTINUE"
+            }
+          }
+        ],
+        "summaries": {
+          "A": {
+            "planned_trials": 60,
+            "evaluable_trials": 60,
+            "j2_false_supported": 0,
+            "false_continue_trials": 0,
+            "false_continue_cases": [],
+            "unnecessary_hold_trials": 0,
+            "unnecessary_hold_cases": [],
+            "incremental_unnecessary_holds": 0,
+            "wrong_excluded_purpose_routes": 0,
+            "route_counts": {
+              "CONTINUE": 30,
+              "EXCLUDED_PURPOSE": 12,
+              "CLARIFY": 12,
+              "REVIEW": 6,
+              "API_FAILURE": 0,
+              "NOT_MEASURED": 0
+            }
+          },
+          "B": {
+            "planned_trials": 60,
+            "evaluable_trials": 60,
+            "j2_false_supported": 0,
+            "false_continue_trials": 0,
+            "false_continue_cases": [],
+            "unnecessary_hold_trials": 0,
+            "unnecessary_hold_cases": [],
+            "incremental_unnecessary_holds": 0,
+            "wrong_excluded_purpose_routes": 0,
+            "route_counts": {
+              "CONTINUE": 30,
+              "EXCLUDED_PURPOSE": 12,
+              "CLARIFY": 12,
+              "REVIEW": 6,
+              "API_FAILURE": 0,
+              "NOT_MEASURED": 0
+            }
+          },
+          "C": {
+            "planned_trials": 60,
+            "evaluable_trials": 60,
+            "j2_false_supported": 0,
+            "false_continue_trials": 0,
+            "false_continue_cases": [],
+            "unnecessary_hold_trials": 0,
+            "unnecessary_hold_cases": [],
+            "incremental_unnecessary_holds": 0,
+            "wrong_excluded_purpose_routes": 0,
+            "route_counts": {
+              "CONTINUE": 30,
+              "EXCLUDED_PURPOSE": 12,
+              "CLARIFY": 12,
+              "REVIEW": 6,
+              "API_FAILURE": 0,
+              "NOT_MEASURED": 0
+            }
+          },
+          "D": {
+            "planned_trials": 60,
+            "evaluable_trials": 60,
+            "j2_false_supported": 0,
+            "false_continue_trials": 0,
+            "false_continue_cases": [],
+            "unnecessary_hold_trials": 0,
+            "unnecessary_hold_cases": [],
+            "incremental_unnecessary_holds": 0,
+            "wrong_excluded_purpose_routes": 0,
+            "route_counts": {
+              "CONTINUE": 30,
+              "EXCLUDED_PURPOSE": 12,
+              "CLARIFY": 12,
+              "REVIEW": 6,
+              "API_FAILURE": 0,
+              "NOT_MEASURED": 0
+            }
+          }
+        },
+        "utility": {
+          "common_evaluable_trials": 60,
+          "common_configuration_summaries": {
+            "A": {
+              "planned_trials": 60,
+              "evaluable_trials": 60,
+              "j2_false_supported": 0,
+              "false_continue_trials": 0,
+              "false_continue_cases": [],
+              "unnecessary_hold_trials": 0,
+              "unnecessary_hold_cases": [],
+              "incremental_unnecessary_holds": 0,
+              "wrong_excluded_purpose_routes": 0,
+              "route_counts": {
+                "CONTINUE": 30,
+                "EXCLUDED_PURPOSE": 12,
+                "CLARIFY": 12,
+                "REVIEW": 6,
+                "API_FAILURE": 0,
+                "NOT_MEASURED": 0
+              }
+            },
+            "B": {
+              "planned_trials": 60,
+              "evaluable_trials": 60,
+              "j2_false_supported": 0,
+              "false_continue_trials": 0,
+              "false_continue_cases": [],
+              "unnecessary_hold_trials": 0,
+              "unnecessary_hold_cases": [],
+              "incremental_unnecessary_holds": 0,
+              "wrong_excluded_purpose_routes": 0,
+              "route_counts": {
+                "CONTINUE": 30,
+                "EXCLUDED_PURPOSE": 12,
+                "CLARIFY": 12,
+                "REVIEW": 6,
+                "API_FAILURE": 0,
+                "NOT_MEASURED": 0
+              }
+            },
+            "C": {
+              "planned_trials": 60,
+              "evaluable_trials": 60,
+              "j2_false_supported": 0,
+              "false_continue_trials": 0,
+              "false_continue_cases": [],
+              "unnecessary_hold_trials": 0,
+              "unnecessary_hold_cases": [],
+              "incremental_unnecessary_holds": 0,
+              "wrong_excluded_purpose_routes": 0,
+              "route_counts": {
+                "CONTINUE": 30,
+                "EXCLUDED_PURPOSE": 12,
+                "CLARIFY": 12,
+                "REVIEW": 6,
+                "API_FAILURE": 0,
+                "NOT_MEASURED": 0
+              }
+            },
+            "D": {
+              "planned_trials": 60,
+              "evaluable_trials": 60,
+              "j2_false_supported": 0,
+              "false_continue_trials": 0,
+              "false_continue_cases": [],
+              "unnecessary_hold_trials": 0,
+              "unnecessary_hold_cases": [],
+              "incremental_unnecessary_holds": 0,
+              "wrong_excluded_purpose_routes": 0,
+              "route_counts": {
+                "CONTINUE": 30,
+                "EXCLUDED_PURPOSE": 12,
+                "CLARIFY": 12,
+                "REVIEW": 6,
+                "API_FAILURE": 0,
+                "NOT_MEASURED": 0
+              }
+            }
+          },
+          "counts": {
+            "noul_catches_false_support": 0,
+            "score_catches_false_support": 0,
+            "score_adds_beyond_noul": 0,
+            "score_extra_legitimate_hold_beyond_noul": 0,
+            "both_hold_same_false_support": 0,
+            "both_allow_same_false_support": 0,
+            "same_B_C_D_route": 30
+          },
+          "cases": {
+            "noul_catches_false_support": [],
+            "score_catches_false_support": [],
+            "score_adds_beyond_noul": [],
+            "score_extra_legitimate_hold_beyond_noul": [],
+            "both_hold_same_false_support": [],
+            "both_allow_same_false_support": [],
+            "same_B_C_D_route": [
+              "EQ-H02",
+              "EQ-H04",
+              "EQ-H05",
+              "EQ-H08",
+              "EQ-H09",
+              "EQ-H10",
+              "EQ-H11",
+              "EQ-H18",
+              "EQ-H19",
+              "EQ-H20"
+            ]
+          },
+          "details": [
+            {
+              "case_id": "EQ-H02",
+              "trial": 1,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "EQ-H02",
+              "trial": 2,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "EQ-H02",
+              "trial": 3,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "EQ-H04",
+              "trial": 1,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "EQ-H04",
+              "trial": 2,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "EQ-H04",
+              "trial": 3,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "EQ-H05",
+              "trial": 1,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "EQ-H05",
+              "trial": 2,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "EQ-H05",
+              "trial": 3,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "EQ-H08",
+              "trial": 1,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "EQ-H08",
+              "trial": 2,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "EQ-H08",
+              "trial": 3,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "EQ-H09",
+              "trial": 1,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "EQ-H09",
+              "trial": 2,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "EQ-H09",
+              "trial": 3,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "EQ-H10",
+              "trial": 1,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "EQ-H10",
+              "trial": 2,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "EQ-H10",
+              "trial": 3,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "EQ-H11",
+              "trial": 1,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "EQ-H11",
+              "trial": 2,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "EQ-H11",
+              "trial": 3,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "EQ-H18",
+              "trial": 1,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "EQ-H18",
+              "trial": 2,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "EQ-H18",
+              "trial": 3,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "EQ-H19",
+              "trial": 1,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "EQ-H19",
+              "trial": 2,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "EQ-H19",
+              "trial": 3,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "EQ-H20",
+              "trial": 1,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "EQ-H20",
+              "trial": 2,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            },
+            {
+              "case_id": "EQ-H20",
+              "trial": 3,
+              "noul_catches_false_support": false,
+              "score_catches_false_support": false,
+              "score_adds_beyond_noul": false,
+              "score_extra_legitimate_hold_beyond_noul": false,
+              "both_hold_same_false_support": false,
+              "both_allow_same_false_support": false,
+              "same_B_C_D_route": true
+            }
+          ]
+        },
+        "hypothesis_checks": {
+          "j3_region_measured": 60,
+          "j3_region_agreement": 54,
+          "j4_region_measured": 60,
+          "j4_region_agreement": 60,
+          "clear_excluded_purpose_low_noul_high_sufficiency_trials": 15,
+          "clear_excluded_contrast_cases": [
+            "EQ-H01",
+            "EQ-H06",
+            "EQ-H07",
+            "EQ-H13",
+            "EQ-H15"
+          ]
+        }
+      }
+    }
+  }
+}

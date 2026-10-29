@@ -1,0 +1,119 @@
+{
+  "note": "Immutable experimental JSON and result reports preserved during consolidation. Source imports and documentation may be updated for relocation; old absolute paths in historical reports/JSON are provenance, not current run paths.",
+  "artifacts": [
+    {
+      "old_path": "v2_plan.json",
+      "path": "experiments/category_validation/v2_plan.json",
+      "sha256": "60e56beb3060a6ead1219b6d9ff6c8237b40fe72b9f577e2981dbf21ae1310ab",
+      "bytes": 9286
+    },
+    {
+      "old_path": "sdk-verification.json",
+      "path": "experiments/category_validation/sdk-verification.json",
+      "sha256": "03c2482695229917016f07c0af388c6cfa16f8500f1bf1b5d672f12b18edad01",
+      "bytes": 12867
+    },
+    {
+      "old_path": "JEV_CATEGORY_EXPERIMENT_RESULTS.md",
+      "path": "experiments/category_validation/JEV_CATEGORY_EXPERIMENT_RESULTS.md",
+      "sha256": "f4b1143e8a4876f6f8874e39f0d1fc47de7e21081ab32c957c6ce08132799a56",
+      "bytes": 17647
+    },
+    {
+      "old_path": "JEV_CATEGORY_EXPERIMENT_V2_RESULTS.md",
+      "path": "experiments/category_validation/JEV_CATEGORY_EXPERIMENT_V2_RESULTS.md",
+      "sha256": "4679b6ea889a1fd671916c5625666c004c44d1effcfc0118d37d1ad1485dba0c",
+      "bytes": 196299
+    },
+    {
+      "old_path": "results/comparison.json",
+      "path": "experiments/category_validation/results/comparison.json",
+      "sha256": "f7a8a8a4b7c412c5c531c0225dbf6d5e35728b95408b70d8fb053515579b28ef",
+      "bytes": 166846
+    },
+    {
+      "old_path": "results/model-catalogue.json",
+      "path": "experiments/category_validation/results/model-catalogue.json",
+      "sha256": "cb8271b166cd201978495ba3eb84650e20143a80edfd668f1fc723723c758e44",
+      "bytes": 77934
+    },
+    {
+      "old_path": "results/v2/comparison.json",
+      "path": "experiments/category_validation/results/v2/comparison.json",
+      "sha256": "447e6871cbaecb44647ed1142fd7e6d69965f2a2d529e915d5328ee0a40d450d",
+      "bytes": 1880617
+    },
+    {
+      "old_path": "results/v2/preregistered.json",
+      "path": "experiments/category_validation/results/v2/preregistered.json",
+      "sha256": "593354691c2513987c3b38203ceae704ada6d32621048a6a45db220c43c02ead",
+      "bytes": 19812
+    },
+    {
+      "old_path": "experiments/purpose_alignment/j2_cases.json",
+      "path": "experiments/purpose_alignment/j2_cases.json",
+      "sha256": "25536f38595514a86b57b366314d8622dc64379e7868696fce3776ba8f903860",
+      "bytes": 20231
+    },
+    {
+      "old_path": "experiments/purpose_alignment/JEV_PURPOSE_ALIGNMENT_RESULTS.md",
+      "path": "experiments/purpose_alignment/JEV_PURPOSE_ALIGNMENT_RESULTS.md",
+      "sha256": "33f650db977f4a21ca7214c410197119d6a0a2098f7dcbd7651e61eeef24e577",
+      "bytes": 70576
+    },
+    {
+      "old_path": "experiments/purpose_alignment/results/j2_comparison.json",
+      "path": "experiments/purpose_alignment/results/j2_comparison.json",
+      "sha256": "1159f5f746f975be3246fc394bb7333afff93597ad3208f3a70bcdf6545f6a9c",
+      "bytes": 781383
+    },
+    {
+      "old_path": "experiments/purpose_alignment/results/j2_preregistered.json",
+      "path": "experiments/purpose_alignment/results/j2_preregistered.json",
+      "sha256": "3043c85c1673151af1bebebc98a9a371001e94f7fd0abcfc4210124ac3fc2aee",
+      "bytes": 46719
+    },
+    {
+      "old_path": "experiments/evidence_quality/j3_j4_dev_cases.json",
+      "path": "experiments/evidence_quality/j3_j4_dev_cases.json",
+      "sha256": "d9cb613f0eefaf50b9e8cb9b93c7cba08d594486a5956e766da79c02cdc03ed5",
+      "bytes": 24886
+    },
+    {
+      "old_path": "experiments/evidence_quality/j3_j4_heldout_cases.json",
+      "path": "experiments/evidence_quality/j3_j4_heldout_cases.json",
+      "sha256": "2df805a7daab72eedb9a28bd0290cf4b36bbb77179607b5994ee4aa36786fe0a",
+      "bytes": 11618
+    },
+    {
+      "old_path": "experiments/evidence_quality/JEV_EVIDENCE_QUALITY_RESULTS.md",
+      "path": "experiments/evidence_quality/JEV_EVIDENCE_QUALITY_RESULTS.md",
+      "sha256": "f83b8000671d26483e9f7735ce65cb7ce078aa653c255d760a3f244bbd9d8802",
+      "bytes": 221991
+    },
+    {
+      "old_path": "experiments/evidence_quality/results/preregistered.json",
+      "path": "experiments/evidence_quality/results/preregistered.json",
+      "sha256": "7f8ceab8aef18e5e307e2533bad7af152bfa97fb12b6af2234e16f3972e1eecf",
+      "bytes": 97094
+    },
+    {
+      "old_path": "experiments/evidence_quality/results/raw_results.json",
+      "path": "experiments/evidence_quality/results/raw_results.json",
+      "sha256": "18ea4c3256188796f48da84798ac7d90b3c8868d73c4cc1390717f60c5b5789d",
+      "bytes": 2797103
+    },
+    {
+      "old_path": "experiments/evidence_quality/results/routing_comparison.json",
+      "path": "experiments/evidence_quality/results/routing_comparison.json",
+      "sha256": "8c9e6cbbbb23861502700d7127ade8d47babe498505b2f7bb191f442b5dce541",
+      "bytes": 143285
+    },
+    {
+      "old_path": "experiments/evidence_quality/results/routing_rule.json",
+      "path": "experiments/evidence_quality/results/routing_rule.json",
+      "sha256": "7d7ab46bc94ecd29dcc50e11fa506443b8f9f63aa73886ed52d42ec8128ff3e7",
+      "bytes": 10477
+    }
+  ]
+}
