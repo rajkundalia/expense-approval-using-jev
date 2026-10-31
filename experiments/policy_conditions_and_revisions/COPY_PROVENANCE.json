@@ -1,0 +1,74 @@
+{
+  "note": "Checked-in files must remain unchanged. Copies below are new experiment-local dependencies, not imports from old experiments.",
+  "tracked_files": {
+    ".gitignore": "1807140e9d558026eb95dd285a5da613bce9a9b5e785ee1d37728ae22e8d5355",
+    "README.md": "1e0a3e74abbd4252d9bbc2d146c58739a15230d9f614726557df9d682f657d63",
+    "experiments/ARCHIVE_MANIFEST.json": "0ca77814d5a19c072e4389f2d7f8cf6c608783ce6d5317bb8728b60ef08c7852",
+    "experiments/README.md": "87a90c061180cd1f371d1e40a45233f3c434471355dd9f327bec2ac6d4210000",
+    "experiments/__init__.py": "8c2434526d6ead58c091dec41a52835fb14c2cc2ce112e74af9003643b384ee2",
+    "experiments/category_validation/JEV_CATEGORY_EXPERIMENT_RESULTS.md": "f4b1143e8a4876f6f8874e39f0d1fc47de7e21081ab32c957c6ce08132799a56",
+    "experiments/category_validation/JEV_CATEGORY_EXPERIMENT_V2_RESULTS.md": "4679b6ea889a1fd671916c5625666c004c44d1effcfc0118d37d1ad1485dba0c",
+    "experiments/category_validation/__init__.py": "29bdedd9a81ee18cfea98e996077ffa12f1b7eec35b0ceed9167e2a8dee1c37b",
+    "experiments/category_validation/experiment.py": "6f1098509043de8a6a292f35bf33be6b73ad30976e335e1fc753714bb3f4cfcd",
+    "experiments/category_validation/experiment_v2.py": "be8125f66fbb682ad81dbc64dff99a09634d100882be163838f6b07a3a4d2658",
+    "experiments/category_validation/results/comparison.json": "f7a8a8a4b7c412c5c531c0225dbf6d5e35728b95408b70d8fb053515579b28ef",
+    "experiments/category_validation/results/model-catalogue.json": "cb8271b166cd201978495ba3eb84650e20143a80edfd668f1fc723723c758e44",
+    "experiments/category_validation/results/v2/comparison.json": "447e6871cbaecb44647ed1142fd7e6d69965f2a2d529e915d5328ee0a40d450d",
+    "experiments/category_validation/results/v2/preregistered.json": "593354691c2513987c3b38203ceae704ada6d32621048a6a45db220c43c02ead",
+    "experiments/category_validation/sdk-verification.json": "03c2482695229917016f07c0af388c6cfa16f8500f1bf1b5d672f12b18edad01",
+    "experiments/category_validation/test_experiment.py": "1177cadd9fdc700e793987de2f4ba77492d446449d83b832353a6faa126e63a3",
+    "experiments/category_validation/test_experiment_v2.py": "c958ba37bd5d50ffb0e990c2ae9a2e49f2dafb58d7ddee585542b287136b0d6b",
+    "experiments/category_validation/v2_plan.json": "60e56beb3060a6ead1219b6d9ff6c8237b40fe72b9f577e2981dbf21ae1310ab",
+    "experiments/evidence_quality/JEV_EVIDENCE_QUALITY_RESULTS.md": "f83b8000671d26483e9f7735ce65cb7ce078aa653c255d760a3f244bbd9d8802",
+    "experiments/evidence_quality/TASK.md": "79aadc869121f6f5d332be8a283acdaabe87f3a05a5c6bd1005e8a5d0e8629b6",
+    "experiments/evidence_quality/__init__.py": "d592a2c3fa8c5a05ef5307fa3aa751270049aff0ed824098544b61eff80757cb",
+    "experiments/evidence_quality/experiment_j3_j4.py": "ff99eb515323ebe335d5ffe3a5fd88594a001cb591d86f4c0e89d0db23b4ce06",
+    "experiments/evidence_quality/j3_j4_dev_cases.json": "d9cb613f0eefaf50b9e8cb9b93c7cba08d594486a5956e766da79c02cdc03ed5",
+    "experiments/evidence_quality/j3_j4_heldout_cases.json": "2df805a7daab72eedb9a28bd0290cf4b36bbb77179607b5994ee4aa36786fe0a",
+    "experiments/evidence_quality/results/preregistered.json": "7f8ceab8aef18e5e307e2533bad7af152bfa97fb12b6af2234e16f3972e1eecf",
+    "experiments/evidence_quality/results/raw_results.json": "18ea4c3256188796f48da84798ac7d90b3c8868d73c4cc1390717f60c5b5789d",
+    "experiments/evidence_quality/results/routing_comparison.json": "8c9e6cbbbb23861502700d7127ade8d47babe498505b2f7bb191f442b5dce541",
+    "experiments/evidence_quality/results/routing_rule.json": "7d7ab46bc94ecd29dcc50e11fa506443b8f9f63aa73886ed52d42ec8128ff3e7",
+    "experiments/evidence_quality/routing_analysis.py": "5af4ee603cddac1a4e7ffd771de1cc1c9c2076f9834b9bed2ba2d742fb7efed4",
+    "experiments/evidence_quality/test_experiment_j3_j4.py": "3a91bda671a183538ad98a1cf12fdf51bfd6b6f2595fe94da42bbf8dd1efa3db",
+    "experiments/purpose_alignment/JEV_PURPOSE_ALIGNMENT_RESULTS.md": "33f650db977f4a21ca7214c410197119d6a0a2098f7dcbd7651e61eeef24e577",
+    "experiments/purpose_alignment/TASK.md": "558420d5ae3a7c3ac652913df6212e28e5e5588560db97d7129411cb6ade50c4",
+    "experiments/purpose_alignment/__init__.py": "472a5f929787e137e32bcf9c1934406fa473889f5d7d2a1730828be276b0e4e8",
+    "experiments/purpose_alignment/experiment_j2.py": "cd1598331788fb8846c68b9c04891b5942ba40c36374875f5d3de4c049b1b27c",
+    "experiments/purpose_alignment/j2_cases.json": "25536f38595514a86b57b366314d8622dc64379e7868696fce3776ba8f903860",
+    "experiments/purpose_alignment/results/j2_comparison.json": "1159f5f746f975be3246fc394bb7333afff93597ad3208f3a70bcdf6545f6a9c",
+    "experiments/purpose_alignment/results/j2_preregistered.json": "3043c85c1673151af1bebebc98a9a371001e94f7fd0abcfc4210124ac3fc2aee",
+    "experiments/purpose_alignment/test_experiment_j2.py": "5158bdf8145f81dc241447425d197e1d60953c5c6e25a029ce98ee7522966e95",
+    "experiments/requirements.txt": "9267445721a5f300460160382dbe600602ba959870030782fc8e6fc65f9ed77d"
+  },
+  "copies": {
+    "sdk_support.py": {
+      "source": "experiments/category_validation/experiment.py",
+      "original_sha256": "6f1098509043de8a6a292f35bf33be6b73ad30976e335e1fc753714bb3f4cfcd"
+    },
+    "j2_reference.py": {
+      "source": "experiments/purpose_alignment/experiment_j2.py",
+      "original_sha256": "cd1598331788fb8846c68b9c04891b5942ba40c36374875f5d3de4c049b1b27c"
+    },
+    "reference_data/j1_v1.json": {
+      "source": "experiments/category_validation/results/comparison.json",
+      "original_sha256": "f7a8a8a4b7c412c5c531c0225dbf6d5e35728b95408b70d8fb053515579b28ef"
+    },
+    "reference_data/j1_v2.json": {
+      "source": "experiments/category_validation/results/v2/comparison.json",
+      "original_sha256": "447e6871cbaecb44647ed1142fd7e6d69965f2a2d529e915d5328ee0a40d450d"
+    },
+    "reference_data/j2_results.json": {
+      "source": "experiments/purpose_alignment/results/j2_comparison.json",
+      "original_sha256": "1159f5f746f975be3246fc394bb7333afff93597ad3208f3a70bcdf6545f6a9c"
+    },
+    "reference_data/j2_preregistered.json": {
+      "source": "experiments/purpose_alignment/results/j2_preregistered.json",
+      "original_sha256": "3043c85c1673151af1bebebc98a9a371001e94f7fd0abcfc4210124ac3fc2aee"
+    }
+  },
+  "local_adaptations": {
+    "j2_reference.py": "Only its SDK helper import was adapted to the local copied sdk_support module.",
+    "sdk_support.py": "New local copy only: unique atomic-write temp names and bounded retries for transient PermissionError on file replacement; no inference retries."
+  }
+}
