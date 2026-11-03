@@ -1,0 +1,41 @@
+
+flowchart TD
+    A["Claim requires action"] --> B{"What kind of action?"}
+
+    B -->|"Field correction"| C["Employee corrects item name, category, invoice details or amount"]
+    C --> D["Save revision in audit history"]
+    D --> E["Rerun Python validations"]
+    E --> F{"Valid?"}
+    F -->|No| G["Show validation error or policy restriction"]
+    F -->|Yes| H{"Item name or category changed?"}
+    H -->|Yes| I["Rerun J1"]
+    H -->|No| J["Reuse J1 result"]
+    I --> K["Return to main evaluation flow"]
+    J --> K
+
+    B -->|"Semantic clarification"| L{"Two attempts already used?"}
+    L -->|Yes| M["HUMAN_REVIEW: Contact Benefits Team"]
+    L -->|No| N["Display broad policy-specific question"]
+    N --> O["Employee revises justification"]
+    O --> P["Save revision and increment clarification attempts"]
+    P --> Q["J4 Score: Evaluate response completeness"]
+    Q --> R["J2 Choice: Reassess revised purpose"]
+    R --> S{"J2 result and confidence"}
+
+    S -->|"Confident SUPPORTED"| T["Continue to financial recheck"]
+    S -->|"Confident UNRELATED"| U["POLICY_RESTRICTION"]
+    S -->|INCONSISTENT| M
+    S -->|"UNCLEAR or uncertain"| V{"Attempts remaining?"}
+
+    V -->|Yes| W["Use J4 to inform next clarification"]
+    W --> N
+    V -->|No| M
+
+    T --> X["Return to main evaluation flow"]
+    
+    classDef success fill:#DFF3E9,stroke:#22865B,color:#18593F
+    classDef warning fill:#FFF1D6,stroke:#BC872D,color:#704F11
+    classDef review fill:#FBE7E7,stroke:#C75C5C,color:#803535
+    class T,X success
+    class N,O,W warning
+    class M,U review

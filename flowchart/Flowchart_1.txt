@@ -1,0 +1,48 @@
+
+flowchart TD
+    A["Employee submits claim"] --> B["Python validates input, invoice age, duplicates and available allowance"]
+    B --> C{"Valid?"}
+    C -->|No| D["Return validation error or POLICY_RESTRICTION"]
+    C -->|Yes| E["J1 Choice: Classify invoice item"]
+    E --> F{"J1 result"}
+
+    F -->|"Low confidence or narrow margin"| G["NEED_INFO: Correct item name"]
+    F -->|"INSUFFICIENT_INFORMATION or MIXED_ITEMS"| G
+    F -->|"Confident OTHER"| H["POLICY_RESTRICTION"]
+    F -->|"Covered category"| I{"Matches employee category?"}
+
+    I -->|No| J["NEED_INFO: Correct category"]
+    I -->|Yes| K["J2 Choice: Assess purpose"]
+
+    K --> L{"J2 result"}
+    L -->|"UNCLEAR"| M["NEED_INFO: Clarify purpose"]
+    L -->|"INCONSISTENT"| N["HUMAN_REVIEW: Benefits Team"]
+    L -->|"SUPPORTED or UNRELATED"| O{"Confidence and margin pass?"}
+
+    O -->|No| M
+    O -->|"Yes + UNRELATED"| P["POLICY_RESTRICTION"]
+    O -->|"Yes + SUPPORTED"| Q["Python rechecks allowance atomically"]
+
+    Q --> R{"Still enough allowance?"}
+    R -->|No| S["POLICY_RESTRICTION"]
+    R -->|Yes| T["PROCESSABLE: Consume allowance"]
+
+    M --> U["Revision workflow - Flowchart 2"]
+    G --> U
+    J --> U
+
+    M -.-> V["Advisory J3 Noul"]
+    N -.-> V
+    P -.-> V
+    T -.-> V
+    S -.-> V
+
+    V --> W["Store probability and display in Decision Details"]
+    W --> X["Never change claim outcome"]
+
+    classDef success fill:#DFF3E9,stroke:#22865B,color:#18593F
+    classDef warning fill:#FFF1D6,stroke:#BC872D,color:#704F11
+    classDef neutral fill:#EAF0FA,stroke:#6686BB,color:#233C65
+    class T success
+    class M,G,J,U warning
+    class V,W,X neutral

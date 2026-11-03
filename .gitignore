@@ -2,6 +2,26 @@
 __pycache__/
 .env
 .env.*
+!.env.example
+.pytest_cache/
+.ruff_cache/
+.uv-cache/
+.tmp/
+*.py[cod]
+*.sqlite
+*.sqlite3
+*.db
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite3-journal
+*.sqlite3-wal
+*.sqlite3-shm
+*.db-journal
+*.db-wal
+*.db-shm
+.coverage
+htmlcov/
 # Frozen fictional experiment responses are intentional versioned evidence.
 # Keep transient atomic-write files and the old root output location ignored.
 /results/

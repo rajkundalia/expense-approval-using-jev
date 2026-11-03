@@ -1,0 +1,32 @@
+[project]
+name = "expense-approval-using-jev"
+version = "0.1.0"
+description = "Local employee expense reimbursement learning application using Jev."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "typesafe-sdk==0.7.5",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8,<10",
+    "ruff>=0.14,<0.15",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+target-version = "py312"
+# Historical research code and recovered source snapshots retain their original style.
+# force-exclude also protects explicitly supplied experiment paths.
+extend-exclude = ["experiments"]
+force-exclude = true
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
+
+[tool.pytest.ini_options]
+testpaths = ["experiments"]
+pythonpath = ["."]

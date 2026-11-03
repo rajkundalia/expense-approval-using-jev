@@ -1,0 +1,40 @@
+
+flowchart TD
+    A["Claim submitted or revised"] --> B["Validate required fields and amounts"]
+    B --> C{"Input valid?"}
+    C -->|No| D["Return validation error"]
+
+    C -->|Yes| E["Validate invoice date against original submission date"]
+    E --> F{"Invoice within 3 calendar months and not future-dated?"}
+    F -->|No| G["POLICY_RESTRICTION: Invoice date invalid"]
+
+    F -->|Yes| H["Normalize employee, merchant and invoice identifiers"]
+    H --> I{"Same invoice line blocked by another claim?"}
+    I -->|Yes| J["Reject duplicate submission"]
+    I -->|No| K["Check applicable allowance period and remaining balance"]
+
+    K --> L{"Requested amount within allowance?"}
+    L -->|No| M["POLICY_RESTRICTION: Allowance exceeded"]
+    L -->|Yes| N["Proceed to J1 and J2 semantic evaluation"]
+
+    N --> O{"Semantic evaluation permits processing?"}
+    O -->|No| P["Save outcome without consuming allowance"]
+    O -->|Yes| Q["Begin SQLite write transaction"]
+
+    Q --> R["Recheck duplicate claim and remaining allowance"]
+    R --> S{"Both checks still pass?"}
+
+    S -->|No| T["POLICY_RESTRICTION: Save rejection"]
+    S -->|Yes| U["Mark claim PROCESSABLE and consume allowance"]
+    U --> V["Commit transaction"]
+
+    P --> W["Preserve decision and audit history"]
+    T --> W
+    V --> W
+
+    classDef success fill:#DFF3E9,stroke:#22865B,color:#18593F
+    classDef restriction fill:#FBE7E7,stroke:#C75C5C,color:#803535
+    classDef important fill:#EAF0FA,stroke:#6686BB,color:#233C65
+    class U,V success
+    class G,J,M,T restriction
+    class Q,R important
