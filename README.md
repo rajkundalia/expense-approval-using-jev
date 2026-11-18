@@ -13,8 +13,9 @@ The end-to-end reimbursement application is not implemented yet.
 
 ## Milestone 1: reproducible Python setup
 
-Only project scaffolding is implemented. No application modules, endpoints, claim
-models, database schema, policy logic, Jev evaluations or UI have been added.
+Milestone 1 established project scaffolding. Milestone 3 now includes a package
+marker and typed configuration (see below). Claim models, endpoints, database
+schema, policy logic, Jev evaluations and UI remain for later slices.
 
 Use `uv` from the repository root (verified with uv 0.10.9):
 
@@ -41,13 +42,13 @@ lockfile updates. No build backend or package installation is needed yet
 | `pyproject.toml` | Python target, pinned SDK, development tools, Ruff and pytest configuration |
 | `uv.lock` | Resolved dependency versions and distribution hashes for repeatable syncs |
 | `.python-version` | Default interpreter selection, Python 3.12.14 |
-| `.env.example` | Placeholder key and provisional future settings; no loading behavior |
+| `.env.example` | Placeholder key and supported configuration values; no automatic `.env` loading |
 | `.gitignore` | Ignore local secrets, environments, SQLite files/sidecars and generated caches; allow `.env.example` |
 | `README.md` | Setup instructions and this inspection/verification record |
 
-The only direct runtime dependency is the existing `typesafe-sdk==0.7.5`, needed
-to run the retained offline SDK tests. Both existing experiment requirements files
-are unchanged and specify the same pin. Installed SDK metadata declares Python
+Direct runtime dependencies are `typesafe-sdk==0.7.5`, Pydantic for typed settings,
+and Windows-only `tzdata` for IANA timezone support. Both existing experiment
+requirements files are unchanged and retain the SDK pin. SDK metadata declares Python
 `>=3.10`; SDK construction and offline tests work on 3.12.14.
 
 Development dependencies are pytest (`>=8,<10`, locked to 9.2.0) and Ruff
@@ -57,26 +58,54 @@ Pydantic 2.14.1 to 2.14.2, and pydantic-core 2.50.1 to 2.50.2. These versions ar
 now locked; the SDK version and experiment dependency declarations did not change.
 This reproduces the new setup, not the exact historical inference environment.
 
-FastAPI and Uvicorn are deferred until a backend milestone. Pydantic is already
-installed transitively by the SDK; declare it directly when application models
-use it. SQLite uses Python's built-in `sqlite3`, so no package is required.
+FastAPI and Uvicorn are deferred until a backend milestone. Pydantic is declared
+directly and remains locked to 2.14.2; Windows timezone data is locked to 2026.6.
+SQLite uses Python's built-in `sqlite3`, so no package is required.
 `python-dotenv` is deferred until environment-file loading is implemented.
 The eventual UI uses plain HTML/CSS/JavaScript; no Node, React or Docker is needed.
 
 ### Environment and SDK conventions
 
 `.env.example` documents `OPENROUTER_API_KEY`, `JEV_MIN_CONFIDENCE=0.70`, and
-`JEV_MIN_PROBABILITY_MARGIN=0.30`. The threshold values are provisional future
-defaults, not implemented settings. Copying the example to `.env` does not load
-it into Python. Existing experiments read the process environment; their README
-documents secure interactive key entry. Offline checks need no API key.
+`JEV_MIN_PROBABILITY_MARGIN=0.30`. The thresholds are implemented configuration
+defaults, still provisional and not calibrated. Copying the example to `.env`
+does not load it into Python. Existing experiments continue reading the process
+environment; their README documents interactive key entry. Offline checks need
+no API key.
 
 Reuse model snapshot `typesafe/jev-1.14-20261014`. Historical J1 and the scoped
 policy experiment use `typesafe/jev-1.14` and check the canonical snapshot;
 J2/J3/J4 request the exact snapshot. The integration explicitly supplies the key,
 model and OpenRouter `base_url="https://openrouter.ai/api"` to `TypeSafeClient`;
 the SDK appends `/v1/systemone`. Experiments disable automatic retries. No model
-upgrade, live inference, credential loading or API configuration behavior was added.
+upgrade or live inference was added; typed application settings are described below.
+
+### Typed configuration (Milestone 3, Slice 2)
+
+`expense_approval/settings.py` separates a small Pydantic `Settings` model from
+explicit loading. `load_settings({})` uses defaults; supplying a mapping uses only
+the three supported variables. To read process values, the caller opts in:
+
+```python
+import os
+
+from expense_approval.settings import load_settings
+
+settings = load_settings(os.environ)
+```
+
+Importing the module does not load application environment values or create a
+settings instance. No `.env` file is read. Missing thresholds use defaults;
+explicit blank, malformed, non-finite or out-of-range values raise Pydantic
+validation errors. Both thresholds independently accept finite values in `[0, 1]`.
+The optional API key uses `SecretStr` and is omitted from model representations;
+normal serialization masks it. No credentials are checked externally. Loading
+does not mutate its input or process environment. Tests use synthetic mappings
+and keys, with no network or real `.env` dependency.
+
+Slice 2 verification: locked offline Ruff lint/format checks passed; pytest
+collected and passed 57 tests (31 configuration tests and 26 historical tests),
+plus 7 historical subtests. No dependencies changed.
 
 ### Repository inspection and authoritative design
 
@@ -243,7 +272,6 @@ inspection used `git -c safe.directory=D:/ProjectsForBlogLearning/expense-approv
 per command, without changing global Git settings. The specification and flowchart
 directory were already untracked before this work. No commit or push was made.
 
-Milestone 2 Phase B stops at documentation reconciliation for human review.
-Application implementation has not started. Further work
-requires explicit approval; the README's final application-wide cleanup is
+Milestone 3 stops after Slice 2's typed configuration for human review. Further
+slices require explicit approval; the README's final application-wide cleanup is
 deferred until the application milestones are complete.
