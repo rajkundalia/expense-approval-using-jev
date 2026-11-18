@@ -172,12 +172,13 @@ claimed cellular line. The older V1 helper lacks `MIXED_ITEMS`; it is historical
 not the application's category contract. No experiment was changed. Historical
 experiment routing recommendations remain evidence, not current V1 rules.
 
-No unresolved contradiction remains in the five approved decisions. Manual
-invoice identity and mixed-item detection remain limited; model thresholds remain
-provisional. These limitations do not authorize new features. Implementation
-choices and any newly discovered ambiguity must be reviewed in later milestones.
+The five initial decisions and four independent-review findings now have explicit
+resolutions. Manual invoice identity and mixed-item detection remain limited;
+model thresholds remain provisional. These limitations do not authorize new
+features. Implementation choices and any newly discovered ambiguity must be
+reviewed in later milestones.
 
-### Phase B verification and diagram status
+### Initial Phase B verification record (2026-11-03)
 
 Only this README, the working specification, and the three existing
 `flowchart/Flowchart_1.txt`, `Flowchart_2.txt`, `Flowchart_3.txt` sources are changed.

@@ -13,9 +13,12 @@ flowchart TD
     ItemLimit -->|Yes| Review["HUMAN_REVIEW: Benefits Team referral; no actual review workflow"]
     ItemLimit -->|No| ItemInfo["NEED_INFO FIELD_CORRECTION: precise item name; one uncertain-item correction opportunity"]
     CategoryReliable -->|Yes| CategoryLabel{"Reliable J1 label"}
-    CategoryLabel -->|OTHER| Restricted["POLICY_RESTRICTION: saved terminal claim; no consumption"]
-    CategoryLabel -->|INSUFFICIENT_INFORMATION| Specific["NEED_INFO FIELD_CORRECTION: specify item name"]
-    CategoryLabel -->|MIXED_ITEMS| Mixed["NEED_INFO FIELD_CORRECTION: one eligible item and actual amount; includes separately charged mobile extras; never infer split"]
+    CategoryLabel -->|OTHER| Restricted["POLICY_RESTRICTION outcome: terminal when guarded write succeeds; no consumption"]
+    CategoryLabel -->|INSUFFICIENT_INFORMATION / MIXED_ITEMS| ReliableItemLimit{"One accepted reliable-item correction already used? Shared across both labels."}
+    ReliableItemLimit -->|Yes| Review
+    ReliableItemLimit -->|No| ReliableItemLabel{"Reliable unresolved-item label"}
+    ReliableItemLabel -->|INSUFFICIENT_INFORMATION| Specific["NEED_INFO FIELD_CORRECTION: specify item name; one accepted reliable-item correction"]
+    ReliableItemLabel -->|MIXED_ITEMS| Mixed["NEED_INFO FIELD_CORRECTION: one eligible item and actual amount; includes separately charged mobile extras; never infer split"]
     CategoryLabel -->|Covered category| Matches{"Matches employee category?"}
     Matches -->|Yes| Purpose
     Matches -->|No| CategoryLimit{"Two category-correction attempts already used?"}
@@ -28,7 +31,7 @@ flowchart TD
     PurposeLabel -->|SUPPORTED / UNRELATED / INCONSISTENT| PurposeReliable{"J2 confidence and top-two margin both pass?"}
     PurposeReliable -->|No| Unresolved
     PurposeReliable -->|Yes| ReliablePurpose{"Reliable J2 label"}
-    ReliablePurpose -->|SUPPORTED| Final["Flowchart 3 FINAL: serialized SQLite transaction; idempotent duplicate-and-allowance recheck"]
+    ReliablePurpose -->|SUPPORTED| Final["Flowchart 3 FINAL: serialized transaction; current status/evidence guard and idempotent duplicate/allowance recheck"]
     ReliablePurpose -->|UNRELATED| Restricted
     ReliablePurpose -->|INCONSISTENT| Review
     Unresolved -->|Yes| Review
@@ -36,7 +39,8 @@ flowchart TD
     Final --> FinalResult{"FINAL outcome"}
     FinalResult -->|Duplicate or allowance failure| Restricted
     FinalResult -->|Committed / already processed same claim| Processable["PROCESSABLE recorded once; eligible for processing, not paid"]
-    ItemInfo --> Record["Record outcome and evidence/evaluation versions; only PROCESSABLE consumes allowance"]
+    FinalResult -->|Stale status or evidence| Stale["Discard stale outcome; audit attempt without changing current status, evidence or allowance; no advisory routing for stale outcome"]
+    ItemInfo --> Record["Guard outcome write by expected eligible status and current evidence version; FINAL results already persisted; only PROCESSABLE consumes"]
     Specific --> Record
     Mixed --> Record
     CategoryInfo --> Record
@@ -45,8 +49,10 @@ flowchart TD
     Review --> Record
     Technical --> Record
     Processable --> Record
-    Record -.-> Actions["Actions use Flowchart 2 editability table; terminal claims cannot edit; only NEED_INFO/HUMAN_REVIEW can cancel"]
-    Record --> AdvisoryEligible{"Required J1 and J2 succeeded for this evidence version, including valid J1 reuse?"}
+    Record --> OutcomeCurrent{"Outcome write accepted, or FINAL result still current?"}
+    OutcomeCurrent -->|No| Stale
+    OutcomeCurrent -.->|Yes| Actions["Actions use Flowchart 2 editability table; terminal claims cannot edit; only NEED_INFO/HUMAN_REVIEW can cancel"]
+    OutcomeCurrent -->|Yes| AdvisoryEligible{"Required J1 and J2 succeeded for this evidence version, including valid J1 reuse?"}
     AdvisoryEligible -->|No| Unchanged["Preserve outcome and allowance; diagnostics never route claims"]
     AdvisoryEligible -->|Yes| Noul["J3: one advisory semantic-support proposition using raw current-revision evidence and policy; no other judgments or arithmetic"]
     Noul --> AdvisoryResult{"Advisory call succeeded?"}

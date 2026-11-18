@@ -10,20 +10,30 @@ flowchart TD
     Blocked -->|Yes| DuplicateKind{"New submission?"}
     DuplicateKind -->|Yes| Conflict["Conflict; no claim created"]
     DuplicateKind -->|No| FailedCorrection
-    Blocked -->|No| Balance["Employee/category/invoice-date period: remaining cap minus sum of PROCESSABLE claims; no fixed cap for business policies"]
-    Balance --> Within{"Requested within remaining allowance, or policy uncapped?"}
-    Within -->|No| Allowance["Save POLICY_RESTRICTION with ID and attempted amounts/history; existing claim retains last valid evidence; terminal; never reduce request"]
-    Within -->|Yes| Accepted["PRE passed: create new claim or accept valid evidence revision; preserve audit versions"]
+    Blocked -->|No| AdmissionBegin["Begin short serialized SQLite admission transaction; do not hold across Jev calls"]
+    Balance["Employee/category/invoice-date period: remaining cap minus sum of PROCESSABLE claims; no fixed cap for business policies"] --> Within{"Requested within remaining allowance, or policy uncapped?"}
+    Within -->|No| Allowance["Save POLICY_RESTRICTION with ID and attempted amounts/history; existing claim retains last valid evidence; commit; never reduce request"]
+    AdmissionBegin --> AdmissionCurrent{"New claim, or existing status and evidence still match expected editable version?"}
+    AdmissionCurrent -->|No| StaleAdmission["End transaction; audit stale admission; preserve current state/version and counters; no Jev"]
+    AdmissionCurrent -->|Yes| AdmissionDuplicate{"Atomic duplicate-key exclusion: another active or PROCESSABLE owner?"}
+    AdmissionDuplicate -->|Yes| AdmissionConflict["End transaction without acquiring/changing key; apply new-conflict or failed-correction rule"]
+    AdmissionConflict --> DuplicateKind
+    AdmissionDuplicate -->|No| Balance
+    Within -->|Yes| Accepted["Atomically create active claim or accept identity/evidence revision; count accepted semantic/reliable-item response once if applicable; commit history"]
     Accepted --> Ready["Flowchart 1 READY: valid J1 reuse or J1 before J2; unresolved J1 never reaches J2"]
     InputError --> Zero["No Jev; consume/reserve zero; existing failed attempts retain last valid evidence"]
     Conflict --> Zero
     FailedCorrection --> Zero
     Allowance --> Zero
+    StaleAdmission --> Zero
 
     Final["FINAL: reliable J2 SUPPORTED from Flowchart 1; no J3/J4 input controls this handoff"] --> Begin["Begin serialized SQLite write transaction"]
     Begin --> Already{"Same claim already PROCESSABLE?"}
     Already -->|Yes| Existing["Return existing result; no second consumption; end transaction"]
-    Already -->|No| Recheck["Recheck duplicate key excluding self AND remaining employee/category/invoice-period allowance; uncapped policies still check duplicates"]
+    Already -->|No| Current{"Status still matches expected eligible editable state AND evaluated evidence version still current?"}
+    Current -->|No| StaleFinal["End transaction; discard stale attempt and audit without changing current claim or allowance; do not overwrite terminal state"]
+    StaleFinal --> StaleReturn["Flowchart 1 STALE: preserve current result; no new restriction, processing or advisory routing from stale outcome"]
+    Current -->|Yes| Recheck["Recheck duplicate key excluding self AND remaining employee/category/invoice-period allowance; uncapped policies still check duplicates"]
     Recheck --> Pass{"Both checks pass?"}
     Pass -->|No| FinalRestriction["Save POLICY_RESTRICTION and reason; consume zero; commit outcome/history"]
     Pass -->|Yes| Process["Atomically record PROCESSABLE and requested amount once; commit outcome/history"]
@@ -39,4 +49,4 @@ flowchart TD
     classDef important fill:#EAF0FA,stroke:#6686BB,color:#233C65
     class Process,Existing success
     class InputError,Conflict,FailedCorrection,Allowance,FinalRestriction restriction
-    class Begin,Recheck,Rules,Evaluation important
+    class AdmissionBegin,AdmissionDuplicate,Begin,Current,Recheck,Rules,Evaluation important
