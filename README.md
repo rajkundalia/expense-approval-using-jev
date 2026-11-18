@@ -13,9 +13,10 @@ The end-to-end reimbursement application is not implemented yet.
 
 ## Milestone 1: reproducible Python setup
 
-Milestone 1 established project scaffolding. Milestone 3 now includes a package
-marker and typed configuration (see below). Claim models, endpoints, database
-schema, policy logic, Jev evaluations and UI remain for later slices.
+Milestone 1 established project scaffolding. Milestone 3 now includes typed
+configuration and structural claim/money validation (see below). Relative date
+eligibility, endpoints, database schema, policy routing, Jev evaluations and UI
+remain for later slices.
 
 Use `uv` from the repository root (verified with uv 0.10.9):
 
@@ -106,6 +107,36 @@ and keys, with no network or real `.env` dependency.
 Slice 2 verification: locked offline Ruff lint/format checks passed; pytest
 collected and passed 57 tests (31 configuration tests and 26 historical tests),
 plus 7 historical subtests. No dependencies changed.
+
+### Structural claim and money validation (Milestone 3, Slice 3)
+
+`expense_approval/claim_input.py` provides `ClaimInput` and the six-category
+`ReimbursementCategory` enum. Use `ClaimInput.model_validate(payload)` for the
+employee-entered fields. Required text must be nonblank and is preserved without
+trimming or case changes; unknown fields are rejected. Invoice line numbers must
+be positive integers and default to `1` only when omitted. Dates accept Python
+`date` values or valid `YYYY-MM-DD` text, rejecting datetimes and timestamps.
+
+Both amount fields use the reusable `parse_money` function in
+`expense_approval/validation.py` through a Pydantic before-validator. It accepts
+decimal text, `Decimal` and integers, rejecting floats and booleans before
+coercion. Values must be finite, positive and exactly representable in paise:
+`12.340` and `12.0000` pass; `12.345` and `12.001` fail. The parser inspects
+fractional digits without rounding, quantizing or depending on Decimal arithmetic
+precision, and retains redundant zeros. Requested reimbursement may be below or
+equal to the item amount; it is never silently adjusted.
+
+Validation leaves the caller's payload unchanged, including after failure. The
+typed model is not a raw audit snapshot; future persistence must preserve the
+original employee-entered evidence separately. A valid model establishes only
+structural validity: three-month eligibility, future-date restrictions and
+original-submission-based correction checks require a separate contextual date
+validator in Slice 4. Duplicate/allowance checks and semantic eligibility are not
+performed here.
+
+Slice 3 verification: locked offline Ruff lint/format checks passed; pytest
+collected and passed 176 tests (119 new structural/money cases, 31 configuration
+cases and 26 historical tests), plus 7 historical subtests. No dependencies changed.
 
 ### Repository inspection and authoritative design
 
@@ -272,6 +303,6 @@ inspection used `git -c safe.directory=D:/ProjectsForBlogLearning/expense-approv
 per command, without changing global Git settings. The specification and flowchart
 directory were already untracked before this work. No commit or push was made.
 
-Milestone 3 stops after Slice 2's typed configuration for human review. Further
+Milestone 3 stops after Slice 3's structural validation for human review. Further
 slices require explicit approval; the README's final application-wide cleanup is
 deferred until the application milestones are complete.
