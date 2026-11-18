@@ -1,6 +1,6 @@
 # Jev Expense Reimbursement — Consolidated Working Specification
 
-**Status:** Implementation design consolidated on 2026-11-02. Agreed rules are marked **Finalized**; unresolved details are explicitly marked **Open**. This is the authoritative working specification for the local demo. The earlier complete working text is retained at the end for traceability.
+**Status:** Current design reconciled on 2026-11-03 in Milestone 2 Phase B (documentation only; no application implementation). Sections 1–11 govern V1. Explicit recent finalized decisions and clearly dated later amendments take precedence over older agreed requirements, provisional recommendations, diagrams, and historical experiments, in that order. The README decision log records the approved resolutions consolidated here. Historical text is retained below for provenance, with superseded wording clearly scoped out of the current contract.
 
 ## 1. Scope — Finalized
 
@@ -31,44 +31,93 @@ On first submission, invoice date must be no later than the **initial submission
 | `BUSINESS_HOTEL` | No fixed cap | Work-related overnight stays for client work, company internal training/offsites/workshops, etc. Explanation of the legitimate work purpose is enough; do not demand external proof. Location alone does not establish purpose. |
 | `BUSINESS_TRANSPORT` | No fixed cap | Work-related journeys for client visits, client transport, internal training/offsites, or specific exceptional travel to the regular office required by a business event. **Ordinary daily home-to-regular-office commuting is excluded**. Merely going with colleagues or attending an unspecified event is insufficient. |
 
-Categorization and purpose are deliberately distinct. A device can belong to a candidate category yet be used for an excluded purpose. A bundled/multi-line purchase must identify the particular claimed item and its actual cost; the system must not invent price allocation. The absence of original invoice inspection limits verification of mobile-plan components. Python enforces any *explicitly structured* exclusion/amount arithmetic where supported, and J2 assesses the semantic description; do not suggest the application has verified an underlying bill.
+Categorization and purpose are deliberately distinct. A device can belong to a candidate category yet be used for an excluded purpose. A bundled/multi-line purchase must identify the particular claimed item and its actual cost; the system must not invent price allocation. Python validates the entered item amount and request, while J2 assesses applicable purpose evidence; neither verifies an underlying invoice.
+
+### Mixed mobile bills — Finalized Q1
+
+Keep the existing input contract: no itemization fields, new semantic classifier, or narrow policy-specific Noul gate. Use J1's existing reliable `MIXED_ITEMS` result where applicable to request an ordinary correction under the same editable claim ID: identify only the eligible cellular component and its actual charge, with requested reimbursement no greater than that charge. Do not calculate, infer or silently split the charges. This is not a semantic clarification attempt. If the component or its actual charge cannot be identified, refer to the Benefits Team (`HUMAN_REVIEW`). Complimentary streaming at no separate charge is not independently disqualifying.
+
+The tested J1 V2 contract in `experiments/category_validation/v2_plan.json` already explicitly distinguishes combined separately charged mobile service plus Netflix (`MIXED_ITEMS`), a specifically claimed cellular line (`MOBILE_BILL`), and complimentary streaming (`MOBILE_BILL`). Its `MIXED_ITEMS` definition prohibits calculating reimbursement or assessing purpose. The historical V1 helper in `experiments/category_validation/experiment.py` lacks `MIXED_ITEMS`; do not substitute that obsolete definition for the V2 contract. Preserve both experiments unchanged. Detection from manually entered information is best-effort, with no guarantee of detecting mixed charges or verifying invoice authenticity. The current policy table governs any differences in historical candidate-policy wording.
 
 ## 4. Invoice-line identity and claim lifecycle — Finalized
 
 Candidate duplicate key (scoped to employee): `(normalized_employee_id, normalized_merchant_name, normalized_invoice_number, invoice_line_number)`. Normalize case and incidental whitespace, but do not attempt unsupported fuzzy merchant identity. **An active or `PROCESSABLE` claim blocks a new claim on that line**. A `POLICY_RESTRICTION` or cancelled claim releases the key for a new initial submission, which must pass the three-month rule again. A processed line is never claimable a second time, even for the unpaid remainder. Revisions of the same claim ID do not self-conflict. Multiple different invoice lines under the same invoice are allowed.
 
-- `NEED_INFO` and `HUMAN_REVIEW` claims can be cancelled, releasing the duplicate key; preserve history.
-- `PROCESSABLE` is locked, cannot be cancelled/edited/reversed in V1.
-- All pre-processing field corrections under the same claim ID are audited and revalidated. Invoice item name or category changes cause J1 to rerun. Justification-only revisions can reuse the prior J1 result. J2 reevaluates changed justification/category when it is reached.
-- Rejected claims remain in history. A fresh submission is permitted on the same line if not already processed and all fresh validation passes; resubmitting an excluded item does not make it eligible.
-- A `HUMAN_REVIEW` status does not indicate that an actual human has processed the claim; show the Benefits Team referral message instead.
+### Editability and cancellation — Finalized Q2
+
+| Status | Editing / retry behavior | Cancellation |
+|---|---|---|
+| `NEED_INFO` | Editable; ordinary corrections or response to the outstanding semantic question as applicable | Allowed; preserve history and release key |
+| `HUMAN_REVIEW` | Permitted corrections and technical retries under the same ID | Allowed; preserve history and release key |
+| `POLICY_RESTRICTION` | Terminal; cannot edit; a new claim may be submitted where rules permit | Not allowed |
+| `CANCELLED` | Terminal; cannot edit; a new claim may be submitted where rules permit | No further cancellation |
+| `PROCESSABLE` | Terminal for ordinary edits; no editing or reversal in V1 | Not allowed |
+
+Restricted and cancelled claims remain in history. A new claim has its own ID and original submission date and must independently pass date and duplicate rules; resubmitting an excluded item does not make it eligible. An actual Benefits Team review workflow is not built in V1. `HUMAN_REVIEW` represents referral/intervention, not human processing or automatic approval.
+
+### Revisions and evidence versions — Finalized Q3
+
+Every revision has an auditable evidence version. Every submitted correction undergoes Python field, amount, original-submission-based date, duplicate and allowance validation again before decision-critical Jev evaluation. Exclude the current claim ID from duplicate comparison; changes to employee, merchant, invoice or line identity must still be checked against other claims. Preserve failed correction attempts and the last valid evidence version as described in §5.
+
+- J1 uses the latest applicable Invoice Item Name and selected Reimbursement Category for the classification/comparison workflow, with candidate-category definitions. The selected category is compared against the classification; it must not force the answer. Employee justification is not category evidence. Rerun J1 when item name or category changes. Reuse a prior J1 result only if its relevant inputs are unchanged and that result remains valid. Reuse cannot bypass J1 routing: J2 still requires a reliable matching covered category, not merely a well-formed prior response.
+- J2 uses the latest applicable item name, accepted category, justification and matching policy. Rerun after item/category changes once J1 is resolved, and after justification revisions; reevaluate other changed purpose evidence when applicable. Financial/identity/date changes always undergo Python validation; they do not become semantic evidence or force unrelated model calls.
+- J3 uses raw employee-entered evidence and policy from the revision being evaluated, never J1/J2/J4 conclusions.
+- J4 uses the outstanding semantic question, the corresponding earlier evidence, and the employee response/revised explanation.
+
+Retain earlier versions, question revisions, model versions and evaluation input references in history. Here, raw evidence does not always mean the first submission: outdated evidence must not override a revised claim.
 
 ## 5. Python financial validation and allowance consumption — Finalized
 
-1. **Before Jev:** check required inputs, positive two-decimal amounts, requested <= line price, initial-submission-based invoice eligibility, duplicate claim key, selected-policy cap and already consumed amount. When requested > remaining allowance, assign `POLICY_RESTRICTION` with a precise amount message; **do not** silently reduce it or call this semantic `NEED_INFO`. No limit check on uncapped business policies.
+1. **Before decision-critical Jev:** check required inputs, positive amounts with at most two decimal places, requested <= line price, original-submission-based invoice eligibility, duplicate claim key, selected-policy cap and already consumed amount. Apply the persistence table below. When requested > remaining allowance on a structurally valid claim, assign `POLICY_RESTRICTION` with a precise amount message; **do not** silently reduce it or call this semantic `NEED_INFO`. No fixed-cap comparison on uncapped business policies.
 2. Only `PROCESSABLE` consumes allowance. `NEED_INFO`, `HUMAN_REVIEW`, cancelled, and `POLICY_RESTRICTION` consume/reserve zero. Annual/monthly allowance periods are keyed by **invoice date**, employee and policy.
-3. **At final processing:** start a serialized SQLite write transaction, recheck the duplicate key and remaining applicable allowance, then atomically record `PROCESSABLE` and the consumed requested amount. If capacity has disappeared, use `POLICY_RESTRICTION`; avoid double count on retries. For V1, derive consumed balance as sum of `PROCESSABLE` claims instead of maintaining a second mutable balance column.
+3. **At final processing:** start a serialized SQLite write transaction, recognize an already processed same-claim request without consuming again, recheck the duplicate key (excluding this claim ID) and remaining applicable allowance, then atomically record `PROCESSABLE` and the consumed requested amount. If the final duplicate or allowance recheck fails, save `POLICY_RESTRICTION` with no consumption. Processing and retries are idempotent: repeated evaluation/request cannot consume twice. For V1, derive consumed balance as sum of `PROCESSABLE` claims instead of maintaining a second mutable balance column.
 4. Financial checks are deterministic; none of the Jev questions perform arithmetic or authorize payment.
+
+### Validation outcomes and persistence — Finalized Q4
+
+| Request / failure | Response and persistence | Jev / allowance |
+|---|---|---|
+| New submission: missing/malformed required fields, nonpositive amount, too many decimal places, requested > item amount, future or too-old invoice date | Validation error; do not create a claim | No Jev; no consumption/reservation |
+| New submission: invoice line blocked by an active or `PROCESSABLE` claim | Conflict; do not create a claim | No Jev; no consumption/reservation |
+| Structurally valid, nonconflicting new claim exceeds remaining allowance | Save `POLICY_RESTRICTION` with claim ID and history | No decision-critical Jev; no consumption/reservation |
+| Structurally valid claim is semantically ineligible | Save `POLICY_RESTRICTION` with claim ID and history | Skip downstream calls when prerequisites fail; no consumption/reservation |
+| Existing editable claim: invalid field/amount/date correction or duplicate conflict | Preserve claim ID and last valid evidence; audit failed correction and precise validation/conflict reason; do not replace last valid version | No Jev on failed deterministic validation; no consumption/reservation |
+| Structurally valid revision exceeds remaining allowance | Save `POLICY_RESTRICTION` under the existing ID, audit the attempted values and allowance reason, and preserve the last valid evidence version; terminal per §4 | No Jev; no consumption/reservation |
+
+For revisions, corrected dates must lie in the inclusive three-calendar-month window ending on the **original submission date**, including its future-date bound. An invalid date correction is a failed correction, not a policy-restricted replacement of the last valid evidence. A valid revision records the new evidence version before applicable evaluation. A policy allowance failure is distinct from malformed input and must not be disguised as a field-validation error.
 
 ## 6. Jev questions — Finalized responsibilities
 
 ### J1 — Choice: invoice-item category
 
-Input: invoice item name and category definitions; **not** the employee's justification as category evidence. Outputs six covered categories plus `OTHER`, `INSUFFICIENT_INFORMATION`, `MIXED_ITEMS`, and full Choice distribution/confidence. Evaluate before J2.
+Use the current evidence/version rules in §4. Classify item identity from Invoice Item Name and candidate-category definitions, not the employee's justification. Outputs six covered categories plus `OTHER`, `INSUFFICIENT_INFORMATION`, `MIXED_ITEMS`, with full Choice distribution/confidence. Python validation precedes J1; J1 must resolve before J2.
 
-- Apply Choice confidence/margin checks before acting on its selected category. If uncertain, `NEED_INFO` requesting a more precise item name; one ordinary correction opportunity, then `HUMAN_REVIEW` if still unresolved (no semantic clarification attempt used).
-- Confident covered category but different employee selection: `NEED_INFO` requesting category correction **before J2**. Do not change it silently; rerun J1 after correction. Ordinary field corrections do not count as semantic clarification attempts.
-- Confident `OTHER`: `POLICY_RESTRICTION`; **skip J2**.
-- `INSUFFICIENT_INFORMATION`: ask for a specific item; `MIXED_ITEMS`: ask for exactly one item and its line amount, then rerun J1; unresolved inseparable bundle → `HUMAN_REVIEW`. Skip J2 until valid.
+First validate the response: a missing/malformed response or missing required fields is a **technical failure**, not `INSUFFICIENT_INFORMATION`. Then apply confidence and top-two margin checks before trusting any label.
+
+| Valid J1 response | Outcome; J2 prerequisite |
+|---|---|
+| Either reliability check fails | `NEED_INFO` requesting more precise item name; one uncertain-classification correction opportunity, then `HUMAN_REVIEW` if still unresolved; no J2 |
+| Reliable covered category matches employee selection | Proceed to J2 |
+| Reliable covered category mismatches selection | `NEED_INFO` for category correction before J2; never silently change category. Allow at most two ordinary category-correction attempts after a reliable mismatch; if still mismatched after the second, `HUMAN_REVIEW` |
+| Reliable `OTHER` | `POLICY_RESTRICTION`; skip J2 |
+| Reliable `INSUFFICIENT_INFORMATION` | Ask for a specific item name; rerun J1 after correction; no J2 until resolved |
+| Reliable `MIXED_ITEMS` | Ask for one identifiable item and its actual corresponding amount, including mobile component correction in §3; rerun J1; no J2 until resolved |
+| Eligible component or actual amount cannot be identified / inseparable bundle | `HUMAN_REVIEW` with Benefits Team guidance; no invented allocation |
+
+The category-correction limit (finalized Q5), uncertain-classification correction opportunity, and J2 semantic-response limit are separate counters (§7). Ordinary corrections do not consume semantic attempts. A category change may produce the same J1 classification; do not force a different label.
 
 ### J2 — Choice: purpose alignment
 
-Runs after J1 establishes a sufficiently reliable, employee-matching covered category. Use original invoice item name, accepted category, employee justification, and matching policy. Labels: `SUPPORTED`, `UNRELATED`, `UNCLEAR`, `INCONSISTENT`. Do not use financial balance or other Jev judgments as evidence.
+Runs only after J1 establishes a reliable, employee-matching covered category. Use the latest applicable item name, accepted category, employee justification/purpose evidence, and matching policy (§4). Do not use financial balance or other Jev judgments as evidence. Malformed/missing responses use the critical-failure rule in §7.
 
-- `SUPPORTED`: if confidence/margin pass, can proceed to final Python financial transaction; if not, `NEED_INFO`.
-- `UNRELATED`: if confidence/margin pass, `POLICY_RESTRICTION`; if not, `NEED_INFO` (same uncertainty treatment as SUPPORTED).
-- `UNCLEAR`: `NEED_INFO` with broad policy-specific question.
-- Confident `INCONSISTENT`: `HUMAN_REVIEW` with Benefits Team referral; do not accuse of deception. Low-confidence exceptional routing is **Open** (see §11), but never auto-process.
+| J2 label | Confidence and top-two margin both pass | Either check fails |
+|---|---|---|
+| `SUPPORTED` | Continue to final atomic duplicate-and-allowance checks | Semantic `NEED_INFO` |
+| `UNRELATED` | `POLICY_RESTRICTION` | Semantic `NEED_INFO` |
+| `INCONSISTENT` | `HUMAN_REVIEW` with Benefits Team guidance | Semantic `NEED_INFO` |
+| `UNCLEAR` | Semantic `NEED_INFO` | Semantic `NEED_INFO` |
+
+Every semantic `NEED_INFO` applies the two-response limit in §7; unresolved after the second response becomes `HUMAN_REVIEW`. A resolved second response follows its resolved outcome. Explicit `UNCLEAR` never becomes `PROCESSABLE`, even with high confidence. `INCONSISTENT` is possible item-purpose mismatch, not proof or accusation of dishonesty or fraud.
 
 ### Confidence/margin — Experimental default configuration
 
@@ -76,13 +125,15 @@ Use `JEV_MIN_CONFIDENCE=0.70`, `JEV_MIN_PROBABILITY_MARGIN=0.30` from environmen
 
 ### J4 — Score: clarification-resolution assessment
 
-Only on employee responses to an **outstanding semantic clarification question**; compare original relevant evidence, exact category-specific question, and revised explanation. Rubric: `0` no relevant resolution, `1` partial resolution, `2` fully answered. Score is fractional in [0,2], with rubric-level probabilities and a separate confidence. A fully answered question may reveal an **excluded** purpose: high Score is **not approval**.
+Only on employee responses to an **outstanding semantic clarification question**; compare the corresponding earlier evidence, exact question, and employee response/revised explanation (§4). Rubric: `0` no relevant resolution, `1` partial resolution, `2` fully answered. Score is fractional in [0,2], with rubric-level probabilities and separate confidence. Save score, confidence and the complete probability distribution in the evaluation history and make them available in Decision Details.
 
-After the revision, revalidate Python rules and reevaluate relevant J1/J2 as necessary **regardless of J4 Score**. A confident J2 outcome takes precedence. If J2 remains uncertain, J4 can help determine whether another clarification would be useful; this supporting role is agreed, but the exact numeric J4-to-routing cutoff is **Open**. At most **two semantic clarification responses**; after the second unresolved evaluation, `HUMAN_REVIEW` with Benefits Team referral. Ordinary corrections and technical retries don't consume those attempts.
+J4 is **informational only**. It cannot influence claim status, approval, rejection, clarification, escalation or allowance consumption; **no J4 routing threshold exists**. Every revision independently undergoes Python validation and relevant J1/J2 evaluation. Do not call Jev, including J4, when deterministic validation fails; retain the response/question evidence in the failed-attempt audit instead. When validation permits evaluation, J4 runs as an independent diagnostic for the semantic response. On J4 failure record a diagnostic failure and continue the decision workflow. A fully answered question can reveal an excluded purpose; high Score is not approval. Display: “This score indicates how completely the clarification question was answered; it does not determine reimbursement eligibility or the final decision.”
 
 ### J3 — Noul: advisory-only semantic comparison
 
-After Python determines a claim outcome, when J1 and J2 completed successfully, run one Noul proposition about whether **the original claim evidence affirmatively supports the qualifying semantic requirements of the selected policy**. Supply claim evidence and policy, **not the conclusions of J1/J2/J4**. Record probability for developer comparison, but do **not** call it a likelihood that the final decision is correct. It cannot approve, deny, clarify, consume allowance, or change status. A J3 failure is `UNAVAILABLE` and has no effect on the decided claim. Prior narrow Noul tests (exceptional commute, charged mobile extras) stay in `experiments/` and **are not V1 calls**.
+After Python determines a claim outcome, provided the required J1 and J2 evaluations completed successfully for the evidence being evaluated (including valid applicable J1 reuse), run one Noul proposition about whether **the raw current-revision claim evidence affirmatively supports the qualifying semantic requirements of the selected policy**. Supply employee-entered evidence and policy, **not the conclusions of J1/J2/J4**. Record proposition probability and supported response metadata, model/question version and evidence version; do **not** call it a likelihood that the final decision is correct. It performs no monetary calculation or verification and cannot approve, deny, clarify, escalate, consume allowance or change status. A J3 failure is `UNAVAILABLE` and preserves the decision. Prior narrow Noul tests (exceptional commute, charged mobile extras) stay in `experiments/` and **are not V1 calls**.
+
+J3 may follow semantic `NEED_INFO`, semantic `HUMAN_REVIEW`, semantic restriction, final financial restriction or `PROCESSABLE` when both prerequisites succeeded. Skip it after failed or skipped required J1/J2, including J1-only restrictions/corrections and pre-evaluation deterministic failures.
 
 **Ordering note:** J3 is diagnostic *after* the Python decision. The UI should not present the decision as waiting for advisory Noul. If synchronous evaluation runs J3 before returning HTTP response for simplicity, a timeout must still never turn a processable decision into review.
 
@@ -92,126 +143,235 @@ One **broad, predefined question per category**, mapped directly from category i
 
 A semantic `NEED_INFO` creates an outstanding question. Each submitted response increments the semantic clarification count **once**. If still uncertain and the count <2, ask again. After count 2 with unresolved semantic interpretation, route to `HUMAN_REVIEW` with “Please get in touch with the Benefits Team.” The `NEED_INFO` status for item name/category/mixed-line correction is distinguished internally by a **reason code** so that field correction does not consume semantic attempts.
 
+| Counter | Separate limit and purpose |
+|---|---|
+| Uncertain J1 item-classification correction | One correction opportunity; if classification remains unresolved afterwards, Benefits Team referral |
+| Reliable J1 category-mismatch correction | Maximum two ordinary category-correction attempts after a reliable mismatch; still mismatched after the second → `HUMAN_REVIEW` |
+| J2 semantic clarification response | Maximum two responses to an outstanding semantic question; unresolved after the second → `HUMAN_REVIEW` |
+
+Do not combine or substitute these counters. Ordinary item/category/component corrections and technical retries do not consume semantic responses. Audit action type, applicable attempt and outcome; retries do not count a response twice. Save and validate revisions per §§4–5 before decision-critical evaluation. J4 runs only for a semantic response and independently of the decision path; ordinary corrections and technical retries alone do not trigger J4.
+
 Decision-critical Jev timeout, invalid/missing response, or provider error → `HUMAN_REVIEW` with a technical-failure reason, no allowance consumption; users may **retry same claim ID**, with each attempt recorded and no clarification-count increment. J3 advisory errors do not affect claim status. No secrets in audit logs. A hypothetical payment is never made by this demo.
+
+| Evaluation failure | Result |
+|---|---|
+| Required J1 or J2 | Technical `HUMAN_REVIEW`, Benefits Team guidance, no consumption; allow auditable same-ID retry through Python validation |
+| Advisory J3 | `UNAVAILABLE` diagnostic; preserve decided outcome and consumption |
+| Informational J4 | Diagnostic failure; continue independent Python/J1/J2 workflow without status or consumption impact from J4 |
 
 ## 8. Status transitions and persistence — Consolidated
 
 | Current state | Trigger | Next state / behavior |
 |---|---|---|
-| New submission | Deterministic validation failure | Input error or `POLICY_RESTRICTION` as applicable; persist policy restriction/history |
-| New or editable claim | J1 uncertain / missing / mixed / category mismatch | `NEED_INFO` (reason `FIELD_CORRECTION`); rerun J1 on updated item/category |
+| New submission | Invalid fields/amount/date, or blocked duplicate | Validation error or conflict; no claim created (§5) |
+| New or editable claim | Structurally valid allowance failure | Save `POLICY_RESTRICTION`; terminal; no consumption |
+| Editable claim | Invalid correction / conflicting revised identity | Audit failed correction; keep claim ID and last valid evidence; no Jev or consumption |
+| Validated claim | Valid but uncertain J1 / insufficient information / mixed / category mismatch | `NEED_INFO` (`FIELD_CORRECTION`) or review at the applicable separate limit; no J2 until resolved |
+| Validated claim | Reliable J1 OTHER | Save `POLICY_RESTRICTION`; no J2 |
 | Valid category | J2 uncertain or UNCLEAR | `NEED_INFO` (reason `SEMANTIC_CLARIFICATION`); ask broad template |
 | Valid category | Confident J2 UNRELATED | `POLICY_RESTRICTION` |
 | Valid category | Confident J2 INCONSISTENT | `HUMAN_REVIEW` |
 | Valid category | Confident J2 SUPPORTED + final transaction valid | `PROCESSABLE` and consume allowance once |
-| Semantic NEED_INFO | Clarification submitted | Increment attempts, run J4, reevaluate J2, route fresh outcome |
+| Semantic NEED_INFO | Clarification submitted | Audit response/count once; validate Python; applicable J1/J2; J4 diagnostic only; route fresh outcome |
 | Semantic NEED_INFO | Second response still unresolved | `HUMAN_REVIEW`; Benefits Team message |
 | Critical Jev failure | Any critical call | `HUMAN_REVIEW` (reason `TECHNICAL_FAILURE`); allow same-claim retry |
 | NEED_INFO / HUMAN_REVIEW | Cancellation | `CANCELLED`; release key; no allowance consumed |
 | POLICY_RESTRICTION / CANCELLED | New claim | New claim ID, validate invoice age afresh, preserve old history |
+| POLICY_RESTRICTION / CANCELLED | Same-ID edit | Disallow; terminal |
 | PROCESSABLE | Edits/cancellation/new claim on same line | Disallow in V1 |
+| PROCESSABLE | Repeated processing request for same claim | Idempotent existing result; no second consumption |
 
-Suggested *minimal* SQLite data: `claims` (identity/current status/original submitted timestamp/clarification count), `claim_revisions` (full submitted input snapshot, revision reason and timestamp), `evaluations` (question type, evidence/input version, model version, label, full distribution, confidence/score/Noul probability, failure metadata), `status_events` (from/to, reason, timestamp). Exact schema and indexes can be selected by Codex while maintaining unique active/processed invoice-line behavior, transactionality, and auditability. Do not store API keys.
+Suggested *minimal* SQLite data: `claims` (identity/current status/original submitted timestamp/separate correction and semantic counts), `claim_revisions` (submitted input snapshot, validity/failed-attempt record, revision reason and timestamp, last valid evidence reference), `evaluations` (question type, evidence/input version, model version, label, full distribution, confidence/score/Noul probability, failure metadata), `status_events` (from/to, reason, timestamp). Exact schema and indexes can be selected during implementation while maintaining unique active/processed invoice-line behavior, transactionality, and auditability. Do not store API keys.
 
 ## 9. Local UI and reproducibility
 
-One basic claim form, a claims/history view, and an expandable developer decision panel. Support changing pre-processable invoice fields, entering clarification answers, and retrying technical failures. Show status and plain-language reason, not a fraud accusation or a “paid” claim. Developer panel shows full Jev distributions/confidence and J4 rubric probabilities and optional J3 diagnostic probability. Examples in README should include correct Wellness running use, unrelated gift/movie purpose, wrong category Garmin, unclassified iPad, vague business journey, exceptional client meeting, mobile complimentary vs charged streaming, partially answered clarification, invalid old invoice, insufficient balance, and duplicate line. README says results may vary with model versions; each developer supplies their own API key and all UI/SQLite run locally.
+One basic claim form, a claims/history view, and an expandable developer decision panel. Support only the edits/cancellations permitted by §4, entering clarification answers, and retrying technical failures. Show status and plain-language reason, not a fraud accusation or a “paid” claim; `PROCESSABLE` means eligible for processing, not paid or actual payment approval. Developer panel shows full Jev distributions/confidence, J4 score/confidence/rubric probabilities and disclaimer, J3 diagnostic probability when available, and diagnostic failures. Examples in the eventual application README should include correct Wellness running use, unrelated gift/movie purpose, wrong category Garmin, unclassified iPad, vague business journey, exceptional client meeting, mobile complimentary vs charged streaming, partially answered clarification, invalid old invoice, insufficient balance, and duplicate line. Results may vary with model versions; each developer supplies their own API key and all UI/SQLite run locally.
 
 Preserve historical J1/J2/J3/J4 experiments and pre-registered fixtures as evidence; do not overwrite experimental data or falsely label Noul as an accuracy probability.
 
-## 10. Flowcharts — Working architectural diagrams
+## 10. Flowcharts — Current Mermaid sources
+
+The three embedded blocks below match `flowchart/Flowchart_1.txt`, `Flowchart_2.txt`, and `Flowchart_3.txt` respectively. `PRE`, `READY` and `FINAL` are named handoffs, not instructions to restart the entire evaluation. Flowchart 1 owns J1/J2 routing and conditional post-decision J3; Flowchart 2 owns permitted actions and informational J4; Flowchart 3 owns deterministic validation and the final transaction. Reference tables in §§3–8 govern details omitted for readability. See the README's Flowcharts note for source and image maintenance.
 
 ### Main claim evaluation
 
 ```mermaid
 flowchart TD
-    A[Submit claim] --> B[Python validates fields date duplicate and allowance]
-    B --> C{Checks pass?}
-    C -->|No| D[Validation error or policy restriction]
-    C -->|Yes| E[J1 Choice category]
-    E --> F{Reliable J1 outcome?}
-    F -->|No or missing mixed| G[NEED_INFO field correction or review]
-    F -->|OTHER| H[POLICY_RESTRICTION]
-    F -->|Covered label| I{Matches selected category?}
-    I -->|No| J[NEED_INFO category correction]
-    I -->|Yes| K[J2 Choice purpose]
-    K --> L{Purpose outcome and confidence?}
-    L -->|Unclear or marginal| M[NEED_INFO semantic clarification]
-    L -->|Inconsistent| N[HUMAN_REVIEW]
-    L -->|Confident unrelated| O[POLICY_RESTRICTION]
-    L -->|Confident supported| P[Final SQLite transaction rechecks allowance and duplicate]
-    P --> Q{Still valid?}
-    Q -->|No| R[POLICY_RESTRICTION]
-    Q -->|Yes| S[PROCESSABLE consume allowance once]
-    M --> U[Clarification workflow]
-    G --> V[Correction workflow]
-    J --> V
-    M -.-> W[Advisory J3 Noul when J1 and J2 succeeded]
-    N -.-> W
-    O -.-> W
-    R -.-> W
-    S -.-> W
-    W --> X[Store diagnostic; never change outcome]
+    New["New submission"] --> Pre["Flowchart 3 PRE: Python fields, amounts, original-date window, duplicate and allowance checks"]
+    Pre --> PreResult{"PRE passed?"}
+    PreResult -->|No| PreStop["PRE handles error/conflict with no new claim, or saves allowance restriction; no Jev"]
+    PreResult -->|Yes| Ready["READY: validated evidence version; revision/retry enters here from Flowchart 2"]
+    Ready --> Reuse{"Unchanged J1 inputs and valid reliable matching covered J1 result?"}
+    Reuse -->|Yes| Purpose["J2: latest applicable item, matching category, justification and policy"]
+    Reuse -->|No| Category["J1: latest item identity and candidate definitions; compare selected category; no justification"]
+    Category --> CategoryValid{"J1 response valid and complete?"}
+    CategoryValid -->|No / API failure| Technical["HUMAN_REVIEW: technical failure; no consumption; same-ID retry via Flowchart 2"]
+    CategoryValid -->|Yes| CategoryReliable{"J1 confidence and top-two margin both pass?"}
+    CategoryReliable -->|No| ItemLimit{"Uncertain-item correction already used?"}
+    ItemLimit -->|Yes| Review["HUMAN_REVIEW: Benefits Team referral; no actual review workflow"]
+    ItemLimit -->|No| ItemInfo["NEED_INFO FIELD_CORRECTION: precise item name; one uncertain-item correction opportunity"]
+    CategoryReliable -->|Yes| CategoryLabel{"Reliable J1 label"}
+    CategoryLabel -->|OTHER| Restricted["POLICY_RESTRICTION: saved terminal claim; no consumption"]
+    CategoryLabel -->|INSUFFICIENT_INFORMATION| Specific["NEED_INFO FIELD_CORRECTION: specify item name"]
+    CategoryLabel -->|MIXED_ITEMS| Mixed["NEED_INFO FIELD_CORRECTION: one eligible item and actual amount; includes separately charged mobile extras; never infer split"]
+    CategoryLabel -->|Covered category| Matches{"Matches employee category?"}
+    Matches -->|Yes| Purpose
+    Matches -->|No| CategoryLimit{"Two category-correction attempts already used?"}
+    CategoryLimit -->|Yes| Review
+    CategoryLimit -->|No| CategoryInfo["NEED_INFO FIELD_CORRECTION: employee corrects category; never change silently"]
+    Purpose --> PurposeValid{"J2 response valid and complete?"}
+    PurposeValid -->|No / API failure| Technical
+    PurposeValid -->|Yes| PurposeLabel{"J2 label"}
+    PurposeLabel -->|UNCLEAR at any confidence| Unresolved{"Two semantic responses already used?"}
+    PurposeLabel -->|SUPPORTED / UNRELATED / INCONSISTENT| PurposeReliable{"J2 confidence and top-two margin both pass?"}
+    PurposeReliable -->|No| Unresolved
+    PurposeReliable -->|Yes| ReliablePurpose{"Reliable J2 label"}
+    ReliablePurpose -->|SUPPORTED| Final["Flowchart 3 FINAL: serialized SQLite transaction; idempotent duplicate-and-allowance recheck"]
+    ReliablePurpose -->|UNRELATED| Restricted
+    ReliablePurpose -->|INCONSISTENT| Review
+    Unresolved -->|Yes| Review
+    Unresolved -->|No| SemanticInfo["NEED_INFO SEMANTIC_CLARIFICATION: predefined category question"]
+    Final --> FinalResult{"FINAL outcome"}
+    FinalResult -->|Duplicate or allowance failure| Restricted
+    FinalResult -->|Committed / already processed same claim| Processable["PROCESSABLE recorded once; eligible for processing, not paid"]
+    ItemInfo --> Record["Record outcome and evidence/evaluation versions; only PROCESSABLE consumes allowance"]
+    Specific --> Record
+    Mixed --> Record
+    CategoryInfo --> Record
+    SemanticInfo --> Record
+    Restricted --> Record
+    Review --> Record
+    Technical --> Record
+    Processable --> Record
+    Record -.-> Actions["Actions use Flowchart 2 editability table; terminal claims cannot edit; only NEED_INFO/HUMAN_REVIEW can cancel"]
+    Record --> AdvisoryEligible{"Required J1 and J2 succeeded for this evidence version, including valid J1 reuse?"}
+    AdvisoryEligible -->|No| Unchanged["Preserve outcome and allowance; diagnostics never route claims"]
+    AdvisoryEligible -->|Yes| Noul["J3: one advisory semantic-support proposition using raw current-revision evidence and policy; no other judgments or arithmetic"]
+    Noul --> AdvisoryResult{"Advisory call succeeded?"}
+    AdvisoryResult -->|Yes| Probability["Save proposition probability and supported metadata for Decision Details"]
+    AdvisoryResult -->|No| Unavailable["Record UNAVAILABLE diagnostic"]
+    Probability --> Unchanged
+    Unavailable --> Unchanged
+    Defaults["Both Choice checks: configurable confidence >= 0.70 and margin >= 0.30; provisional, not calibrated. J4 only in Flowchart 2; no routing threshold."]
+
+    classDef success fill:#DFF3E9,stroke:#22865B,color:#18593F
+    classDef warning fill:#FFF1D6,stroke:#BC872D,color:#704F11
+    classDef neutral fill:#EAF0FA,stroke:#6686BB,color:#233C65
+    class Processable success
+    class ItemInfo,Specific,Mixed,CategoryInfo,SemanticInfo warning
+    class Noul,Probability,Unavailable,Unchanged,Defaults neutral
 ```
 
 ### Revision and clarification
 
 ```mermaid
 flowchart TD
-    A[Editable claim needs action] --> B{Correction or semantic clarification?}
-    B -->|Correction| C[Save field revision and revalidate]
-    C --> D{Item name or category changed?}
-    D -->|Yes| E[Rerun J1 then J2 if eligible]
-    D -->|No| F[Reuse J1 and reevaluate changed purpose as needed]
-    B -->|Semantic clarification| G{Attempts less than two?}
-    G -->|No| H[HUMAN_REVIEW Benefits Team]
-    G -->|Yes| I[Show broad policy-specific question]
-    I --> J[Employee answers; save revision and increment count]
-    J --> K[J4 Score question resolution]
-    K --> L[Revalidate and reevaluate applicable J2]
-    L --> M{J2 clear and confident?}
-    M -->|SUPPORTED| N[Final financial check]
-    M -->|UNRELATED| O[POLICY_RESTRICTION]
-    M -->|INCONSISTENT| H
-    M -->|Still unclear| P{Attempts remaining?}
-    P -->|Yes| I
-    P -->|No| H
+    Action["Action on existing claim"] --> State{"Current status"}
+    State -->|PROCESSABLE| Locked["No edits, cancellation or reversal; repeated processing returns existing result without consumption"]
+    State -->|POLICY_RESTRICTION / CANCELLED| Terminal["Terminal: no edits or cancellation; new claim only where rules permit"]
+    Terminal --> New["New ID and submission date: Flowchart 1 NEW then Flowchart 3 PRE; preserve old history"]
+    State -->|NEED_INFO / HUMAN_REVIEW| Kind{"Permitted action"}
+    Kind -->|Cancel| Cancel["Save CANCELLED and history; release duplicate key; consume zero"]
+    Kind -->|Technical retry after evaluation failure| Retry["Audit same-ID retry; no correction/semantic counter increment; no new J4 response"]
+    Kind -->|Ordinary correction| CorrectionLimit{"Responding to a limited J1 correction whose separate opportunity is exhausted?"}
+    CorrectionLimit -->|Yes| CorrectionExhausted["HUMAN_REVIEW: Benefits Team guidance; do not accept an extra limited correction attempt"]
+    CorrectionLimit -->|No| Correction["Audit submitted correction and applicable separate J1 correction attempt; no semantic increment"]
+    Kind -->|Cannot identify eligible component or actual amount| Referral["Save HUMAN_REVIEW with Benefits Team guidance and history; no consumption or invented allocation"]
+    Kind -->|Semantic response| Outstanding{"Outstanding semantic question and fewer than two responses used?"}
+    Outstanding -->|No| NoResponse["Do not accept another semantic response; unresolved exhausted claim refers to Benefits Team"]
+    Outstanding -->|Yes| Response["Audit response and corresponding earlier evidence/question; increment semantic responses once"]
+    Retry --> Validate["Flowchart 3 PRE: validate fields, amounts, date against original submission, other-claim duplicates and allowance"]
+    Correction --> Validate
+    Response --> Validate
+    Validate --> ValidationResult{"PRE result"}
+    ValidationResult -->|Invalid correction / duplicate conflict| Failed["Audit failed attempt; retain claim ID and last valid evidence; no Jev and no allowance reservation/consumption"]
+    ValidationResult -->|Structurally valid allowance failure| Restriction["Save POLICY_RESTRICTION and history; terminal; no Jev or consumption"]
+    ValidationResult -->|Passed| Evidence["Save valid current evidence version; retain earlier versions"]
+    Evidence --> Changed{"Item name/category changed, or no valid reliable matching covered J1 result?"}
+    Changed -->|Yes| Rerun["Flowchart 1 READY: rerun J1, then J2 only after reliable matching category"]
+    Changed -->|No| Reuse["Flowchart 1 READY: reuse valid unchanged J1; reassess latest applicable J2 evidence including revised justification"]
+    Evidence -.-> DiagnosticEligible{"This action responds to an outstanding semantic question?"}
+    DiagnosticEligible -->|No| NoScore["No J4 call for ordinary correction or technical retry alone"]
+    DiagnosticEligible -->|Yes| Score["J4: earlier question evidence, exact outstanding question, response/revised explanation"]
+    Score --> ScoreResult{"Diagnostic call succeeded?"}
+    ScoreResult -->|Yes| SavedScore["Save fractional score, confidence and full distribution for Decision Details with disclaimer"]
+    ScoreResult -->|No| ScoreFailure["Record diagnostic failure; independent decision workflow continues"]
+    SavedScore --> DiagnosticOnly["Informational only: no status, clarification, escalation or allowance effect; no routing threshold"]
+    ScoreFailure --> DiagnosticOnly
+    Counters["Separate limits: one uncertain-J1 item correction; two reliable-mismatch category corrections; two J2 semantic responses. Never combine counters. See specification sections 6-7."]
+    Routing["Flowchart 1 owns J2 routing: reliable SUPPORTED -> Flowchart 3 FINAL; reliable UNRELATED -> restriction; reliable INCONSISTENT -> review; UNCLEAR or either reliability check failing -> semantic NEED_INFO, or review when two responses remain unresolved."]
+    Diagnostics["Flowchart 1 owns critical J1/J2 failures and post-decision J3. J3/J4 failures never override the independent outcome."]
+
+    classDef success fill:#DFF3E9,stroke:#22865B,color:#18593F
+    classDef warning fill:#FFF1D6,stroke:#BC872D,color:#704F11
+    classDef neutral fill:#EAF0FA,stroke:#6686BB,color:#233C65
+    class Rerun,Reuse success
+    class Correction,Response,Failed warning
+    class Score,SavedScore,ScoreFailure,DiagnosticOnly,Counters,Routing,Diagnostics neutral
 ```
 
 ### Financial integrity
 
 ```mermaid
 flowchart TD
-    A[Claim creation or revision] --> B[Validate dates identifiers and amounts]
-    B --> C{Valid?}
-    C -->|No| D[Input error or policy restriction]
-    C -->|Yes| E[Check duplicate key and selected-policy balance]
-    E --> F{Eligible for semantic evaluation?}
-    F -->|No| G[POLICY_RESTRICTION or duplicate block]
-    F -->|Yes| H[J1 J2 and Python routing]
-    H --> I{Semantically PROCESSABLE candidate?}
-    I -->|No| J[Save result no allowance consumed]
-    I -->|Yes| K[Begin SQLite write transaction]
-    K --> L[Recheck duplicate and remaining invoice-period balance]
-    L --> M{Still sufficient?}
-    M -->|No| N[POLICY_RESTRICTION; no allowance consumed]
-    M -->|Yes| O[Mark PROCESSABLE and commit]
+    Pre["PRE: new submission or existing editable revision/retry from Flowcharts 1-2"] --> Fields["Validate required fields including Employee ID; positive INR Decimal amounts with <= 2 decimals; requested <= item cost"]
+    Fields --> Dates["Validate inclusive three-calendar-month window ending at original submission date; never revision date; no future invoice"]
+    Dates --> Valid{"Fields, amounts and date valid?"}
+    Valid -->|No| InvalidKind{"New submission?"}
+    InvalidKind -->|Yes| InputError["Validation error; no claim created; invalid initial dates are not saved restrictions"]
+    InvalidKind -->|No| FailedCorrection["Audit failed correction; keep same ID and last valid evidence version; no Jev"]
+    Valid -->|Yes| Identity["Normalize Employee ID, Merchant Name, Invoice Number; key also includes Invoice Line Number; one item/line per claim"]
+    Identity --> Blocked{"Another active or PROCESSABLE claim blocks this key? Exclude current claim ID."}
+    Blocked -->|Yes| DuplicateKind{"New submission?"}
+    DuplicateKind -->|Yes| Conflict["Conflict; no claim created"]
+    DuplicateKind -->|No| FailedCorrection
+    Blocked -->|No| Balance["Employee/category/invoice-date period: remaining cap minus sum of PROCESSABLE claims; no fixed cap for business policies"]
+    Balance --> Within{"Requested within remaining allowance, or policy uncapped?"}
+    Within -->|No| Allowance["Save POLICY_RESTRICTION with ID and attempted amounts/history; existing claim retains last valid evidence; terminal; never reduce request"]
+    Within -->|Yes| Accepted["PRE passed: create new claim or accept valid evidence revision; preserve audit versions"]
+    Accepted --> Ready["Flowchart 1 READY: valid J1 reuse or J1 before J2; unresolved J1 never reaches J2"]
+    InputError --> Zero["No Jev; consume/reserve zero; existing failed attempts retain last valid evidence"]
+    Conflict --> Zero
+    FailedCorrection --> Zero
+    Allowance --> Zero
+
+    Final["FINAL: reliable J2 SUPPORTED from Flowchart 1; no J3/J4 input controls this handoff"] --> Begin["Begin serialized SQLite write transaction"]
+    Begin --> Already{"Same claim already PROCESSABLE?"}
+    Already -->|Yes| Existing["Return existing result; no second consumption; end transaction"]
+    Already -->|No| Recheck["Recheck duplicate key excluding self AND remaining employee/category/invoice-period allowance; uncapped policies still check duplicates"]
+    Recheck --> Pass{"Both checks pass?"}
+    Pass -->|No| FinalRestriction["Save POLICY_RESTRICTION and reason; consume zero; commit outcome/history"]
+    Pass -->|Yes| Process["Atomically record PROCESSABLE and requested amount once; commit outcome/history"]
+    Existing --> Recorded["FINAL outcome to Flowchart 1 outcome recording and conditional advisory J3; preserve outcome on J3 failure"]
+    FinalRestriction --> Recorded
+    Process --> Recorded
+    Process -.-> Meaning["PROCESSABLE means eligible for processing, not paid; locked against edits, cancellation and reversal"]
+    Rules["Six policies and lifecycle: specification sections 3-4. Only PROCESSABLE consumes; NEED_INFO, HUMAN_REVIEW, restrictions and cancellation consume/reserve zero. Only NEED_INFO/HUMAN_REVIEW may cancel. Restricted/cancelled claims allow fresh submission where rules permit."]
+    Evaluation["Decision-critical errors: technical HUMAN_REVIEW with same-ID retry via PRE. J3 UNAVAILABLE and J4 diagnostic failure never change status or allowance. Flowcharts 1-2 own separate correction/semantic counters."]
+
+    classDef success fill:#DFF3E9,stroke:#22865B,color:#18593F
+    classDef restriction fill:#FBE7E7,stroke:#C75C5C,color:#803535
+    classDef important fill:#EAF0FA,stroke:#6686BB,color:#233C65
+    class Process,Existing success
+    class InputError,Conflict,FailedCorrection,Allowance,FinalRestriction restriction
+    class Begin,Recheck,Rules,Evaluation important
 ```
 
-## 11. Explicit open implementation points (not newly agreed policy)
+## 11. Resolution record and limitations
 
-1. **J4 routing (resolved 2026-11-03):** J4 Score is informational only; its score, distribution and confidence appear in Decision Details with a disclaimer. It never controls status, acceptance, rejection or escalation. Revised claims are reassessed by J2 and Python, with the existing two-attempt rule. No J4 routing threshold.
-2. **J1 input/category policy wording:** J1 should classify from the item name and candidate-policy definitions, ignoring employee purpose; rerun if category changes per earlier agreement. The category-change-triggered rerun may produce the same item classification; do not force a different result.
-3. **Uncertain `INCONSISTENT` behavior (resolved 2026-11-03):** Apply the same configured Choice confidence and top-two margin requirements used for SUPPORTED/UNRELATED. If both pass: `HUMAN_REVIEW`; if either fails: `NEED_INFO` with category clarification, subject to the existing two semantic clarification attempts, after which `HUMAN_REVIEW`. Never describe the judgment as fraud.
-4. **Invoice line identity limits:** default line number `1` may lead to collisions if employees omit it for different items on one invoice; UI should encourage entering actual line number for multi-line invoices. Normalized text is not independent proof of invoice uniqueness.
-5. **Potential mismatch in previous flowchart:** the earlier drawing included advisory J3 following a final financial failure, but only when both J1/J2 actually completed. This version makes the precondition explicit.
-6. **Manual component billing:** separately charged mobile entertainment must not be reimbursed; with only an item-name field, precise itemization and per-component amounts may be unavailable. If it cannot be determined, request one eligible item/amount or refer to Benefits Team rather than pretending Python verified the bill.
+The five Phase A questions are finalized in this current contract: Q1 mixed mobile bills (§3), Q2 editability (§4), Q3 evidence versions (§4), Q4 invalid submissions/persistence (§5), and Q5 category-correction limit (§§6–7). The earlier J4-routing, uncertain-INCONSISTENT and revision-validation discrepancies are resolved in §§4–7. These are no longer open policy choices.
+
+Known limitations remain: omitted line numbers default to `1` and can collide for distinct items on the same invoice; encourage actual line numbers for multi-line invoices. Normalized manual identifiers do not prove uniqueness. Mixed-item detection is best-effort (§3), not verified bill auditing. Choice thresholds are configurable experimental defaults, not calibrated accuracy guarantees. None of these limitations authorizes adding new classifiers, invoice inspection or infrastructure.
+
+No unresolved contradiction in the five approved decisions remains. Exact code/schema choices belong to later milestones; this phase implements no behavior. Any newly discovered ambiguity must be surfaced before implementing that branch rather than resolved by historical experiments or diagram shorthand.
 
 ---
 
-## Archived prior working specification (verbatim; retained so no settled detail is lost)
+## Historical specification and amendments — provenance only
 
-The following is the complete text that existed before this consolidation. The consolidated sections above govern when historical wording is outdated, while the archive preserves decision provenance.
+The retained text below includes the earlier specification and later dated amendments, reproduced without rewriting their original claims. All still-current decisions, including Steps 37–39, have been consolidated into §§1–11 above. This historical section is not a competing implementation contract. Its old headings such as “Finalized,” “Preliminary,” “Next work,” and “not yet synchronized” describe their original context, not present project status.
+
+**Supersession map:** historical Step 12's broad pre-PROCESSABLE editability is restricted by current §4/Q2; Step 13's invalid-date `POLICY_RESTRICTION` is superseded by §5/Q4's validation/failed-correction rules; Step 14's generic API-failure rule applies only to decision-critical J1/J2 under §7, not J3/J4 diagnostics. Historical “original” evidence means the applicable evaluated version under §4/Q3, not necessarily the first submission. Historical Steps 26–29 are supplemented by the distinct correction limits in §§6–7/Q5. Step 39 is implemented in the design through the existing J1 V2 `MIXED_ITEMS` contract (§3/Q1), with no new itemization fields or classifier. The current six-policy table (§3), J2 routing table (§6), and advisory-only J3/J4 rules (§6) supersede any older provisional alternatives. Historical experimental observations remain observations, not new policy or calibrated guarantees.
 
 # Jev Expense Reimbursement — Working Design Specification
 

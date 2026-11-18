@@ -1,41 +1,43 @@
-
 flowchart TD
-    A["Claim requires action"] --> B{"What kind of action?"}
+    Action["Action on existing claim"] --> State{"Current status"}
+    State -->|PROCESSABLE| Locked["No edits, cancellation or reversal; repeated processing returns existing result without consumption"]
+    State -->|POLICY_RESTRICTION / CANCELLED| Terminal["Terminal: no edits or cancellation; new claim only where rules permit"]
+    Terminal --> New["New ID and submission date: Flowchart 1 NEW then Flowchart 3 PRE; preserve old history"]
+    State -->|NEED_INFO / HUMAN_REVIEW| Kind{"Permitted action"}
+    Kind -->|Cancel| Cancel["Save CANCELLED and history; release duplicate key; consume zero"]
+    Kind -->|Technical retry after evaluation failure| Retry["Audit same-ID retry; no correction/semantic counter increment; no new J4 response"]
+    Kind -->|Ordinary correction| CorrectionLimit{"Responding to a limited J1 correction whose separate opportunity is exhausted?"}
+    CorrectionLimit -->|Yes| CorrectionExhausted["HUMAN_REVIEW: Benefits Team guidance; do not accept an extra limited correction attempt"]
+    CorrectionLimit -->|No| Correction["Audit submitted correction and applicable separate J1 correction attempt; no semantic increment"]
+    Kind -->|Cannot identify eligible component or actual amount| Referral["Save HUMAN_REVIEW with Benefits Team guidance and history; no consumption or invented allocation"]
+    Kind -->|Semantic response| Outstanding{"Outstanding semantic question and fewer than two responses used?"}
+    Outstanding -->|No| NoResponse["Do not accept another semantic response; unresolved exhausted claim refers to Benefits Team"]
+    Outstanding -->|Yes| Response["Audit response and corresponding earlier evidence/question; increment semantic responses once"]
+    Retry --> Validate["Flowchart 3 PRE: validate fields, amounts, date against original submission, other-claim duplicates and allowance"]
+    Correction --> Validate
+    Response --> Validate
+    Validate --> ValidationResult{"PRE result"}
+    ValidationResult -->|Invalid correction / duplicate conflict| Failed["Audit failed attempt; retain claim ID and last valid evidence; no Jev and no allowance reservation/consumption"]
+    ValidationResult -->|Structurally valid allowance failure| Restriction["Save POLICY_RESTRICTION and history; terminal; no Jev or consumption"]
+    ValidationResult -->|Passed| Evidence["Save valid current evidence version; retain earlier versions"]
+    Evidence --> Changed{"Item name/category changed, or no valid reliable matching covered J1 result?"}
+    Changed -->|Yes| Rerun["Flowchart 1 READY: rerun J1, then J2 only after reliable matching category"]
+    Changed -->|No| Reuse["Flowchart 1 READY: reuse valid unchanged J1; reassess latest applicable J2 evidence including revised justification"]
+    Evidence -.-> DiagnosticEligible{"This action responds to an outstanding semantic question?"}
+    DiagnosticEligible -->|No| NoScore["No J4 call for ordinary correction or technical retry alone"]
+    DiagnosticEligible -->|Yes| Score["J4: earlier question evidence, exact outstanding question, response/revised explanation"]
+    Score --> ScoreResult{"Diagnostic call succeeded?"}
+    ScoreResult -->|Yes| SavedScore["Save fractional score, confidence and full distribution for Decision Details with disclaimer"]
+    ScoreResult -->|No| ScoreFailure["Record diagnostic failure; independent decision workflow continues"]
+    SavedScore --> DiagnosticOnly["Informational only: no status, clarification, escalation or allowance effect; no routing threshold"]
+    ScoreFailure --> DiagnosticOnly
+    Counters["Separate limits: one uncertain-J1 item correction; two reliable-mismatch category corrections; two J2 semantic responses. Never combine counters. See specification sections 6-7."]
+    Routing["Flowchart 1 owns J2 routing: reliable SUPPORTED -> Flowchart 3 FINAL; reliable UNRELATED -> restriction; reliable INCONSISTENT -> review; UNCLEAR or either reliability check failing -> semantic NEED_INFO, or review when two responses remain unresolved."]
+    Diagnostics["Flowchart 1 owns critical J1/J2 failures and post-decision J3. J3/J4 failures never override the independent outcome."]
 
-    B -->|"Field correction"| C["Employee corrects item name, category, invoice details or amount"]
-    C --> D["Save revision in audit history"]
-    D --> E["Rerun Python validations"]
-    E --> F{"Valid?"}
-    F -->|No| G["Show validation error or policy restriction"]
-    F -->|Yes| H{"Item name or category changed?"}
-    H -->|Yes| I["Rerun J1"]
-    H -->|No| J["Reuse J1 result"]
-    I --> K["Return to main evaluation flow"]
-    J --> K
-
-    B -->|"Semantic clarification"| L{"Two attempts already used?"}
-    L -->|Yes| M["HUMAN_REVIEW: Contact Benefits Team"]
-    L -->|No| N["Display broad policy-specific question"]
-    N --> O["Employee revises justification"]
-    O --> P["Save revision and increment clarification attempts"]
-    P --> Q["J4 Score: Evaluate response completeness"]
-    Q --> R["J2 Choice: Reassess revised purpose"]
-    R --> S{"J2 result and confidence"}
-
-    S -->|"Confident SUPPORTED"| T["Continue to financial recheck"]
-    S -->|"Confident UNRELATED"| U["POLICY_RESTRICTION"]
-    S -->|INCONSISTENT| M
-    S -->|"UNCLEAR or uncertain"| V{"Attempts remaining?"}
-
-    V -->|Yes| W["Use J4 to inform next clarification"]
-    W --> N
-    V -->|No| M
-
-    T --> X["Return to main evaluation flow"]
-    
     classDef success fill:#DFF3E9,stroke:#22865B,color:#18593F
     classDef warning fill:#FFF1D6,stroke:#BC872D,color:#704F11
-    classDef review fill:#FBE7E7,stroke:#C75C5C,color:#803535
-    class T,X success
-    class N,O,W warning
-    class M,U review
+    classDef neutral fill:#EAF0FA,stroke:#6686BB,color:#233C65
+    class Rerun,Reuse success
+    class Correction,Response,Failed warning
+    class Score,SavedScore,ScoreFailure,DiagnosticOnly,Counters,Routing,Diagnostics neutral

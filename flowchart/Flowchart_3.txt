@@ -1,40 +1,42 @@
-
 flowchart TD
-    A["Claim submitted or revised"] --> B["Validate required fields and amounts"]
-    B --> C{"Input valid?"}
-    C -->|No| D["Return validation error"]
+    Pre["PRE: new submission or existing editable revision/retry from Flowcharts 1-2"] --> Fields["Validate required fields including Employee ID; positive INR Decimal amounts with <= 2 decimals; requested <= item cost"]
+    Fields --> Dates["Validate inclusive three-calendar-month window ending at original submission date; never revision date; no future invoice"]
+    Dates --> Valid{"Fields, amounts and date valid?"}
+    Valid -->|No| InvalidKind{"New submission?"}
+    InvalidKind -->|Yes| InputError["Validation error; no claim created; invalid initial dates are not saved restrictions"]
+    InvalidKind -->|No| FailedCorrection["Audit failed correction; keep same ID and last valid evidence version; no Jev"]
+    Valid -->|Yes| Identity["Normalize Employee ID, Merchant Name, Invoice Number; key also includes Invoice Line Number; one item/line per claim"]
+    Identity --> Blocked{"Another active or PROCESSABLE claim blocks this key? Exclude current claim ID."}
+    Blocked -->|Yes| DuplicateKind{"New submission?"}
+    DuplicateKind -->|Yes| Conflict["Conflict; no claim created"]
+    DuplicateKind -->|No| FailedCorrection
+    Blocked -->|No| Balance["Employee/category/invoice-date period: remaining cap minus sum of PROCESSABLE claims; no fixed cap for business policies"]
+    Balance --> Within{"Requested within remaining allowance, or policy uncapped?"}
+    Within -->|No| Allowance["Save POLICY_RESTRICTION with ID and attempted amounts/history; existing claim retains last valid evidence; terminal; never reduce request"]
+    Within -->|Yes| Accepted["PRE passed: create new claim or accept valid evidence revision; preserve audit versions"]
+    Accepted --> Ready["Flowchart 1 READY: valid J1 reuse or J1 before J2; unresolved J1 never reaches J2"]
+    InputError --> Zero["No Jev; consume/reserve zero; existing failed attempts retain last valid evidence"]
+    Conflict --> Zero
+    FailedCorrection --> Zero
+    Allowance --> Zero
 
-    C -->|Yes| E["Validate invoice date against original submission date"]
-    E --> F{"Invoice within 3 calendar months and not future-dated?"}
-    F -->|No| G["POLICY_RESTRICTION: Invoice date invalid"]
-
-    F -->|Yes| H["Normalize employee, merchant and invoice identifiers"]
-    H --> I{"Same invoice line blocked by another claim?"}
-    I -->|Yes| J["Reject duplicate submission"]
-    I -->|No| K["Check applicable allowance period and remaining balance"]
-
-    K --> L{"Requested amount within allowance?"}
-    L -->|No| M["POLICY_RESTRICTION: Allowance exceeded"]
-    L -->|Yes| N["Proceed to J1 and J2 semantic evaluation"]
-
-    N --> O{"Semantic evaluation permits processing?"}
-    O -->|No| P["Save outcome without consuming allowance"]
-    O -->|Yes| Q["Begin SQLite write transaction"]
-
-    Q --> R["Recheck duplicate claim and remaining allowance"]
-    R --> S{"Both checks still pass?"}
-
-    S -->|No| T["POLICY_RESTRICTION: Save rejection"]
-    S -->|Yes| U["Mark claim PROCESSABLE and consume allowance"]
-    U --> V["Commit transaction"]
-
-    P --> W["Preserve decision and audit history"]
-    T --> W
-    V --> W
+    Final["FINAL: reliable J2 SUPPORTED from Flowchart 1; no J3/J4 input controls this handoff"] --> Begin["Begin serialized SQLite write transaction"]
+    Begin --> Already{"Same claim already PROCESSABLE?"}
+    Already -->|Yes| Existing["Return existing result; no second consumption; end transaction"]
+    Already -->|No| Recheck["Recheck duplicate key excluding self AND remaining employee/category/invoice-period allowance; uncapped policies still check duplicates"]
+    Recheck --> Pass{"Both checks pass?"}
+    Pass -->|No| FinalRestriction["Save POLICY_RESTRICTION and reason; consume zero; commit outcome/history"]
+    Pass -->|Yes| Process["Atomically record PROCESSABLE and requested amount once; commit outcome/history"]
+    Existing --> Recorded["FINAL outcome to Flowchart 1 outcome recording and conditional advisory J3; preserve outcome on J3 failure"]
+    FinalRestriction --> Recorded
+    Process --> Recorded
+    Process -.-> Meaning["PROCESSABLE means eligible for processing, not paid; locked against edits, cancellation and reversal"]
+    Rules["Six policies and lifecycle: specification sections 3-4. Only PROCESSABLE consumes; NEED_INFO, HUMAN_REVIEW, restrictions and cancellation consume/reserve zero. Only NEED_INFO/HUMAN_REVIEW may cancel. Restricted/cancelled claims allow fresh submission where rules permit."]
+    Evaluation["Decision-critical errors: technical HUMAN_REVIEW with same-ID retry via PRE. J3 UNAVAILABLE and J4 diagnostic failure never change status or allowance. Flowcharts 1-2 own separate correction/semantic counters."]
 
     classDef success fill:#DFF3E9,stroke:#22865B,color:#18593F
     classDef restriction fill:#FBE7E7,stroke:#C75C5C,color:#803535
     classDef important fill:#EAF0FA,stroke:#6686BB,color:#233C65
-    class U,V success
-    class G,J,M,T restriction
-    class Q,R important
+    class Process,Existing success
+    class InputError,Conflict,FailedCorrection,Allowance,FinalRestriction restriction
+    class Begin,Recheck,Rules,Evaluation important

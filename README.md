@@ -78,7 +78,7 @@ model and OpenRouter `base_url="https://openrouter.ai/api"` to `TypeSafeClient`;
 the SDK appends `/v1/systemone`. Experiments disable automatic retries. No model
 upgrade, live inference, credential loading or API configuration behavior was added.
 
-### Repository inspection and documented discrepancies
+### Repository inspection and authoritative design
 
 The authoritative working specification is present at
 [`JEV_EXPENSE_AUDIT_WORKING_SPEC.md`](JEV_EXPENSE_AUDIT_WORKING_SPEC.md).
@@ -88,9 +88,12 @@ fixtures, offline tests, raw results, preregistrations and reports. The archive
 manifest tracks 19 immutable artifacts. Reuse these as learning evidence; the
 future application should have its own small adapter rather than import runners.
 
-The finalized decision log below takes precedence over older contradictory
-specification sections and Mermaid diagrams. The discrepancies remain documented
-for traceability; this milestone changes neither the specification nor the diagrams.
+Explicit recent finalized decisions and clearly dated later amendments take
+precedence over other agreed specification requirements, provisional proposals,
+diagrams and historical experiments, in that order. Milestone 2 Phase B
+consolidates the approved decisions into specification sections 1–11 and aligns
+all Mermaid sources. The historical specification text is preserved with a
+supersession map; it is not a competing implementation contract.
 
 ### Finalized decision log (2026-11-03)
 
@@ -111,36 +114,100 @@ They document future behavior only; no business logic is implemented here.
    Category changes. Rerun J2 when appropriate, including after justification
    revisions. J4 never replaces or gates these validations and evaluations.
 
-### Older wording and diagram discrepancies
+### Milestone 2 Phase B: five finalized decisions (2026-11-03)
 
-- Specification section 6 still says J4 can guide further clarification and calls
-  a numeric cutoff open. Section 11 item 1 and finalized steps 24/37 instead make
-  J4 informational only. Flowchart 2's "Use J4 to inform next clarification" has
-  the same conflict with the finalized advisory-only wording.
-- Specification section 6 calls low-confidence `INCONSISTENT` routing open, while
-  section 11 item 3 and step 38 finalize confidence/margin-aware routing.
-  Flowcharts 1 and 2 send `INCONSISTENT` directly to review without that check.
-- Flowchart 2's semantic clarification branch omits Python revalidation before
-  reevaluating J2, which specification section 6 requires for revisions.
-- Flowchart 1's final check mentions only allowance; section 5 also requires a
-  duplicate recheck. Flowchart 3 explicitly includes both. Preserve this difference
-  rather than implementing the narrower check from Flowchart 1.
-- The historical experiments README describes a J1/J2-only provisional default
-  and optional extra judgments; the current specification includes advisory J3
-  and clarification J4. Experimental routing thresholds and old policy wording
-  remain historical evidence, not current application rules.
-- Finalized step 39 explicitly requests ordinary item correction for separately
-  charged mobile entertainment. The external diagrams do not explicitly show
-  this branch. The specification's archived text is labeled historical, but also
-  contains later finalized amendments; it cannot be dismissed wholesale.
+This milestone reconciles documentation only. No application logic is implemented.
+The following user-approved decisions resolve the five Phase A questions:
 
-Other diagrams simplify lifecycle rules such as cancellation, technical retries,
-the J1 correction limit and J3's successful-J1/J2 precondition. Consult the full
-specification together with the finalized decision log before implementation.
-The first three discrepancies above have authoritative resolutions in that log;
-their older source text remains untouched for this milestone.
+1. **Q1 — Mixed mobile bills:** keep the existing form and use J1's existing
+   `MIXED_ITEMS` result where applicable to request one eligible cellular component
+   and its actual charge. No itemization fields, new classifier, inferred split or
+   narrow Noul gate. Complimentary streaming is not independently disqualifying;
+   inability to identify the eligible component leads to Benefits Team referral.
+   Detection is best-effort from unverified employee-entered information.
+2. **Q2 — Editability:** `NEED_INFO` is editable; `HUMAN_REVIEW` permits corrections
+   and technical retries. Only these two states can be cancelled.
+   `POLICY_RESTRICTION` and `CANCELLED` are terminal and permit new submissions only
+   under the usual rules. `PROCESSABLE` cannot be edited, cancelled or reversed.
+   Old claims/history remain; a new claim has its own date/duplicate checks.
+3. **Q3 — Evidence versions:** evaluate the latest applicable evidence. Reuse J1
+   only for unchanged relevant inputs and a valid prior result. J3 receives raw
+   evaluated-revision evidence/policy, never other Jev conclusions. J4 receives the
+   outstanding question, corresponding earlier evidence, and employee response.
+   Preserve every earlier evidence version; "original" does not always mean first
+   submission.
+4. **Q4 — Validation/persistence:** invalid new fields/amounts/dates return errors
+   without creating claims; blocked new duplicates return conflicts without
+   creating claims. Structurally valid allowance failures and semantic exclusions
+   are saved as `POLICY_RESTRICTION`. Existing editable claims retain their ID and
+   last valid evidence on failed corrections; audit attempted values and failures.
+   No Jev or consumption/reservation when deterministic validation fails. Corrected
+   dates are checked against the original submission date.
+5. **Q5 — Category corrections:** allow at most two ordinary category-correction
+   attempts after reliable J1 mismatch, then refer if still mismatched. Keep this
+   counter separate from the one uncertain-J1 correction opportunity and two J2
+   semantic responses. Ordinary corrections and technical retries consume no J2
+   semantic attempts.
 
-### Verification record (2026-11-03)
+### Reconciled discrepancy inventory
+
+| Phase A issue | Phase B resolution |
+| --- | --- |
+| C01: J4 routing and open threshold | Informational only; no threshold; failure records a diagnostic and does not control decisions |
+| C02: uncertain INCONSISTENT | Same two configurable checks as SUPPORTED/UNRELATED; full four-label J2 table in specification §6 and Flowchart 1 |
+| C03/C07/C16: revision validation, J1 reuse and vague returns | Every revision/retry uses Python PRE; valid unchanged J1 reuse only; named READY and FINAL handoffs |
+| C04: allowance-only final check | Serialized atomic duplicate-and-allowance recheck with same-claim idempotency |
+| C05/C06: J1 validity, labels and correction loops | Response-validity check precedes reliability; separate label instructions and distinct correction limits |
+| C08: terminal/editable states | Explicit Q2 lifecycle table and cancellation restrictions |
+| C09/C10: evaluation failures and J3 eligibility | J1/J2 critical failure is distinct from J3 UNAVAILABLE and J4 diagnostic failure; J3 requires successful applicable J1/J2 |
+| C11: ambiguous original evidence | Q3 versioned current evidence and question-associated earlier evidence |
+| C12: mobile detection | Q1 uses the tested V2 MIXED_ITEMS contract; no new detection mechanism |
+| C13/C15: invalid submissions and history | Q4 persistence table; no saved claim for invalid initial dates or blocked new duplicates; failed corrections audited |
+| C14: archive and misleading open questions | Current sections consolidate approved amendments; historical text retained with an explicit supersession map |
+
+The actual V2 `MOBILE_BILL` and `MIXED_ITEMS` definitions in
+`experiments/category_validation/v2_plan.json` already explicitly cover separately
+charged mobile service plus Netflix, complimentary Netflix, and a specifically
+claimed cellular line. The older V1 helper lacks `MIXED_ITEMS`; it is historical,
+not the application's category contract. No experiment was changed. Historical
+experiment routing recommendations remain evidence, not current V1 rules.
+
+No unresolved contradiction remains in the five approved decisions. Manual
+invoice identity and mixed-item detection remain limited; model thresholds remain
+provisional. These limitations do not authorize new features. Implementation
+choices and any newly discovered ambiguity must be reviewed in later milestones.
+
+### Phase B verification and diagram status
+
+Only this README, the working specification, and the three existing
+`flowchart/Flowchart_1.txt`, `Flowchart_2.txt`, `Flowchart_3.txt` sources are changed.
+The specification embeds matching copies of those Mermaid sources. Review covers
+all J1/J2 branches, separate counters, terminal states, failed corrections,
+diagnostic independence, and the sole atomic path to processing. Verification:
+
+- All three embedded blocks exactly match their standalone sources. Node/edge
+  structure checks passed (39/55, 33/32 and 29/31 nodes/edges respectively).
+- Graph checks confirmed that accepted revisions cannot bypass Python validation,
+  new processing cannot bypass the final transaction/rechecks, diagnostic branches
+  cannot reach decision routing, and unresolved J2 outcomes cannot process.
+- The historical specification body, six detailed policy rows, and Milestone 1
+  setup/verification text remain unchanged. All 19 archive hashes match.
+- SHA-256 comparison against the inspection baseline found only the five
+  authorized files changed; the other 69 tracked files, including experiments,
+  configuration, dependencies and PNGs, are unchanged.
+- `git diff --check` passed. Existing Mermaid CLI tooling was not found on PATH;
+  manual syntax review and structural checks were used without installing tools.
+  These checks are not a full Mermaid parser or visual rendering check.
+
+### Flowcharts
+
+The three `flowchart/Flowchart_*.txt` files are the editable Mermaid sources;
+matching `.png` files are generated images. After changing a source, render it
+with a Mermaid-compatible tool, check labels and arrows for readability, and
+replace the corresponding PNG using the same filename. Keep the embedded diagrams
+in the working specification aligned with the sources.
+
+### Milestone 1 verification record (2026-11-03)
 
 - Baseline `.venv/Scripts/python.exe -m unittest discover -s experiments -t . -v`:
   25 passed, one temporary-directory permission error in the sandbox.
@@ -175,7 +242,7 @@ inspection used `git -c safe.directory=D:/ProjectsForBlogLearning/expense-approv
 per command, without changing global Git settings. The specification and flowchart
 directory were already untracked before this work. No commit or push was made.
 
-Recommended next milestone: approve a small typed settings/validation scope and
-its tests, using the finalized decision log above. Any diagram or specification
-cleanup remains a separate approved documentation task. No Milestone 2 work has
-started; further implementation requires explicit approval.
+Milestone 2 Phase B stops at documentation reconciliation for human review.
+Application implementation has not started. Further work
+requires explicit approval; the README's final application-wide cleanup is
+deferred until the application milestones are complete.

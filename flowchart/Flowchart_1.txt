@@ -1,48 +1,64 @@
-
 flowchart TD
-    A["Employee submits claim"] --> B["Python validates input, invoice age, duplicates and available allowance"]
-    B --> C{"Valid?"}
-    C -->|No| D["Return validation error or POLICY_RESTRICTION"]
-    C -->|Yes| E["J1 Choice: Classify invoice item"]
-    E --> F{"J1 result"}
-
-    F -->|"Low confidence or narrow margin"| G["NEED_INFO: Correct item name"]
-    F -->|"INSUFFICIENT_INFORMATION or MIXED_ITEMS"| G
-    F -->|"Confident OTHER"| H["POLICY_RESTRICTION"]
-    F -->|"Covered category"| I{"Matches employee category?"}
-
-    I -->|No| J["NEED_INFO: Correct category"]
-    I -->|Yes| K["J2 Choice: Assess purpose"]
-
-    K --> L{"J2 result"}
-    L -->|"UNCLEAR"| M["NEED_INFO: Clarify purpose"]
-    L -->|"INCONSISTENT"| N["HUMAN_REVIEW: Benefits Team"]
-    L -->|"SUPPORTED or UNRELATED"| O{"Confidence and margin pass?"}
-
-    O -->|No| M
-    O -->|"Yes + UNRELATED"| P["POLICY_RESTRICTION"]
-    O -->|"Yes + SUPPORTED"| Q["Python rechecks allowance atomically"]
-
-    Q --> R{"Still enough allowance?"}
-    R -->|No| S["POLICY_RESTRICTION"]
-    R -->|Yes| T["PROCESSABLE: Consume allowance"]
-
-    M --> U["Revision workflow - Flowchart 2"]
-    G --> U
-    J --> U
-
-    M -.-> V["Advisory J3 Noul"]
-    N -.-> V
-    P -.-> V
-    T -.-> V
-    S -.-> V
-
-    V --> W["Store probability and display in Decision Details"]
-    W --> X["Never change claim outcome"]
+    New["New submission"] --> Pre["Flowchart 3 PRE: Python fields, amounts, original-date window, duplicate and allowance checks"]
+    Pre --> PreResult{"PRE passed?"}
+    PreResult -->|No| PreStop["PRE handles error/conflict with no new claim, or saves allowance restriction; no Jev"]
+    PreResult -->|Yes| Ready["READY: validated evidence version; revision/retry enters here from Flowchart 2"]
+    Ready --> Reuse{"Unchanged J1 inputs and valid reliable matching covered J1 result?"}
+    Reuse -->|Yes| Purpose["J2: latest applicable item, matching category, justification and policy"]
+    Reuse -->|No| Category["J1: latest item identity and candidate definitions; compare selected category; no justification"]
+    Category --> CategoryValid{"J1 response valid and complete?"}
+    CategoryValid -->|No / API failure| Technical["HUMAN_REVIEW: technical failure; no consumption; same-ID retry via Flowchart 2"]
+    CategoryValid -->|Yes| CategoryReliable{"J1 confidence and top-two margin both pass?"}
+    CategoryReliable -->|No| ItemLimit{"Uncertain-item correction already used?"}
+    ItemLimit -->|Yes| Review["HUMAN_REVIEW: Benefits Team referral; no actual review workflow"]
+    ItemLimit -->|No| ItemInfo["NEED_INFO FIELD_CORRECTION: precise item name; one uncertain-item correction opportunity"]
+    CategoryReliable -->|Yes| CategoryLabel{"Reliable J1 label"}
+    CategoryLabel -->|OTHER| Restricted["POLICY_RESTRICTION: saved terminal claim; no consumption"]
+    CategoryLabel -->|INSUFFICIENT_INFORMATION| Specific["NEED_INFO FIELD_CORRECTION: specify item name"]
+    CategoryLabel -->|MIXED_ITEMS| Mixed["NEED_INFO FIELD_CORRECTION: one eligible item and actual amount; includes separately charged mobile extras; never infer split"]
+    CategoryLabel -->|Covered category| Matches{"Matches employee category?"}
+    Matches -->|Yes| Purpose
+    Matches -->|No| CategoryLimit{"Two category-correction attempts already used?"}
+    CategoryLimit -->|Yes| Review
+    CategoryLimit -->|No| CategoryInfo["NEED_INFO FIELD_CORRECTION: employee corrects category; never change silently"]
+    Purpose --> PurposeValid{"J2 response valid and complete?"}
+    PurposeValid -->|No / API failure| Technical
+    PurposeValid -->|Yes| PurposeLabel{"J2 label"}
+    PurposeLabel -->|UNCLEAR at any confidence| Unresolved{"Two semantic responses already used?"}
+    PurposeLabel -->|SUPPORTED / UNRELATED / INCONSISTENT| PurposeReliable{"J2 confidence and top-two margin both pass?"}
+    PurposeReliable -->|No| Unresolved
+    PurposeReliable -->|Yes| ReliablePurpose{"Reliable J2 label"}
+    ReliablePurpose -->|SUPPORTED| Final["Flowchart 3 FINAL: serialized SQLite transaction; idempotent duplicate-and-allowance recheck"]
+    ReliablePurpose -->|UNRELATED| Restricted
+    ReliablePurpose -->|INCONSISTENT| Review
+    Unresolved -->|Yes| Review
+    Unresolved -->|No| SemanticInfo["NEED_INFO SEMANTIC_CLARIFICATION: predefined category question"]
+    Final --> FinalResult{"FINAL outcome"}
+    FinalResult -->|Duplicate or allowance failure| Restricted
+    FinalResult -->|Committed / already processed same claim| Processable["PROCESSABLE recorded once; eligible for processing, not paid"]
+    ItemInfo --> Record["Record outcome and evidence/evaluation versions; only PROCESSABLE consumes allowance"]
+    Specific --> Record
+    Mixed --> Record
+    CategoryInfo --> Record
+    SemanticInfo --> Record
+    Restricted --> Record
+    Review --> Record
+    Technical --> Record
+    Processable --> Record
+    Record -.-> Actions["Actions use Flowchart 2 editability table; terminal claims cannot edit; only NEED_INFO/HUMAN_REVIEW can cancel"]
+    Record --> AdvisoryEligible{"Required J1 and J2 succeeded for this evidence version, including valid J1 reuse?"}
+    AdvisoryEligible -->|No| Unchanged["Preserve outcome and allowance; diagnostics never route claims"]
+    AdvisoryEligible -->|Yes| Noul["J3: one advisory semantic-support proposition using raw current-revision evidence and policy; no other judgments or arithmetic"]
+    Noul --> AdvisoryResult{"Advisory call succeeded?"}
+    AdvisoryResult -->|Yes| Probability["Save proposition probability and supported metadata for Decision Details"]
+    AdvisoryResult -->|No| Unavailable["Record UNAVAILABLE diagnostic"]
+    Probability --> Unchanged
+    Unavailable --> Unchanged
+    Defaults["Both Choice checks: configurable confidence >= 0.70 and margin >= 0.30; provisional, not calibrated. J4 only in Flowchart 2; no routing threshold."]
 
     classDef success fill:#DFF3E9,stroke:#22865B,color:#18593F
     classDef warning fill:#FFF1D6,stroke:#BC872D,color:#704F11
     classDef neutral fill:#EAF0FA,stroke:#6686BB,color:#233C65
-    class T success
-    class M,G,J,U warning
-    class V,W,X neutral
+    class Processable success
+    class ItemInfo,Specific,Mixed,CategoryInfo,SemanticInfo warning
+    class Noul,Probability,Unavailable,Unchanged,Defaults neutral
