@@ -309,6 +309,56 @@ No dependencies, schema, database helpers, specification, diagrams or historical
 artifacts changed. Claim-admission, duplicate-query, revision/lifecycle and
 evaluation-persistence workflows remain deferred; neither helper writes to SQLite.
 
+### Internal initial storage and history reads (Milestone 4, Slice 3)
+
+`expense_approval/claim_store.py` exposes `insert_initial_claim(connection,
+raw_input=..., submitted_at=...)` as an internal persistence primitive. Supply a
+connection from `connect_database()` inside a caller-owned `write_transaction()`.
+The function rejects calls without an active transaction. It uses a local savepoint
+to insert a claim, accepted evidence version and matching `INITIAL_CLAIM_STORED`
+audit event atomically. A failed insert removes that operation's partial records
+even when the caller catches the error. It never commits or rolls back the caller's
+entire transaction; the returned UUID is provisional until the caller commits.
+
+The single supplied aware submission instant provides both the UTC timestamp and
+original India business date, without another clock read. Raw evidence is captured
+before `ClaimInput` parsing; existing structural and invoice-date checks run before
+SQL writes. Employee ID, merchant name and invoice number are normalized separately
+from the original snapshot. Monetary projections retain exact Decimal text, and
+line numbers use canonical positive-integer text without a signed 64-bit limit.
+The claim, revision and event have separate UUID4 identifiers. Initial evidence and
+state versions are 1; status/reason/question are unset and all counters remain zero.
+The SQLite partial unique index enforces duplicate ownership during insertion;
+there is no preliminary duplicate-query API or allowance reservation. Validation
+and database errors propagate without being converted into reimbursement statuses.
+
+`get_claim(connection, claim_id)` returns `sqlite3.Row` current state together with
+`current_revision_id`, `current_raw_evidence_json`, `current_invoice_date`,
+`current_reimbursement_category`, `current_invoice_item_amount` and
+`current_requested_reimbursement`. It joins the accepted revision on both the same
+claim ID and `claims.current_evidence_version`, rather than choosing the latest
+historical row. Missing claims return `None`.
+
+`list_claim_revisions()` returns all accepted and failed-attempt records, preserving
+dispositions and ordering by `submitted_at, revision_id`. `list_claim_events()`
+returns complete event history ordered by `occurred_at, event_id`. Both return
+lists of `sqlite3.Row` and return `[]` for missing history. All three reads use
+cursor-local row factories, preserve stored JSON as text, close their cursors and
+leave connection-wide settings and caller transaction ownership unchanged. They
+perform no writes or explicit transaction control. A caller needing a shared
+snapshot across multiple reads must supply the transaction scope.
+
+Slice 3 verification: locked offline Ruff lint/format checks passed; focused
+claim-store tests passed all 41 cases (32 insertion and 9 read cases). Full pytest
+collected and passed 405 tests, plus 7 historical subtests. Separate unittest
+discovery passed all 26 historical tests; all 19 protected archive hashes match.
+Both approved code/test files are unchanged during final documentation. No schema,
+database helpers, dependencies, specification, diagrams or historical artifacts
+changed. Complete admission orchestration, financial-policy/allowance checks,
+corrections, cancellation, evaluation persistence and lifecycle workflows remain
+deferred. The future admission workflow must complete policy checks before
+calling Jev.
+
 ### Repository inspection and authoritative design
 
 The authoritative working specification is present at
@@ -474,6 +524,6 @@ inspection used `git -c safe.directory=D:/ProjectsForBlogLearning/expense-approv
 per command, without changing global Git settings. The specification and flowchart
 directory were already untracked before this work. No commit or push was made.
 
-Milestone 4 stops after Slice 2's identity/evidence helpers for independent
-review. Slice 3 requires explicit authorization; the README's final application-wide
+Milestone 4 stops after Slice 3's initial storage/history reads for independent
+review. Slice 4 requires explicit authorization; the README's final application-wide
 cleanup is deferred until the application milestones are complete.
