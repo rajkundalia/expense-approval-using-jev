@@ -14,9 +14,9 @@ The end-to-end reimbursement application is not implemented yet.
 ## Milestone 1: reproducible Python setup
 
 Milestone 1 established project scaffolding. Milestone 3 now includes typed
-configuration and structural claim/money validation (see below). Relative date
-eligibility, endpoints, database schema, policy routing, Jev evaluations and UI
-remain for later slices.
+configuration, structural claim/money validation, and contextual invoice-date
+eligibility (see below). Endpoints, database schema, policy routing, Jev
+evaluations and UI remain for later slices.
 
 Use `uv` from the repository root (verified with uv 0.10.9):
 
@@ -130,13 +130,41 @@ Validation leaves the caller's payload unchanged, including after failure. The
 typed model is not a raw audit snapshot; future persistence must preserve the
 original employee-entered evidence separately. A valid model establishes only
 structural validity: three-month eligibility, future-date restrictions and
-original-submission-based correction checks require a separate contextual date
-validator in Slice 4. Duplicate/allowance checks and semantic eligibility are not
-performed here.
+original-submission-based correction checks use the separate contextual date
+validator implemented in Slice 4. Duplicate/allowance checks and semantic
+eligibility are not performed here.
 
 Slice 3 verification: locked offline Ruff lint/format checks passed; pytest
 collected and passed 176 tests (119 new structural/money cases, 31 configuration
 cases and 26 historical tests), plus 7 historical subtests. No dependencies changed.
+
+### Business clock and invoice-date eligibility (Milestone 3, Slice 4)
+
+`expense_approval/clock.py` provides `utc_now()` as an aware production time
+source and `business_date(now=utc_now)`. The latter reads its callable once,
+converts the instant to `Asia/Kolkata`, and returns the date. Naive datetimes
+raise `ValueError`; host timezone and environment settings are not consulted.
+Injecting a fixed aware datetime source makes midnight behavior reproducible.
+
+`validate_invoice_date(invoice_date, original_submission_date)` in `validation.py`
+accepts already parsed dates and returns `None` on success. The inclusive window
+starts three calendar months before the reference date, preserving the day where
+possible and clamping to the target month's last day: May 31 maps to February 28
+(February 29 in a leap year). This is not a 90-day calculation. `ValueError`
+messages distinguish too-old invoices (including the earliest allowed date) from
+invoices after the original submission date.
+
+For an initial submission, capture `business_date()` once and pass that trusted
+date explicitly. For corrections, pass the retained original submission date;
+the correction's date never moves either bound. The validator reads no clock.
+`ClaimInput` retains its structural-only date contract. Persistence and revision
+workflows remain deferred.
+
+Slice 4 verification: locked offline Ruff lint/format checks passed; pytest
+collected and passed 195 tests, plus 7 historical subtests. The 19 new cases cover
+11 clock cases and 8 calendar-window/correction cases. All 176 prior tests pass,
+all 19 archive hashes match, and `git diff HEAD --check` passes. No dependencies,
+historical experiments, specification or diagrams changed.
 
 ### Repository inspection and authoritative design
 
@@ -303,6 +331,6 @@ inspection used `git -c safe.directory=D:/ProjectsForBlogLearning/expense-approv
 per command, without changing global Git settings. The specification and flowchart
 directory were already untracked before this work. No commit or push was made.
 
-Milestone 3 stops after Slice 3's structural validation for human review. Further
+Milestone 3 stops after Slice 4's clock and date eligibility for human review. Further
 slices require explicit approval; the README's final application-wide cleanup is
 deferred until the application milestones are complete.
