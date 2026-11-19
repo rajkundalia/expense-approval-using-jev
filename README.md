@@ -15,8 +15,9 @@ The end-to-end reimbursement application is not implemented yet.
 
 Milestone 1 established project scaffolding. Milestone 3 now includes typed
 configuration, structural claim/money validation, and contextual invoice-date
-eligibility (see below). Endpoints, database schema, policy routing, Jev
-evaluations and UI remain for later slices.
+eligibility (see below). Milestone 4 adds the explicit SQLite connection/schema
+foundation. Endpoints, persistence workflows, policy routing, Jev evaluations and
+UI remain for later slices.
 
 Use `uv` from the repository root (verified with uv 0.10.9):
 
@@ -213,6 +214,51 @@ Jev integration, lifecycle/audit workflows, UI, authentication and deployment re
 unimplemented. Slice 5 is ready for independent review; formal milestone closure
 and further implementation require approval.
 
+### SQLite connection/schema foundation (Milestone 4, Slice 1)
+
+`expense_approval/database.py` provides three explicit functions:
+`initialize_database(path)`, `connect_database(path)` and
+`write_transaction(connection)`. The connection context enables foreign keys
+and always closes the connection. The transaction context uses `BEGIN IMMEDIATE`,
+commits on success and rolls back on exceptions, including commit-time foreign-key
+failures. It rejects nested transactions. Importing the module creates no database;
+opening a connection may create an empty file, but only initialization adds tables.
+
+`schema.sql` defines four STRICT tables: `claims` for current state/identity,
+`claim_revisions` for accepted evidence and failed attempts, `evaluations` for
+evidence-bound evaluation records, and `claim_events` for audit history. Deferred
+foreign keys let a transaction insert the claim before its accepted revision and
+require valid references at commit. Composite references prevent cross-claim links
+and require event revision/evaluation IDs to match the supplied evidence version;
+revision-only failed-attempt events remain supported.
+
+The partial unique identity index includes undecided (`NULL`), `NEED_INFO`,
+`HUMAN_REVIEW` and `PROCESSABLE` claims; restricted/cancelled rows release the key.
+Undecided claims must have evidence version 1, zero counters, no question and no
+decision reason. NULL is not a sixth employee-facing status. Revision/event history
+is immutable; completed evaluations cannot be updated, deleted or replaced.
+Evaluation claim/evidence associations are fixed from insertion; unfinished rows
+can still receive response/error, completion-time and write-disposition updates.
+Explicit replacement guards also protect history when recursive triggers are off.
+
+Initialization uses `PRAGMA user_version = 1`. Repeated initialization leaves that
+version intact; unknown versions and nonempty unversioned databases are rejected.
+DDL and version assignment share one transaction; complete statements are executed
+individually to avoid `executescript()` committing a pending transaction. There is
+no migration or schema-repair mechanism. Money and line-number projections use text
+without a signed 64-bit limit; date/money validation and encoding remain Python
+responsibilities. Raw JSON storage does not yet implement the evidence encoder.
+
+Slice 1 verification: locked offline Ruff lint/format checks passed; pytest
+collected and passed 298 tests, plus 7 historical subtests. The 100 new database
+cases span 31 test functions, including 21 audit-reference regression cases, using
+temporary files and direct SQL fixtures.
+Separate unittest discovery passed all 26 historical tests; all 19 protected
+archive hashes match. Two-connection tests verify writer exclusion and duplicate
+identity protection. These checks do not establish complete admission, lifecycle,
+retry or allowance correctness. No dependencies, prior modules/tests, historical
+artifacts, specification or diagrams changed. No application database was created.
+
 ### Repository inspection and authoritative design
 
 The authoritative working specification is present at
@@ -378,6 +424,6 @@ inspection used `git -c safe.directory=D:/ProjectsForBlogLearning/expense-approv
 per command, without changing global Git settings. The specification and flowchart
 directory were already untracked before this work. No commit or push was made.
 
-Milestone 3 stops after Slice 5's final verification for independent review. Formal
-closure and Milestone 4 require approval; the README's final application-wide
+Milestone 4 stops after Slice 1's connection/schema foundation for independent
+review. Slice 2 requires explicit authorization; the README's final application-wide
 cleanup is deferred until the application milestones are complete.
