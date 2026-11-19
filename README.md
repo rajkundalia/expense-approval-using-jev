@@ -247,7 +247,7 @@ DDL and version assignment share one transaction; complete statements are execut
 individually to avoid `executescript()` committing a pending transaction. There is
 no migration or schema-repair mechanism. Money and line-number projections use text
 without a signed 64-bit limit; date/money validation and encoding remain Python
-responsibilities. Raw JSON storage does not yet implement the evidence encoder.
+responsibilities. Raw JSON storage is separate from the evidence encoder below.
 
 Slice 1 verification: locked offline Ruff lint/format checks passed; pytest
 collected and passed 298 tests, plus 7 historical subtests. The 100 new database
@@ -258,6 +258,56 @@ archive hashes match. Two-connection tests verify writer exclusion and duplicate
 identity protection. These checks do not establish complete admission, lifecycle,
 retry or allowance correctness. No dependencies, prior modules/tests, historical
 artifacts, specification or diagrams changed. No application database was created.
+
+### Identity normalization and raw evidence (Milestone 4, Slice 2)
+
+`expense_approval/identity.py` exposes `normalize_identity_text(value: str) -> str`.
+Its exact operation is `" ".join(value.split()).casefold()`: collapse Unicode
+whitespace, trim surrounding whitespace, and perform Unicode case folding.
+Punctuation and other distinctions remain; there is no fuzzy matching or merchant
+alias resolution. Non-string inputs raise `TypeError`; blank input may normalize
+to `""`. Structural validation remains the caller's responsibility. Original text
+is unchanged; normalization does not acquire or query duplicate ownership.
+
+`expense_approval/evidence.py` exposes `encode_raw_evidence(value: object) -> str`.
+It returns strict JSON with the envelope `{"format":"raw-evidence","version":1,
+"value":...}`. Each value has an explicit type tag. Exact built-in `None`, boolean,
+string, integer, float, list and dictionary values, plus exact `Decimal` and plain
+`date` values, are supported. Dictionary `entries` preserve insertion order; list
+`items` preserve list order. Field absence stays distinct from explicit values;
+no defaults are inserted, and employee keys cannot collide with encoding metadata.
+
+Integers use exact decimal text, including exceptionally large values, without
+changing interpreter-global settings. Decimal sign, digits and exponent are
+preserved, including trailing zeros, signed zero and special values. Finite floats
+use exact hexadecimal text; infinities have explicit markers, and NaNs retain sign
+and payload bits. Dates have a separate ISO-date tag. Capture performs no claim
+validation, text normalization, rounding or quantization, and does not mutate input.
+
+Unsupported objects/subclasses (including `datetime`), non-string dictionary keys
+and cycles produce `type: "incomplete"` descriptors with a reason and Python type.
+These explicitly identify incomplete capture; they do not reconstruct the omitted
+object or key. Supported surrounding values remain captured. Shared noncyclic
+containers are encoded each time. Arbitrary object `str()`, `repr()` and custom
+serialization methods are not invoked.
+
+Capture raw input before structural parsing applies defaults or transformations;
+do not reconstruct it from `ClaimInput`. Invalid evidence can still be captured:
+for example, a list supplied as an amount remains a list. Encoding does not certify
+validity or accept a revision. Callers supply stable input while encoding; returned
+JSON is detached from later mutations. Unexpected errors, including excessive
+nesting, propagate without partial JSON. Original HTTP bytes, object identity,
+arbitrary-object reconstruction and a decoder are outside this format's scope.
+
+Slice 2 verification: locked offline Ruff lint/format checks passed; pytest
+collected and passed 364 tests, plus 7 historical subtests. New coverage comprises
+21 identity cases and 45 evidence cases, including one temporary SQLite round trip
+using direct SQL for accepted and failed-attempt snapshots. Separate unittest
+discovery passed all 26 historical tests; all 19 protected archive hashes match.
+The four approved source/test files are unchanged during final documentation.
+No dependencies, schema, database helpers, specification, diagrams or historical
+artifacts changed. Claim-admission, duplicate-query, revision/lifecycle and
+evaluation-persistence workflows remain deferred; neither helper writes to SQLite.
 
 ### Repository inspection and authoritative design
 
@@ -424,6 +474,6 @@ inspection used `git -c safe.directory=D:/ProjectsForBlogLearning/expense-approv
 per command, without changing global Git settings. The specification and flowchart
 directory were already untracked before this work. No commit or push was made.
 
-Milestone 4 stops after Slice 1's connection/schema foundation for independent
-review. Slice 2 requires explicit authorization; the README's final application-wide
+Milestone 4 stops after Slice 2's identity/evidence helpers for independent
+review. Slice 3 requires explicit authorization; the README's final application-wide
 cleanup is deferred until the application milestones are complete.
