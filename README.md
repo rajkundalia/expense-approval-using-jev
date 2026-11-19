@@ -166,6 +166,53 @@ collected and passed 195 tests, plus 7 historical subtests. The 19 new cases cov
 all 19 archive hashes match, and `git diff HEAD --check` passes. No dependencies,
 historical experiments, specification or diagrams changed.
 
+### Milestone 3 final verification (Slice 5, 2026-11-19)
+
+The foundation now includes explicit typed settings, the six-category claim
+contract, exact money validation, the injectable India business clock and
+original-submission-based invoice eligibility. The usage notes above describe
+each component; callers connect them directly without an orchestration service:
+
+```python
+from expense_approval.claim_input import ClaimInput
+from expense_approval.clock import business_date
+from expense_approval.validation import validate_invoice_date
+
+# payload is the employee-entered mapping; capture the trusted date once.
+original_submission_date = business_date()
+claim = ClaimInput.model_validate(payload)
+validate_invoice_date(claim.invoice_date, original_submission_date)
+# Later corrections use the retained original_submission_date with the same validator.
+```
+
+Three integration cases now verify complete payload parsing and preservation,
+explicit clock/date validation, later corrections using the original reference,
+and structurally valid claims rejected as too old or after submission. Final checks:
+
+```powershell
+uv sync --locked
+uv run --offline --locked python --version
+uv run --offline --locked ruff check .
+uv run --offline --locked ruff format --check .
+uv run --offline --locked pytest --collect-only -q
+uv run --offline --locked pytest -q
+uv run --offline --locked python -m unittest discover -s experiments -t . -v
+git diff --check
+```
+
+All commands passed: Python 3.12.14; Ruff lint/format clean; 198 pytest cases
+collected and passed (172 application cases, 26 historical tests), plus 7 historical
+subtests; separate unittest discovery passed all 26 experiment tests. All 19
+protected archive hashes match. SDK 0.7.5, dependency declarations and lockfile are
+unchanged, as are production modules, historical artifacts, specification and diagrams.
+
+Settings thresholds remain provisional; loading remains explicit with no automatic
+`.env` loading. Typed inputs do not replace raw audit evidence or verify invoices.
+Endpoints/startup, persistence, duplicate handling, allowances/policy enforcement,
+Jev integration, lifecycle/audit workflows, UI, authentication and deployment remain
+unimplemented. Slice 5 is ready for independent review; formal milestone closure
+and further implementation require approval.
+
 ### Repository inspection and authoritative design
 
 The authoritative working specification is present at
@@ -331,6 +378,6 @@ inspection used `git -c safe.directory=D:/ProjectsForBlogLearning/expense-approv
 per command, without changing global Git settings. The specification and flowchart
 directory were already untracked before this work. No commit or push was made.
 
-Milestone 3 stops after Slice 4's clock and date eligibility for human review. Further
-slices require explicit approval; the README's final application-wide cleanup is
-deferred until the application milestones are complete.
+Milestone 3 stops after Slice 5's final verification for independent review. Formal
+closure and Milestone 4 require approval; the README's final application-wide
+cleanup is deferred until the application milestones are complete.

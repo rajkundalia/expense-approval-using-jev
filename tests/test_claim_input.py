@@ -7,6 +7,8 @@ import pytest
 from pydantic import ValidationError
 
 from expense_approval.claim_input import ClaimInput, ReimbursementCategory
+from expense_approval.clock import business_date
+from expense_approval.validation import validate_invoice_date
 
 
 @pytest.fixture
@@ -283,3 +285,72 @@ def test_failed_validation_does_not_modify_caller_payload(
         ClaimInput.model_validate(claim_payload)
 
     assert claim_payload == original_payload
+
+
+def test_complete_claim_and_later_correction_use_captured_submission_date(
+    claim_payload: dict[str, object],
+) -> None:
+    claim_payload.update(
+        {
+            "merchant_name": "  Example   MERCHANT ",
+            "employee_justification": "\tFor daily RUNNING\n",
+            "invoice_date": "2026-07-31",
+            "invoice_item_amount": "1200.0000",
+        }
+    )
+    original_payload = claim_payload.copy()
+    original_submission_date = business_date(
+        lambda: datetime(2026, 10, 31, 18, 29, tzinfo=timezone.utc)
+    )
+    claim = ClaimInput.model_validate(claim_payload)
+
+    assert original_submission_date == date(2026, 10, 31)
+    assert validate_invoice_date(claim.invoice_date, original_submission_date) is None
+    for field_name, value in original_payload.items():
+        if isinstance(value, str) and field_name not in {
+            "invoice_date",
+            "invoice_item_amount",
+            "requested_reimbursement",
+        }:
+            assert getattr(claim, field_name) == value
+    assert claim.invoice_item_amount.as_tuple() == Decimal("1200.0000").as_tuple()
+    assert claim_payload == original_payload
+
+    revision_date = business_date(
+        lambda: datetime(2027, 3, 15, 12, tzinfo=timezone.utc)
+    )
+    assert revision_date > original_submission_date
+    assert validate_invoice_date(claim.invoice_date, original_submission_date) is None
+
+    corrected_payload = {**original_payload, "invoice_date": "2026-08-01"}
+    corrected_claim = ClaimInput.model_validate(corrected_payload)
+    assert (
+        validate_invoice_date(corrected_claim.invoice_date, original_submission_date)
+        is None
+    )
+    assert claim.invoice_date == date(2026, 7, 31)
+    assert claim_payload == original_payload
+
+
+@pytest.mark.parametrize(
+    ("invoice_date", "error_message"),
+    [
+        ("2026-07-30", "too old"),
+        ("2026-11-01", "after the original submission date"),
+    ],
+)
+def test_complete_claim_can_pass_structure_but_fail_contextual_date_validation(
+    claim_payload: dict[str, object], invoice_date: str, error_message: str
+) -> None:
+    claim_payload["invoice_date"] = invoice_date
+    original_payload = claim_payload.copy()
+    reference_date = business_date(
+        lambda: datetime(2026, 10, 31, 12, tzinfo=timezone.utc)
+    )
+
+    claim = ClaimInput.model_validate(claim_payload)
+
+    with pytest.raises(ValueError, match=error_message):
+        validate_invoice_date(claim.invoice_date, reference_date)
+    assert claim_payload == original_payload
+    assert claim.invoice_date == date.fromisoformat(invoice_date)
