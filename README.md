@@ -15,8 +15,9 @@ The end-to-end reimbursement application is not implemented yet.
 
 Milestone 1 established project scaffolding. Milestone 3 now includes typed
 configuration, structural claim/money validation, and contextual invoice-date
-eligibility (see below). Milestone 4 adds the explicit SQLite connection/schema
-foundation. Endpoints, persistence workflows, policy routing, Jev evaluations and
+eligibility (see below). Milestone 4 adds the SQLite connection/schema foundation,
+initial storage/history reads, and guarded correction/cancellation persistence.
+Complete admission, financial-policy enforcement, Jev evaluations, endpoints and
 UI remain for later slices.
 
 Use `uv` from the repository root (verified with uv 0.10.9):
@@ -359,6 +360,141 @@ corrections, cancellation, evaluation persistence and lifecycle workflows remain
 deferred. The future admission workflow must complete policy checks before
 calling Jev.
 
+### Guarded corrections and cancellation (Milestone 4, Slice 4)
+
+`expense_approval/claim_changes.py` provides internal evidence-change and
+cancellation persistence through `correct_claim()` and `cancel_claim()`. These
+operations preserve history and enforce current-state and invoice-line ownership
+guards; persisted evidence is not complete financial or semantic admission.
+
+Supply a connection from `connect_database()` inside a caller-owned
+`write_transaction()` (`BEGIN IMMEDIATE`). Both functions require an active
+transaction and accept `claim_id`, a canonical UUID4 string `operation_id`,
+`expected_status`, positive integer `expected_evidence_version` and
+`expected_state_version`, and a trusted aware `occurred_at` datetime. Timestamps
+are stored in UTC; booleans are not version integers. The helpers never commit or
+roll back the outer transaction. Every returned outcome, including a rejection,
+is provisional until the caller commits. Outer rollback removes the operation's
+changes, audits and receipt.
+
+`correct_claim()` additionally requires `action_kind="ORDINARY_CORRECTION"` and
+`raw_input`, a complete replacement dictionary of employee evidence. Supply all
+required `ClaimInput` fields, including unchanged fields: there is no patch or
+merge. Omitting optional `invoice_line_number` applies its default `1`, rather
+than retaining the previous line. Keep input stable during capture and validation.
+Raw input is encoded before parsing applies defaults; structural and exact-money
+checks reuse `ClaimInput`. Invoice dates are validated against the stored
+`original_submission_date`, never the correction date. Accepted corrections store
+an `ACCEPTED` revision and a `CLAIM_CORRECTION_ACCEPTED` event, update normalized
+employee/merchant/invoice/line projections, and increment both evidence and state
+versions once. An unchanged-value correction with a new operation ID also creates
+the next accepted version; replay does not.
+
+Ordinary corrections preserve the original submission timestamp/date, existing
+status, reason, outstanding-question pointer and all four counters. Retained
+decision/question context can concern earlier evidence: it is not a fresh decision
+about the new revision, nor acceptance of an answer to that question. The accepted
+event records earlier versions and retained context. Earlier evidence, question
+events and evaluations retain their original associations. Subsequent decision
+reevaluation and question/counter coordination remain deferred. Trusted internal
+callers must identify ordinary corrections explicitly; they must not submit a
+semantic response or a separately counted correction response through this API.
+The helper does not infer response intent from employee text.
+
+`cancel_claim()` permits only matching `NEED_INFO` or `HUMAN_REVIEW` claims. It
+accepts optional `cancellation_reason` as plain text or `None`, sets status to
+`CANCELLED` with reason `CANCELLED_BY_EMPLOYEE`, increments only state version,
+and clears `outstanding_question_event_id`. It creates no revision and preserves
+accepted evidence/version, identity projections, original submission context and
+all counters. Its `CLAIM_CANCELLED` event references the current evidence version
+and records the previous status, reason and question reference plus the optional
+explanation. Clearing the current pointer never deletes historical question events.
+
+After replay lookup, both operations compare expected status, evidence version and
+state version exactly. A mismatch takes precedence over editability and correction
+validation. Only `NEED_INFO` and `HUMAN_REVIEW` are editable/cancellable;
+`POLICY_RESTRICTION`, `CANCELLED`, `PROCESSABLE` and undecided `NULL` are not.
+
+| Outcome | Persistence and effect |
+| --- | --- |
+| `INVALID` correction | Unversioned failed revision and rejection event with structural/date errors; keep accepted evidence and claim state |
+| `DUPLICATE_CONFLICT` correction | Roll back candidate revision/identity changes, then store an unversioned failed revision and rejection event identifying the other blocking claim |
+| `STALE` correction | Unversioned failed revision and rejection event identifying mismatched guards; preserve current claim |
+| `STALE` cancellation | Rejection event only; no revision or claim change |
+| `NOT_EDITABLE` with matching guards | Rejection event only for either action; correction input remains captured in event details; no revision or claim change |
+
+All rejection events use `CLAIM_CHANGE_REJECTED`. No rejection advances evidence
+or state versions or changes counters. Failed revisions have NULL evidence versions,
+and their events leave `evidence_version` NULL to keep composite foreign keys
+coherent. These failures do not produce financial-policy restrictions. Missing
+claims raise `LookupError`; invalid internal arguments and unexpected failures
+raise errors rather than claiming a recorded business outcome.
+
+The existing partial unique index enforces normalized invoice-line ownership on
+the same guarded UPDATE. A same-claim key does not self-conflict; distinct lines
+remain independent. Revision acceptance releases the old key and acquires the new
+key atomically within the serialized write transaction. Only a verified identity
+uniqueness failure with another blocking owner becomes `DUPLICATE_CONFLICT`;
+other integrity errors propagate. Cancellation releases ownership through the
+index's status predicate. Another writer cannot acquire the released key before
+commit, and rollback restores the original ownership. Acquiring a key does not
+reserve allowance.
+
+Local savepoints join mutation and audit persistence. Duplicate handling rolls back
+the candidate mutation before writing its failed-attempt audit. A failed revision,
+claim update or event insertion leaves no partial operation, while ordinary
+operation failures preserve earlier caller work. Lock contention propagates for
+the caller to retry in a fresh transaction. SQLite-wide transaction aborts and
+outer commit failures can roll back the whole caller transaction; original errors
+are preserved rather than masked by savepoint cleanup.
+
+Generate an operation UUID4 once per logical request and reuse it for retries. It
+is used directly as the globally unique event ID. Versioned receipts in event JSON
+support both accepted and rejected operations. An identical request replays its
+original `ChangeResult` before current guards, with `replayed=True`, no additional
+audit and no version increment, even after later claim changes. The result carries
+operation/claim/event IDs, optional revision ID, outcome/reason, recorded resulting
+status/versions and detached `details_json`; replay returns those original values,
+not a fresh current-state snapshot.
+
+Reusing an operation ID for another claim, action, guards, encoded correction
+input or cancellation explanation raises `OperationIdConflict`; unrelated event-ID
+collisions do too. Retry timestamp is excluded from equality, but must still be
+aware. Correction equality is exact encoded equality, including field presence,
+dictionary order and Decimal representation. Malformed or incompatible recognized
+receipts raise `MalformedOperationReceipt`, never a successful replay.
+
+When either correction capture includes incomplete descriptors, matching descriptors
+cannot prove identical requests. With otherwise matching request metadata, replay
+raises `UnverifiableReplayConflict` (an `OperationIdConflict`) even for the same
+unsupported object. The first accepted/rejected outcome and its audit stay intact;
+no duplicate record is appended. Reliable replay requires fully captured inputs;
+no additional serialization framework is used.
+
+These operations do not implement financial allowance enforcement, Jev evaluation
+or orchestration, semantic clarification-response admission, correction/response
+counter updates, initial evaluation recovery, final processing, endpoints or UI.
+Future admission must complete applicable financial and semantic coordination
+before evaluation/processing. Tests seed `PROCESSABLE` rows directly to verify
+preservation of existing state and derived consumed amounts; those fixtures do not
+demonstrate implemented allowance calculation or processing decisions.
+
+Slice 4 final verification (Step 5): locked offline checks passed with Python
+3.12.14 and clean Ruff lint/format checks. The focused `test_claim_changes.py`
+suite passed 245 cases; full pytest passed 650 tests plus 7 historical subtests.
+Separate historical unittest discovery passed all 26 tests. All 19 protected
+archive SHA-256 hashes match, and staged/unstaged Git whitespace checks pass.
+Foreign-key and SQLite integrity assertions pass in the persistence tests.
+Coverage includes deterministic cross-connection ordering, accepted/rejected
+replays, before/after-write failures, caller savepoints, outer commit failure and
+transaction aborts, immutable history and nonempty evaluation associations.
+
+Step 5 changes only this README. The independently reviewed Slice 4 source and
+tests remain unchanged, as do schema, dependencies, specification, flowcharts and
+historical experiments. Existing staged work remains intact. Slice 4 is ready for
+independent documentation/final-verification review; no commit, push or later
+slice is included.
+
 ### Repository inspection and authoritative design
 
 The authoritative working specification is present at
@@ -524,6 +660,7 @@ inspection used `git -c safe.directory=D:/ProjectsForBlogLearning/expense-approv
 per command, without changing global Git settings. The specification and flowchart
 directory were already untracked before this work. No commit or push was made.
 
-Milestone 4 stops after Slice 3's initial storage/history reads for independent
-review. Slice 4 requires explicit authorization; the README's final application-wide
-cleanup is deferred until the application milestones are complete.
+Milestone 4 Phase B stops after Slice 4's persistence implementation, invariant
+verification and README documentation for independent review. Slice 5 is not
+authorized. Application-wide README cleanup remains deferred until the application
+milestones are complete.
