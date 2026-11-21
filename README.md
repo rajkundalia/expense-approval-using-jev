@@ -516,9 +516,51 @@ Step 1 verification has been independently reviewed and approved. Step 2 reconci
 only this README; no additional integration tests were required by the approved
 Slice 5 plan. The persistence capabilities and workflow exclusions are documented
 in Slices 1–4 above; evaluation schema/association protection does not implement
-evaluation-persistence workflows or decision orchestration. Slice 5 documentation
-and formal Milestone 4 closure remain pending independent review; no later step
-is authorized.
+evaluation-persistence workflows or decision orchestration. At that review checkpoint,
+Slice 5 documentation and formal Milestone 4 closure were pending independent review;
+no later step was authorized. Milestone 4 was subsequently formally closed with
+commit `aafc9535b58be492f81b77abaa9f84d159c7111b`.
+
+### Fixed allowance policies and invoice periods (Milestone 5, Slice 1)
+
+`expense_approval/allowance_policy.py` provides deterministic, side-effect-free
+`get_allowance_policy(category)` and `get_allowance_period(category, invoice_date)`.
+`AllowancePolicy` and `AllowancePeriod` are frozen value objects; the fixed policy
+mapping is read-only. Caps are exact INR `Decimal` constants:
+
+| Existing `ReimbursementCategory` | Cap (INR) | Calendar period |
+| --- | --- | --- |
+| `WELLNESS` | 30000 | Annual |
+| `SMARTPHONE` | 100000 | Annual |
+| `BROADBAND` | 3000 | Monthly |
+| `MOBILE_BILL` | 750 | Monthly |
+| `BUSINESS_HOTEL` | `None` (uncapped) | None |
+| `BUSINESS_TRANSPORT` | `None` (uncapped) | None |
+
+Annual period keys contain `kind=ANNUAL`, the invoice year and `month=None`;
+monthly keys contain `kind=MONTHLY`, the invoice year and month. They represent
+the whole calendar year/month, inclusive, using only the supplied invoice date.
+Employee and category remain separate scopes. Uncapped policies have no cap or
+period kind, and period lookup returns `None`; this does not imply reimbursement
+approval. Period selection does not establish invoice-date eligibility.
+
+Both functions require an existing `ReimbursementCategory` enum member, rejecting
+plain category strings. Period lookup accepts `date` objects and their subclasses,
+but rejects `datetime`, date text and other types. Unsupported types raise
+`TypeError`; category validation precedes date validation, including for uncapped
+categories. Lookup reads no clock and performs no database operations.
+
+Slice 1 implementation and Step 3 integration verification have been independently
+reviewed and approved. Locked offline verification passed with Python 3.12.14:
+916 pytest tests plus 7 historical subtests; separate historical unittest discovery
+passed 26 tests. Ruff lint/format passed, existing SQLite foreign-key/integrity
+assertions passed in the persistence tests, and all 19 protected archive hashes
+matched. These results verify the current implementation, not deferred workflows.
+
+Money conversion and financial assessment arithmetic, remaining-allowance
+calculations, SQLite consumption queries, composed claim allowance assessments,
+admission and final processing, financial allowance enforcement and consumption
+recording, Jev orchestration, API endpoints and UI remain deferred.
 
 ### Repository inspection and authoritative design
 
