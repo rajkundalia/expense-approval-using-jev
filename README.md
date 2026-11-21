@@ -557,10 +557,50 @@ passed 26 tests. Ruff lint/format passed, existing SQLite foreign-key/integrity
 assertions passed in the persistence tests, and all 19 protected archive hashes
 matched. These results verify the current implementation, not deferred workflows.
 
-Money conversion and financial assessment arithmetic, remaining-allowance
-calculations, SQLite consumption queries, composed claim allowance assessments,
-admission and final processing, financial allowance enforcement and consumption
-recording, Jev orchestration, API endpoints and UI remain deferred.
+At Slice 1 completion, money conversion and financial assessment arithmetic,
+remaining-allowance calculations, SQLite consumption queries, composed claim
+allowance assessments, admission and final processing, financial allowance
+enforcement and consumption recording, Jev orchestration, API endpoints and UI
+remained deferred.
+
+### Exact financial assessment (Milestone 5, Slice 2)
+
+`expense_approval/allowance_policy.py` now also provides
+`MoneyInput` (`str | Decimal | int`), `AllowanceOutcome`, frozen `AllowanceAssessment`
+and `assess_allowance(category, invoice_date, requested, consumed)`. All four
+arguments are required. Assessment reuses Slice 1's fixed policies and invoice periods and
+accepts caller-supplied consumption; it performs no database operations or state
+changes.
+
+Requested amounts must be finite, positive and exactly representable in paise.
+For capped policies, consumption must be explicit, finite, nonnegative and exactly
+representable in paise.
+Exact integer-paise arithmetic computes remaining allowance as cap minus consumption,
+before the candidate request. The full request is compared with that balance:
+equal or lower returns `WITHIN_ALLOWANCE`; higher returns `EXCEEDS_ALLOWANCE`.
+Requests are never silently reduced, negative balances are never clamped, and no
+rounding is performed. Parsed input values and Decimal representations are preserved;
+derived remaining balances have exactly two decimal places, including negative
+balances and canonical positive zero. Arithmetic does not depend on ambient Decimal
+precision or impose a fixed-width integer limit.
+
+Uncapped categories require `consumed=None` and return `UNCAPPED`, with cap, period,
+consumed and remaining fields all `None`. The result also carries the category and
+validated requested amount. A financial assessment is not reimbursement approval
+or authorization to process a claim.
+
+SQLite consumption queries and employee/category/period consumption attribution,
+claim admission and lifecycle orchestration, financial allowance enforcement,
+allowance reservations or consumption writes, Jev evaluations and decision routing,
+final processing, API endpoints and UI remain deferred. Callers are responsible
+for supplying consumption for the intended employee, category and invoice period.
+
+Slice 2 implementation and Step 3 integration verification have been independently
+reviewed and approved. Locked offline checks passed with Python 3.12.14: 439 focused
+tests; 1,089 full pytest tests plus 7 historical subtests; and 26 separate historical
+unittest tests. Ruff lint/format passed, existing SQLite foreign-key/integrity
+assertions passed in the persistence tests, and all 19 protected archive hashes
+matched. These results establish the approved Slice 2 integration baseline.
 
 ### Repository inspection and authoritative design
 
