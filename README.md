@@ -16,9 +16,10 @@ The end-to-end reimbursement application is not implemented yet.
 Milestone 1 established project scaffolding. Milestone 3 now includes typed
 configuration, structural claim/money validation, and contextual invoice-date
 eligibility (see below). Milestone 4 adds the SQLite connection/schema foundation,
-initial storage/history reads, and guarded correction/cancellation persistence.
-Complete admission, financial-policy enforcement, Jev evaluations, endpoints and
-UI remain for later slices.
+identity normalization, raw evidence capture, initial storage/history reads, and
+guarded ordinary-correction/cancellation persistence. These are internal persistence
+capabilities; complete admission, financial-policy enforcement, Jev evaluation and
+decision orchestration, endpoints and UI remain deferred.
 
 Use `uv` from the repository root (verified with uv 0.10.9):
 
@@ -129,12 +130,12 @@ precision, and retains redundant zeros. Requested reimbursement may be below or
 equal to the item amount; it is never silently adjusted.
 
 Validation leaves the caller's payload unchanged, including after failure. The
-typed model is not a raw audit snapshot; future persistence must preserve the
-original employee-entered evidence separately. A valid model establishes only
-structural validity: three-month eligibility, future-date restrictions and
-original-submission-based correction checks use the separate contextual date
-validator implemented in Slice 4. Duplicate/allowance checks and semantic
-eligibility are not performed here.
+typed model is not a raw audit snapshot; Milestone 4 persistence captures the
+original employee-entered evidence separately before parsing. A valid model
+establishes only structural validity: three-month eligibility, future-date
+restrictions and original-submission-based correction checks use the separate
+contextual date validator implemented in Slice 4. Duplicate/allowance checks and
+semantic eligibility are not performed here.
 
 Slice 3 verification: locked offline Ruff lint/format checks passed; pytest
 collected and passed 176 tests (119 new structural/money cases, 31 configuration
@@ -159,8 +160,9 @@ invoices after the original submission date.
 For an initial submission, capture `business_date()` once and pass that trusted
 date explicitly. For corrections, pass the retained original submission date;
 the correction's date never moves either bound. The validator reads no clock.
-`ClaimInput` retains its structural-only date contract. Persistence and revision
-workflows remain deferred.
+`ClaimInput` retains its structural-only date contract. Milestone 4 initial storage
+and ordinary-correction persistence call this validator; complete admission and
+revision orchestration remain deferred.
 
 Slice 4 verification: locked offline Ruff lint/format checks passed; pytest
 collected and passed 195 tests, plus 7 historical subtests. The 19 new cases cover
@@ -169,6 +171,8 @@ all 19 archive hashes match, and `git diff HEAD --check` passes. No dependencies
 historical experiments, specification or diagrams changed.
 
 ### Milestone 3 final verification (Slice 5, 2026-11-19)
+
+This historical record describes the scope and review status before Milestone 4.
 
 The foundation now includes explicit typed settings, the six-category claim
 contract, exact money validation, the injectable India business clock and
@@ -307,8 +311,9 @@ using direct SQL for accepted and failed-attempt snapshots. Separate unittest
 discovery passed all 26 historical tests; all 19 protected archive hashes match.
 The four approved source/test files are unchanged during final documentation.
 No dependencies, schema, database helpers, specification, diagrams or historical
-artifacts changed. Claim-admission, duplicate-query, revision/lifecycle and
-evaluation-persistence workflows remain deferred; neither helper writes to SQLite.
+artifacts changed. At Slice 2 completion, claim-admission, duplicate-query,
+revision/lifecycle and evaluation-persistence workflows remained deferred; neither
+helper writes to SQLite. Slices 3–4 below add storage and guarded claim changes.
 
 ### Internal initial storage and history reads (Milestone 4, Slice 3)
 
@@ -355,9 +360,10 @@ collected and passed 405 tests, plus 7 historical subtests. Separate unittest
 discovery passed all 26 historical tests; all 19 protected archive hashes match.
 Both approved code/test files are unchanged during final documentation. No schema,
 database helpers, dependencies, specification, diagrams or historical artifacts
-changed. Complete admission orchestration, financial-policy/allowance checks,
-corrections, cancellation, evaluation persistence and lifecycle workflows remain
-deferred. The future admission workflow must complete policy checks before
+changed. At Slice 3 completion, complete admission orchestration, financial-policy/
+allowance checks, corrections, cancellation, evaluation persistence and lifecycle
+workflows remained deferred. Slice 4 below adds ordinary-correction and cancellation
+persistence. The future admission workflow must complete policy checks before
 calling Jev.
 
 ### Guarded corrections and cancellation (Milestone 4, Slice 4)
@@ -494,6 +500,25 @@ tests remain unchanged, as do schema, dependencies, specification, flowcharts an
 historical experiments. Existing staged work remains intact. Slice 4 is ready for
 independent documentation/final-verification review; no commit, push or later
 slice is included.
+
+### Milestone 4 Phase B verification and status (Slice 5)
+
+Slice 5 Step 1 verified committed HEAD
+`d493fd94e4e551f615159ae7241bd98ef559aa8e` using locked offline Python 3.12.14.
+Ruff lint and format checks passed; claim-change tests passed 245 cases; database,
+store, identity and evidence tests passed 207 cases. Full pytest passed 650 tests
+plus 7 historical subtests, and separate historical unittest discovery passed
+26 tests. All 19 protected archive hashes matched; existing SQLite foreign-key
+and integrity assertions and Git whitespace checks passed. All 94 tracked files
+and the Git index were unchanged, with no errors or warnings reported.
+
+Step 1 verification has been independently reviewed and approved. Step 2 reconciles
+only this README; no additional integration tests were required by the approved
+Slice 5 plan. The persistence capabilities and workflow exclusions are documented
+in Slices 1–4 above; evaluation schema/association protection does not implement
+evaluation-persistence workflows or decision orchestration. Slice 5 documentation
+and formal Milestone 4 closure remain pending independent review; no later step
+is authorized.
 
 ### Repository inspection and authoritative design
 
@@ -660,7 +685,8 @@ inspection used `git -c safe.directory=D:/ProjectsForBlogLearning/expense-approv
 per command, without changing global Git settings. The specification and flowchart
 directory were already untracked before this work. No commit or push was made.
 
-Milestone 4 Phase B stops after Slice 4's persistence implementation, invariant
-verification and README documentation for independent review. Slice 5 is not
-authorized. Application-wide README cleanup remains deferred until the application
-milestones are complete.
+Milestone 4 Phase B Slice 5 Step 2 is limited to README reconciliation against the
+committed persistence implementation and approved Step 1 verification. Work stops
+here for independent review; staging, commits, pushes and Step 3 are not authorized.
+Application-wide README cleanup remains deferred until the application milestones
+are complete.
