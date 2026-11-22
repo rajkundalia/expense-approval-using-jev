@@ -602,6 +602,97 @@ unittest tests. Ruff lint/format passed, existing SQLite foreign-key/integrity
 assertions passed in the persistence tests, and all 19 protected archive hashes
 matched. These results establish the approved Slice 2 integration baseline.
 
+### Milestone 5 allowance integration and final verification
+
+Slices 1-4 implement Deterministic Allowance Foundations and are committed at
+`46993e220722acd893cdfa8c04a27448aa3737f6`. The fixed category caps and invoice
+periods are documented in Slice 1 above; exact financial calculations and the
+`WITHIN_ALLOWANCE`, `EXCEEDS_ALLOWANCE` and `UNCAPPED` outcomes are documented in
+Slice 2. This Slice 5 Step 2 documentation and verification checkpoint awaits
+independent review; Milestone 5 is not formally closed. The preceding Slice 2
+deferral statement and the final Milestone 4 stopping-boundary paragraph record
+historical checkpoints, rather than the current availability of Slices 3-4.
+
+**SQLite consumption reader (Slice 3).**
+`expense_approval/allowance_store.py` provides
+`read_consumed_allowance(connection, *, employee_id, category, period) -> Decimal`
+for capped categories. It normalizes employee identity and selects only
+`PROCESSABLE` claims, joining accepted revisions on both claim ID and the current
+evidence version. The current revision supplies category, invoice date and
+requested reimbursement. Inclusive invoice-calendar year/month bounds select the
+period; submission and correction timestamps do not determine consumption.
+Non-current accepted history and rejected attempts do not contribute. Selected
+money is validated and summed exactly as Python integer paise, returning two-place
+INR or `0.00` for no matches. Malformed selected money raises `ValueError` without
+a partial total. Schema-valid references, canonical ISO dates and standard text
+decoding are assumed; the reader is not a database corruption scanner.
+
+**Candidate assessment (Slice 4).**
+`expense_approval/candidate_allowance.py` provides
+`assess_candidate_allowance(connection, *, candidate: ClaimInput) -> AllowanceAssessment`.
+Supply a normally validated `ClaimInput`; validation-bypassing construction or
+updates are outside this contract. The function derives the candidate's policy
+and invoice period, reads capped consumption for its employee/category/period,
+and delegates to `assess_allowance`, returning the existing assessment object.
+Both uncapped categories bypass SQLite and supply `consumed=None`; a correctly
+typed but closed SQLite connection is therefore acceptable for those categories.
+Contextual invoice-date eligibility and selection of current candidate evidence
+remain caller responsibilities. There is no candidate claim ID or exclusion:
+every matching `PROCESSABLE` claim contributes, even one represented by the
+candidate. This function is not an idempotent processing shortcut.
+
+**Transactions and limitations.** The reader and composition are read-only and
+preserve caller ownership of the connection, transaction and savepoints. They
+start no transactions or savepoints, change no connection settings, and perform
+no commits or rollbacks. Capped consumption observes one SELECT snapshot or the
+caller's existing transaction snapshot, including its own visible writes. A WAL
+writer can commit while an established reader snapshot remains active;
+rollback-journal readers can block writer commit. Consumption can become stale,
+and an assessment never approves a claim, reserves allowance or authorizes
+spending. Future final processing must serialize and recheck consumption and the
+applicable state/evidence guards. Extreme monetary values remain resource-bound.
+
+Financial enforcement/admission, allowance reservations or consumption writes,
+claim lifecycle orchestration, Jev judgments and semantic decisions, final
+processing and its idempotency workflow, API endpoints and UI remain deferred.
+No schema extensions/migrations or configurable/employee-specific policies are
+implemented by Milestone 5. The separate approved Milestone 5 Phase A document
+was unavailable locally; it has not been reconstructed.
+
+**Locked offline verification.** Run from the repository root using the existing
+Python 3.12.14 environment. These process-local cache/temp overrides are the
+established sandbox settings; `.tmp` already exists in this workspace.
+
+```powershell
+$env:UV_CACHE_DIR = Join-Path $PWD '.uv-cache'
+$env:TEMP = Join-Path $PWD '.tmp'
+$env:TMP = $env:TEMP
+uv run --offline --locked python --version
+uv run --offline --locked ruff check .
+uv run --offline --locked ruff format --check .
+uv run --offline --locked pytest tests/test_allowance_policy.py tests/test_allowance_store.py tests/test_candidate_allowance.py -q
+uv run --offline --locked pytest -q
+uv run --offline --locked python -m unittest discover -s experiments -t . -v
+```
+
+The reader/composition tests include SQLite foreign-key and integrity assertions;
+the full pytest suite also runs the historical tests and their subtests. Verify
+the 19 protected archive hashes separately using the manifest procedure in
+[experiments/README.md](experiments/README.md#offline-verification). Inspect the
+complete README diff, run `git diff --check` and `git diff --cached --check`, and
+compare the other tracked files and Git index against the pre-edit SHA-256
+baseline. Use the established per-command `safe.directory` override if needed.
+
+Step 2 verification on 2026-11-22 passed with Python 3.12.14: Ruff lint/format;
+588 focused Milestone 5 tests; 1,238 full pytest tests plus 7 historical subtests;
+and 26 separate historical unittest tests. Existing SQLite foreign-key/integrity
+assertions passed, and all 19 protected archive hashes matched. Git whitespace
+checks passed. All 99 tracked files other than README and the Git index remained
+byte-identical to the pre-edit baseline. This step adds only this README section;
+no source, tests, schema, dependencies or historical artifacts changed. No staging,
+commit or push occurred. Documentation review and formal milestone closure remain
+pending independent approval.
+
 ### Repository inspection and authoritative design
 
 The authoritative working specification is present at
