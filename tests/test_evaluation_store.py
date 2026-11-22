@@ -1,13 +1,15 @@
-"""Slice 1 validation and opaque reads; evaluations are direct-SQL fixtures."""
+"""Evaluation creation/replay and reads; completed rows are direct-SQL fixtures."""
 
 import sqlite3
 from datetime import date, datetime, timedelta, timezone, tzinfo
+from uuid import uuid4
 
 import pytest
 
 import expense_approval.evaluation_store as store
 from expense_approval.allowance_policy import get_allowance_period
 from expense_approval.allowance_store import read_consumed_allowance
+from expense_approval.claim_changes import cancel_claim, correct_claim
 from expense_approval.claim_input import ReimbursementCategory
 from expense_approval.claim_store import insert_initial_claim
 from expense_approval.database import (
@@ -556,3 +558,558 @@ def test_closed_connection_errors_propagate(connection):
     ):
         with pytest.raises(sqlite3.ProgrammingError):
             operation()
+
+
+@pytest.fixture
+def creation(history):
+    return {
+        "evaluation_id": "new-evaluation",
+        "claim_id": history[1],
+        "evidence_version": 1,
+        "evaluation_run_id": " opaque run ",
+        "question_kind": "J1",
+        "question_revision": " question-v1 ",
+        "model_version": " model-v1 ",
+        "expected_status": None,
+        "expected_state_version": 1,
+        "started_at": INSTANT,
+        "input_snapshot_json": ' { "item" : "shoes" } ',
+    }
+
+
+def test_create_unfinished_and_preserve_other_tables(
+    connection, creation, database_path
+):
+    before = _snapshot(connection)
+    allowance = _consumed(connection)
+    with connect_database(database_path) as observer:
+        with write_transaction(connection):
+            row = store.create_evaluation(connection, **creation)
+            assert isinstance(row, sqlite3.Row)
+            for key, value in creation.items():
+                assert row[key] == (
+                    "2026-10-31T12:00:00.000000+00:00" if key == "started_at" else value
+                )
+            assert all(
+                row[key] is None
+                for key in (
+                    "completed_at",
+                    "response_json",
+                    "error_json",
+                    "write_disposition",
+                )
+            )
+            assert store.get_evaluation(observer, creation["evaluation_id"]) is None
+            after = _snapshot(connection)
+            assert all(
+                after[table] == before[table]
+                for table in TABLES
+                if table != "evaluations"
+            )
+            assert _consumed(connection) == allowance
+        assert dict(store.get_evaluation(observer, creation["evaluation_id"])) == dict(
+            row
+        )
+
+
+@pytest.mark.parametrize(
+    "field,value,error",
+    [
+        ("evaluation_id", None, TypeError),
+        ("claim_id", "  ", ValueError),
+        ("evidence_version", True, TypeError),
+        ("evidence_version", 0, ValueError),
+        ("evaluation_run_id", "", ValueError),
+        ("question_kind", "J5", ValueError),
+        ("question_revision", 1, TypeError),
+        ("model_version", "", ValueError),
+        ("expected_status", "NEW", ValueError),
+        ("expected_state_version", False, TypeError),
+        ("started_at", INSTANT.replace(tzinfo=None), ValueError),
+        ("input_snapshot_json", '{"a":1,"a":2}', ValueError),
+    ],
+)
+def test_create_argument_validation_precedes_sql(
+    connection, creation, field, value, error
+):
+    with write_transaction(connection):
+        statements = []
+        connection.set_trace_callback(statements.append)
+        try:
+            with pytest.raises(error):
+                store.create_evaluation(connection, **{**creation, field: value})
+            assert statements == []
+        finally:
+            connection.set_trace_callback(None)
+
+
+def test_create_connection_transaction_and_signature_precedence(connection, creation):
+    with pytest.raises(TypeError, match="sqlite3.Connection"):
+        store.create_evaluation(None, **{**creation, "evaluation_id": None})
+    with pytest.raises(ValueError, match="active caller-owned"):
+        store.create_evaluation(connection, **{**creation, "evaluation_id": None})
+    with write_transaction(connection):
+        with pytest.raises(TypeError, match="Evaluation ID"):
+            store.create_evaluation(
+                connection, **{**creation, "evaluation_id": None, "evidence_version": 0}
+            )
+
+
+def test_sqlite_json_check_precedes_identity_lookup(connection, creation):
+    with write_transaction(connection):
+        store.create_evaluation(connection, **creation)
+        statements = []
+        connection.set_trace_callback(statements.append)
+        try:
+            with pytest.raises(ValueError):
+                store.create_evaluation(
+                    connection,
+                    **{
+                        **creation,
+                        "input_snapshot_json": '{"x":'
+                        + "[" * 2000
+                        + "0"
+                        + "]" * 2000
+                        + "}",
+                    },
+                )
+            assert not any("FROM evaluations" in sql for sql in statements)
+        finally:
+            connection.set_trace_callback(None)
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("evidence_version", 2),
+        ("expected_status", "NEED_INFO"),
+        ("expected_state_version", 2),
+    ],
+)
+def test_new_creation_guard_mismatch(connection, creation, field, value):
+    before = _snapshot(connection)
+    with write_transaction(connection):
+        with pytest.raises(store.EvaluationStateConflict):
+            store.create_evaluation(connection, **{**creation, field: value})
+    assert _snapshot(connection) == before
+
+
+def test_missing_claim_and_cross_claim_evidence(connection, creation):
+    with write_transaction(connection):
+        with pytest.raises(LookupError):
+            store.create_evaluation(connection, **{**creation, "claim_id": "missing"})
+        # Version 2 exists only for the other claim; it must not satisfy this one.
+        with pytest.raises(store.EvaluationStateConflict):
+            store.create_evaluation(connection, **{**creation, "evidence_version": 2})
+
+
+def test_missing_current_accepted_revision_is_malformed(connection, creation):
+    with write_transaction(connection):
+        connection.execute(
+            "UPDATE claims SET status='NEED_INFO', current_evidence_version=99 WHERE claim_id=?",
+            (creation["claim_id"],),
+        )
+        with pytest.raises(store.MalformedEvaluationRecord, match="anchor"):
+            store.create_evaluation(connection, **creation)
+        connection.execute(
+            "UPDATE claims SET status=NULL, current_evidence_version=1 WHERE claim_id=?",
+            (creation["claim_id"],),
+        )
+
+
+@pytest.mark.parametrize(
+    "status",
+    [
+        None,
+        "NEED_INFO",
+        "HUMAN_REVIEW",
+        "POLICY_RESTRICTION",
+        "CANCELLED",
+        "PROCESSABLE",
+    ],
+)
+@pytest.mark.parametrize("kind", ["J1", "J2", "J3", "J4"])
+def test_role_and_terminal_anchor_storage(connection, creation, status, kind):
+    with write_transaction(connection):
+        connection.execute(
+            "UPDATE claims SET status=? WHERE claim_id=?",
+            (status, creation["claim_id"]),
+        )
+        request = {**creation, "expected_status": status, "question_kind": kind}
+        if status in ("POLICY_RESTRICTION", "CANCELLED", "PROCESSABLE") and kind in (
+            "J1",
+            "J2",
+        ):
+            with pytest.raises(store.EvaluationStateConflict, match="terminal"):
+                store.create_evaluation(connection, **request)
+        else:
+            assert (
+                store.create_evaluation(connection, **request)["expected_status"]
+                == status
+            )
+
+
+@pytest.mark.parametrize("disposition", [None, "APPLIED", "STALE", "DIAGNOSTIC"])
+@pytest.mark.parametrize("failed", [False, True])
+def test_creation_replay_after_completed_fixture(
+    connection, creation, disposition, failed
+):
+    with write_transaction(connection):
+        store.create_evaluation(connection, **creation)
+        connection.execute(
+            """UPDATE evaluations SET completed_at=?, response_json=?, error_json=?, write_disposition=?
+               WHERE evaluation_id=?""",
+            (
+                "2026-10-31T12:00:01.000000+00:00",
+                None if failed else '{"opaque":true}',
+                '{"code":"TIMEOUT"}' if failed else None,
+                disposition,
+                creation["evaluation_id"],
+            ),
+        )
+        connection.execute(
+            "UPDATE claims SET status='CANCELLED', state_version=2 WHERE claim_id=?",
+            (creation["claim_id"],),
+        )
+        before = _snapshot(connection)
+        changes = connection.total_changes
+        row = store.create_evaluation(connection, **creation)
+        assert row["write_disposition"] == disposition
+        assert row["completed_at"] == "2026-10-31T12:00:01.000000+00:00"
+        assert _snapshot(connection) == before
+        assert connection.total_changes == changes
+
+
+@pytest.mark.parametrize("action", ["correction", "cancellation", "state"])
+def test_creation_replay_after_claim_changes(connection, creation, action):
+    with write_transaction(connection):
+        original = store.create_evaluation(connection, **creation)
+        connection.execute(
+            "UPDATE claims SET status='NEED_INFO', state_version=2 WHERE claim_id=?",
+            (creation["claim_id"],),
+        )
+        common = dict(
+            claim_id=creation["claim_id"],
+            operation_id=str(uuid4()),
+            expected_status="NEED_INFO",
+            expected_evidence_version=1,
+            expected_state_version=2,
+            occurred_at=INSTANT,
+        )
+        if action == "correction":
+            result = correct_claim(
+                connection,
+                **common,
+                action_kind="ORDINARY_CORRECTION",
+                raw_input={
+                    "employee_id": "emp-1",
+                    "merchant_name": "merchant",
+                    "invoice_number": "two",
+                    "invoice_date": "2026-10-01",
+                    "invoice_item_name": "New running shoes",
+                    "invoice_item_amount": "100.00",
+                    "requested_reimbursement": "10.01",
+                    "reimbursement_category": "WELLNESS",
+                    "employee_justification": "For running",
+                },
+            )
+            assert result.outcome == "ACCEPTED"
+        elif action == "cancellation":
+            assert cancel_claim(connection, **common).outcome == "CANCELLED"
+        before = _snapshot(connection)
+        changes = connection.total_changes
+        assert dict(store.create_evaluation(connection, **creation)) == dict(original)
+        assert _snapshot(connection) == before
+        assert connection.total_changes == changes
+        with pytest.raises(store.EvaluationStateConflict):
+            store.create_evaluation(
+                connection, **{**creation, "evaluation_id": "new-attempt"}
+            )
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("claim_id", "other-owner"),
+        ("evidence_version", 2),
+        ("evaluation_run_id", "other-run"),
+        ("question_kind", "J2"),
+        ("question_revision", "q2"),
+        ("model_version", "model2"),
+        ("expected_status", "NEED_INFO"),
+        ("expected_state_version", 2),
+        ("started_at", INSTANT + timedelta(microseconds=1)),
+        ("input_snapshot_json", '{"item":"shoes"}'),
+    ],
+)
+def test_creation_identity_conflicts_before_current_guards(
+    connection, creation, field, value
+):
+    with write_transaction(connection):
+        store.create_evaluation(connection, **creation)
+        connection.execute(
+            "UPDATE claims SET status='CANCELLED', state_version=2 WHERE claim_id=?",
+            (creation["claim_id"],),
+        )
+        before = _snapshot(connection)
+        with pytest.raises(store.EvaluationConflict):
+            store.create_evaluation(connection, **{**creation, field: value})
+        assert _snapshot(connection) == before
+
+
+def test_timestamp_instant_replay_and_run_is_not_unique(connection, creation):
+    with write_transaction(connection):
+        original = store.create_evaluation(connection, **creation)
+        offset = timezone(timedelta(hours=5, minutes=30))
+        assert dict(
+            store.create_evaluation(
+                connection, **{**creation, "started_at": INSTANT.astimezone(offset)}
+            )
+        ) == dict(original)
+        assert (
+            store.create_evaluation(
+                connection, **{**creation, "evaluation_id": "second-id"}
+            )["evaluation_run_id"]
+            == original["evaluation_run_id"]
+        )
+
+
+def test_historical_aware_start_is_compared_by_normalized_instant(connection, creation):
+    with write_transaction(connection):
+        store.create_evaluation(connection, **creation)
+        stored_start = "2026-10-31T17:30:00+05:30"
+        connection.execute(
+            "UPDATE evaluations SET started_at=? WHERE evaluation_id=?",
+            (stored_start, creation["evaluation_id"]),
+        )
+        changes = connection.total_changes
+        assert (
+            store.create_evaluation(connection, **creation)["started_at"]
+            == stored_start
+        )
+        assert connection.total_changes == changes
+
+
+@pytest.mark.parametrize(
+    "assignments",
+    [
+        "model_version=' '",
+        "started_at='not-a-timestamp'",
+        "started_at='2026-10-31T12:00:00'",
+        "input_snapshot_json='[]'",
+        'input_snapshot_json=\'{"x":1,"x":2}\'',
+        "response_json='{}'",
+        'error_json=\'{"code":"TIMEOUT"}\'',
+        "write_disposition='STALE'",
+        "completed_at='2026-10-31T12:00:01+00:00'",
+        "completed_at='2026-10-31T11:00:00+00:00', response_json='{}'",
+        "completed_at='bad', response_json='{}'",
+        "completed_at='2026-10-31T12:00:01+00:00', response_json='{}', error_json='{}'",
+        "completed_at='2026-10-31T12:00:01+00:00', response_json='[]'",
+        "completed_at='2026-10-31T12:00:01+00:00', error_json='{\"code\":\"UNKNOWN\"}'",
+        'completed_at=\'2026-10-31T12:00:01+00:00\', error_json=\'{"code":"TIMEOUT","secret":"token"}\'',
+    ],
+)
+def test_malformed_record_precedes_metadata_conflict_but_not_owner_conflict(
+    connection, creation, assignments
+):
+    with write_transaction(connection):
+        store.create_evaluation(connection, **creation)
+        connection.execute(
+            f"UPDATE evaluations SET {assignments} WHERE evaluation_id=?",
+            (creation["evaluation_id"],),
+        )
+        before = _snapshot(connection)
+        with pytest.raises(store.EvaluationConflict, match="another claim"):
+            store.create_evaluation(connection, **{**creation, "claim_id": "missing"})
+        with pytest.raises(store.MalformedEvaluationRecord) as caught:
+            store.create_evaluation(
+                connection, **{**creation, "evaluation_run_id": "changed"}
+            )
+        assert "token" not in str(caught.value)
+        assert _snapshot(connection) == before
+        assert store.get_evaluation(connection, creation["evaluation_id"]) is not None
+
+
+@pytest.mark.parametrize("failure", ["FAIL", "IGNORE"])
+def test_creation_failure_savepoint_and_transaction_abort(
+    connection, creation, failure
+):
+    with write_transaction(connection):
+        timing = "BEFORE" if failure == "IGNORE" else "AFTER"
+        connection.execute(f"""CREATE TEMP TRIGGER creation_failure {timing} INSERT ON evaluations
+            BEGIN SELECT RAISE({failure}{", 'forced evaluation failure'" if failure != "IGNORE" else ""}); END""")
+    with write_transaction(connection):
+        connection.execute(
+            "UPDATE evaluations SET model_version='caller-work' WHERE evaluation_id='b'"
+        )
+        with pytest.raises(
+            RuntimeError if failure == "IGNORE" else sqlite3.IntegrityError
+        ):
+            store.create_evaluation(connection, **creation)
+        assert store.get_evaluation(connection, creation["evaluation_id"]) is None
+        assert connection.in_transaction
+        assert store.get_evaluation(connection, "b")["model_version"] == "caller-work"
+
+
+def test_creation_sqlite_abort_preserves_original_failure(connection, creation):
+    before = _snapshot(connection)
+    with pytest.raises(sqlite3.IntegrityError, match="forced transaction abort"):
+        with write_transaction(connection):
+            connection.execute(
+                "UPDATE evaluations SET model_version='caller-work' WHERE evaluation_id='b'"
+            )
+            connection.execute("""CREATE TEMP TRIGGER creation_abort AFTER INSERT ON evaluations
+                BEGIN SELECT RAISE(ROLLBACK, 'forced transaction abort'); END""")
+            store.create_evaluation(connection, **creation)
+    assert not connection.in_transaction
+    assert _snapshot(connection) == before
+
+
+@pytest.mark.parametrize("failure", ["readback", "rewritten-row"])
+def test_creation_failure_after_insert_is_atomic(
+    connection, creation, monkeypatch, failure
+):
+    original_get = store.get_evaluation
+    calls = 0
+
+    def failing_get(connection, evaluation_id):
+        nonlocal calls
+        calls += 1
+        if calls == 2:
+            raise sqlite3.OperationalError("forced readback failure")
+        return original_get(connection, evaluation_id)
+
+    with write_transaction(connection):
+        connection.execute(
+            "UPDATE evaluations SET model_version='caller-work' WHERE evaluation_id='b'"
+        )
+        before = _snapshot(connection)
+        if failure == "readback":
+            monkeypatch.setattr(store, "get_evaluation", failing_get)
+        else:
+            connection.execute("""CREATE TEMP TRIGGER rewrite_creation AFTER INSERT ON evaluations
+                BEGIN UPDATE evaluations SET model_version='rewritten' WHERE evaluation_id=NEW.evaluation_id; END""")
+        with pytest.raises(
+            sqlite3.OperationalError if failure == "readback" else RuntimeError
+        ):
+            store.create_evaluation(connection, **creation)
+        assert connection.in_transaction
+        assert _snapshot(connection) == before
+
+
+def test_creation_preserves_connection_settings_and_caller_cursor(connection, creation):
+    def factory(cursor, row):
+        return tuple(row)
+
+    connection.row_factory = factory
+    caller_cursor = connection.cursor()
+    settings = (
+        connection.isolation_level,
+        connection.autocommit,
+        connection.text_factory,
+        connection.execute("PRAGMA foreign_keys").fetchone(),
+    )
+    try:
+        with write_transaction(connection):
+            row = store.create_evaluation(connection, **creation)
+            assert isinstance(row, sqlite3.Row)
+            assert connection.row_factory is factory
+            assert connection.in_transaction
+            assert caller_cursor.execute("SELECT 1").fetchone() == (1,)
+            assert (
+                connection.isolation_level,
+                connection.autocommit,
+                connection.text_factory,
+                connection.execute("PRAGMA foreign_keys").fetchone(),
+            ) == settings
+    finally:
+        caller_cursor.close()
+        connection.row_factory = None
+
+
+def test_creation_respects_caller_savepoint_and_outer_rollback(connection, creation):
+    before = _snapshot(connection)
+    with write_transaction(connection):
+        connection.execute("SAVEPOINT caller_scope")
+        store.create_evaluation(connection, **creation)
+        connection.execute("ROLLBACK TO caller_scope")
+        connection.execute("RELEASE caller_scope")
+        assert _snapshot(connection) == before
+    with pytest.raises(RuntimeError, match="caller rollback"):
+        with write_transaction(connection):
+            store.create_evaluation(connection, **creation)
+            raise RuntimeError("caller rollback")
+    assert _snapshot(connection) == before
+
+
+def test_creation_deferred_commit_failure(connection, creation):
+    before = _snapshot(connection)
+    with pytest.raises(sqlite3.IntegrityError, match="FOREIGN KEY"):
+        with write_transaction(connection):
+            store.create_evaluation(connection, **creation)
+            connection.execute(
+                "UPDATE claims SET status='NEED_INFO', outstanding_question_event_id='missing-event' WHERE claim_id=?",
+                (creation["claim_id"],),
+            )
+    assert not connection.in_transaction
+    assert _snapshot(connection) == before
+
+
+def test_creation_operational_failure_preserves_caller_work(connection, creation):
+    with write_transaction(connection):
+        connection.execute(
+            "UPDATE evaluations SET model_version='caller-work' WHERE evaluation_id='b'"
+        )
+        connection.set_authorizer(
+            lambda action, table, *args: sqlite3.SQLITE_DENY
+            if action == sqlite3.SQLITE_INSERT and table == "evaluations"
+            else sqlite3.SQLITE_OK
+        )
+        try:
+            with pytest.raises(sqlite3.DatabaseError):
+                store.create_evaluation(connection, **creation)
+        finally:
+            connection.set_authorizer(None)
+        assert connection.in_transaction
+        assert store.get_evaluation(connection, "b")["model_version"] == "caller-work"
+        assert store.get_evaluation(connection, creation["evaluation_id"]) is None
+
+
+@pytest.mark.parametrize("commit_first", [True, False])
+@pytest.mark.parametrize("conflicting", [False, True])
+def test_competing_creation_writers_serialize(
+    connection, creation, database_path, commit_first, conflicting
+):
+    with connect_database(database_path) as second:
+        second.execute("PRAGMA busy_timeout=0")
+        connection.execute("BEGIN IMMEDIATE")
+        original = store.create_evaluation(connection, **creation)
+        with pytest.raises(sqlite3.OperationalError, match="locked"):
+            with write_transaction(second):
+                pytest.fail("Second writer must wait for the first transaction.")
+        connection.execute("COMMIT" if commit_first else "ROLLBACK")
+        request = (
+            {**creation, "model_version": "different"} if conflicting else creation
+        )
+        with write_transaction(second):
+            if commit_first and conflicting:
+                with pytest.raises(store.EvaluationConflict):
+                    store.create_evaluation(second, **request)
+            else:
+                result = store.create_evaluation(second, **request)
+                assert result["model_version"] == request["model_version"]
+                if commit_first:
+                    assert dict(result) == dict(original)
+        assert (
+            len(
+                [
+                    row
+                    for row in store.list_claim_evaluations(
+                        second, creation["claim_id"]
+                    )
+                    if row["evaluation_id"] == creation["evaluation_id"]
+                ]
+            )
+            == 1
+        )

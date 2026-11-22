@@ -1,4 +1,4 @@
-"""Evaluation validation foundations and opaque history reads; no write APIs."""
+"""Guarded evaluation creation and opaque history reads; no result persistence."""
 
 import json
 import sqlite3
@@ -18,6 +18,18 @@ _FAILURE_CODES = frozenset(
         "REMOTE_OUTCOME_UNKNOWN",
     }
 )
+
+
+class EvaluationConflict(ValueError):
+    """An evaluation ID already identifies another owner or creation request."""
+
+
+class EvaluationStateConflict(ValueError):
+    """A new evaluation's anchor is stale or its decision role is terminal."""
+
+
+class MalformedEvaluationRecord(ValueError):
+    """Stored metadata or lifecycle data cannot support a safe write/replay."""
 
 
 def _validate_connection(connection: sqlite3.Connection) -> None:
@@ -150,6 +162,217 @@ def _validate_sqlite_json(
         cursor.row_factory = None
         if cursor.execute("SELECT json_valid(?)", (value,)).fetchone()[0] != 1:
             raise ValueError(f"{name} is not compatible with SQLite JSON.")
+
+
+def _stored_timestamp(value: str) -> str:
+    _validate_required_text(value, "Stored timestamp")
+    return _normalize_timestamp(datetime.fromisoformat(value), "Stored timestamp")
+
+
+def _validate_stored_evaluation(row: sqlite3.Row) -> str:
+    """Check replay-critical structure, not provenance or current eligibility.
+
+    Return the normalized stored start for instant comparison. Completed schema
+    dispositions, including APPLIED, are preserved without role/freshness checks.
+    """
+    try:
+        for field in (
+            "evaluation_id",
+            "claim_id",
+            "evaluation_run_id",
+            "question_revision",
+            "model_version",
+        ):
+            _validate_required_text(row[field], "Stored metadata")
+        _validate_positive_version(row["evidence_version"], "Stored evidence version")
+        _validate_positive_version(
+            row["expected_state_version"], "Stored state version"
+        )
+        _validate_question_kind(row["question_kind"])
+        _validate_expected_status(row["expected_status"])
+        started = _stored_timestamp(row["started_at"])
+        _validate_json_object(row["input_snapshot_json"], "Stored input snapshot")
+        response, error = row["response_json"], row["error_json"]
+        disposition = row["write_disposition"]
+        if row["completed_at"] is None:
+            if any(value is not None for value in (response, error, disposition)):
+                raise ValueError
+        else:
+            if _stored_timestamp(row["completed_at"]) < started:
+                raise ValueError
+            if (response is None) == (error is None):
+                raise ValueError
+            if response is not None:
+                _validate_json_object(response, "Stored response")
+            else:
+                _validate_json_object(error, "Stored failure")
+                failure = json.loads(error)
+                if set(failure) != {"code"}:
+                    raise ValueError
+                _validate_failure_code(failure["code"])
+            if disposition is not None and disposition not in (
+                "APPLIED",
+                "STALE",
+                "DIAGNOSTIC",
+            ):
+                raise ValueError
+    except (TypeError, ValueError):
+        raise MalformedEvaluationRecord(
+            "Stored evaluation metadata or lifecycle is malformed."
+        ) from None
+    return started
+
+
+def create_evaluation(
+    connection: sqlite3.Connection,
+    *,
+    evaluation_id: str,
+    claim_id: str,
+    evidence_version: int,
+    evaluation_run_id: str,
+    question_kind: str,
+    question_revision: str,
+    model_version: str,
+    expected_status: str | None,
+    expected_state_version: int,
+    started_at: datetime,
+    input_snapshot_json: str,
+) -> sqlite3.Row:
+    """Capture an unfinished attempt under a current accepted-evidence anchor.
+
+    Use connect_database() within caller-owned write_transaction() (BEGIN
+    IMMEDIATE); returns are provisional until commit. Exact creation replay
+    precedes current guards, including after completion or claim changes. Reuse
+    the original ID, timestamp and exact JSON after a lost acknowledgment.
+
+    Storage does not establish inference eligibility or snapshot provenance.
+    New terminal J1/J2 anchors are rejected; J3/J4 storage admits no model call.
+    No result, disposition, claim change or event is written. No remote execution
+    guarantees, retries, outer transaction control or settings changes are made.
+    """
+    _require_write_transaction(connection)
+    _validate_required_text(evaluation_id, "Evaluation ID")
+    _validate_required_text(claim_id, "Claim ID")
+    _validate_positive_version(evidence_version, "Evidence version")
+    _validate_required_text(evaluation_run_id, "Evaluation run ID")
+    _validate_question_kind(question_kind)
+    _validate_required_text(question_revision, "Question revision")
+    _validate_required_text(model_version, "Model version")
+    _validate_expected_status(expected_status)
+    _validate_positive_version(expected_state_version, "Expected state version")
+    timestamp = _normalize_timestamp(started_at, "Start timestamp")
+    _validate_json_object(input_snapshot_json, "Input snapshot")
+    _validate_sqlite_json(connection, input_snapshot_json, "Input snapshot")
+    metadata = {
+        "evaluation_id": evaluation_id,
+        "claim_id": claim_id,
+        "evidence_version": evidence_version,
+        "evaluation_run_id": evaluation_run_id,
+        "question_kind": question_kind,
+        "question_revision": question_revision,
+        "model_version": model_version,
+        "expected_status": expected_status,
+        "expected_state_version": expected_state_version,
+        "started_at": timestamp,
+        "input_snapshot_json": input_snapshot_json,
+    }
+    existing = get_evaluation(connection, evaluation_id)
+    if existing is not None:
+        if existing["claim_id"] != claim_id:
+            raise EvaluationConflict("Evaluation ID belongs to another claim.")
+        stored_start = _validate_stored_evaluation(existing)
+        if any(
+            (stored_start if key == "started_at" else existing[key]) != value
+            for key, value in metadata.items()
+        ):
+            raise EvaluationConflict(
+                "Evaluation ID identifies different creation metadata."
+            )
+        return existing
+
+    with closing(connection.cursor()) as cursor:
+        cursor.row_factory = sqlite3.Row
+        claim = cursor.execute(
+            """SELECT c.status, c.state_version, c.current_evidence_version,
+                      r.evidence_version AS accepted_evidence_version
+            FROM claims AS c LEFT JOIN claim_revisions AS r
+              ON r.claim_id = c.claim_id
+             AND r.evidence_version = c.current_evidence_version
+             AND r.disposition = 'ACCEPTED'
+            WHERE c.claim_id = ?""",
+            (claim_id,),
+        ).fetchone()
+    if claim is None:
+        raise LookupError("Claim does not exist.")
+    try:
+        _validate_expected_status(claim["status"])
+        _validate_positive_version(claim["state_version"], "Current state version")
+        _validate_positive_version(
+            claim["current_evidence_version"], "Current evidence version"
+        )
+        if claim["accepted_evidence_version"] is None:
+            raise ValueError
+    except (TypeError, ValueError):
+        raise MalformedEvaluationRecord(
+            "Current claim/evidence anchor is malformed."
+        ) from None
+    if (
+        claim["current_evidence_version"] != evidence_version
+        or claim["status"] != expected_status
+        or claim["state_version"] != expected_state_version
+    ):
+        raise EvaluationStateConflict(
+            "Evaluation anchor does not match the current claim."
+        )
+    if question_kind in ("J1", "J2") and claim["status"] in (
+        "POLICY_RESTRICTION",
+        "CANCELLED",
+        "PROCESSABLE",
+    ):
+        raise EvaluationStateConflict(
+            "Decision evaluations cannot start on a terminal claim."
+        )
+
+    connection.execute("SAVEPOINT evaluation_creation")
+    try:
+        connection.execute(
+            """INSERT INTO evaluations (
+                evaluation_id, claim_id, evidence_version, evaluation_run_id,
+                question_kind, question_revision, model_version, expected_status,
+                expected_state_version, started_at, input_snapshot_json,
+                completed_at, response_json, error_json, write_disposition
+            ) VALUES (
+                :evaluation_id, :claim_id, :evidence_version, :evaluation_run_id,
+                :question_kind, :question_revision, :model_version, :expected_status,
+                :expected_state_version, :started_at, :input_snapshot_json,
+                NULL, NULL, NULL, NULL
+            )""",
+            metadata,
+        )
+        persisted = get_evaluation(connection, evaluation_id)
+        if (
+            persisted is None
+            or any(persisted[key] != value for key, value in metadata.items())
+            or any(
+                persisted[key] is not None
+                for key in (
+                    "completed_at",
+                    "response_json",
+                    "error_json",
+                    "write_disposition",
+                )
+            )
+        ):
+            raise RuntimeError(
+                "Evaluation insertion did not preserve the unfinished record."
+            )
+        connection.execute("RELEASE SAVEPOINT evaluation_creation")
+    except BaseException:
+        if connection.in_transaction:
+            connection.execute("ROLLBACK TO SAVEPOINT evaluation_creation")
+            connection.execute("RELEASE SAVEPOINT evaluation_creation")
+        raise
+    return persisted
 
 
 def get_evaluation(
