@@ -11,7 +11,7 @@ from expense_approval.allowance_policy import get_allowance_period
 from expense_approval.allowance_store import read_consumed_allowance
 from expense_approval.claim_changes import cancel_claim, correct_claim
 from expense_approval.claim_input import ReimbursementCategory
-from expense_approval.claim_store import insert_initial_claim
+from expense_approval.claim_store import get_claim, insert_initial_claim
 from expense_approval.database import (
     connect_database,
     initialize_database,
@@ -1705,3 +1705,233 @@ def test_completion_broken_current_evidence_is_not_staleness(connection, unfinis
             "UPDATE claims SET status=NULL, current_evidence_version=1 WHERE claim_id=?",
             (unfinished["claim_id"],),
         )
+
+
+@pytest.mark.parametrize(
+    "action,completion_first",
+    [
+        pytest.param("correction", False, id="correction-before-completion"),
+        pytest.param("cancellation", False, id="cancellation-before-completion"),
+        pytest.param("correction", True, id="completion-before-correction"),
+        pytest.param("cancellation", True, id="completion-before-cancellation"),
+    ],
+)
+def test_completion_and_claim_change_serialize_across_connections(
+    connection, creation, completion, database_path, action, completion_first
+):
+    with write_transaction(connection):
+        connection.execute(
+            "UPDATE claims SET status='NEED_INFO' WHERE claim_id=?",
+            (creation["claim_id"],),
+        )
+        store.create_evaluation(
+            connection,
+            **{**creation, "expected_status": "NEED_INFO", "question_kind": "J3"},
+        )
+    allowance = _consumed(connection)
+    operation_id = str(uuid4())
+
+    def perform(writer, operation):
+        before = _snapshot(writer)
+        claim_before = dict(get_claim(writer, creation["claim_id"]))
+        if operation == "complete":
+            original = dict(store.get_evaluation(writer, creation["evaluation_id"]))
+            result = dict(store.complete_evaluation(writer, **completion))
+            expected = {
+                **original,
+                "completed_at": "2026-10-31T12:00:01.000000+00:00",
+                "response_json": completion["response_json"],
+                "error_json": None,
+                "write_disposition": "DIAGNOSTIC" if completion_first else "STALE",
+            }
+            assert result == expected
+            after = _snapshot(writer)
+            assert all(
+                after[table] == before[table]
+                for table in TABLES
+                if table != "evaluations"
+            )
+            assert len(after["evaluations"]) == len(before["evaluations"])
+            assert [
+                row
+                for row in after["evaluations"]
+                if row[0] != creation["evaluation_id"]
+            ] == [
+                row
+                for row in before["evaluations"]
+                if row[0] != creation["evaluation_id"]
+            ]
+        else:
+            arguments = dict(
+                claim_id=creation["claim_id"],
+                operation_id=operation_id,
+                expected_status="NEED_INFO",
+                expected_evidence_version=1,
+                expected_state_version=1,
+                occurred_at=INSTANT,
+            )
+            if action == "correction":
+                result = correct_claim(
+                    writer,
+                    **arguments,
+                    action_kind="ORDINARY_CORRECTION",
+                    raw_input={
+                        "employee_id": "emp-1",
+                        "merchant_name": "merchant",
+                        "invoice_number": "two",
+                        "invoice_date": "2026-10-01",
+                        "invoice_item_name": "Revised running shoes",
+                        "invoice_item_amount": "100.00",
+                        "requested_reimbursement": "10.01",
+                        "reimbursement_category": "WELLNESS",
+                        "employee_justification": "For running",
+                    },
+                )
+                assert result.outcome == "ACCEPTED"
+                allowed = {
+                    "state_version",
+                    "current_evidence_version",
+                    "current_revision_id",
+                    "current_raw_evidence_json",
+                }
+            else:
+                result = cancel_claim(writer, **arguments)
+                assert result.outcome == "CANCELLED"
+                allowed = {
+                    "status",
+                    "reason_code",
+                    "state_version",
+                    "outstanding_question_event_id",
+                }
+            after = _snapshot(writer)
+            claim_after = dict(get_claim(writer, creation["claim_id"]))
+            assert claim_after["state_version"] == 2
+            assert claim_after["status"] == (
+                "NEED_INFO" if action == "correction" else "CANCELLED"
+            )
+            assert claim_after["current_evidence_version"] == (
+                2 if action == "correction" else 1
+            )
+            assert all(
+                claim_after[key] == value
+                for key, value in claim_before.items()
+                if key not in allowed
+            )
+            assert [
+                row for row in after["claims"] if row[0] != creation["claim_id"]
+            ] == [row for row in before["claims"] if row[0] != creation["claim_id"]]
+            assert after["evaluations"] == before["evaluations"]
+            assert after["claim_events"][:-1] == before["claim_events"]
+            assert after["claim_events"][-1][0] == result.event_id == operation_id
+            if action == "correction":
+                assert after["claim_revisions"][:-1] == before["claim_revisions"]
+                assert after["claim_revisions"][-1][0] == result.revision_id
+            else:
+                assert after["claim_revisions"] == before["claim_revisions"]
+        assert _consumed(writer) == allowance
+        return result
+
+    with connect_database(database_path) as second:
+        second.execute("PRAGMA busy_timeout=0")
+        committed_before = _snapshot(second)
+        first_operation = "complete" if completion_first else "change"
+        with write_transaction(connection):
+            assert connection.in_transaction
+            first_result = perform(connection, first_operation)
+            assert _snapshot(second) == committed_before
+            with pytest.raises(sqlite3.OperationalError, match="locked"):
+                with write_transaction(second):
+                    pytest.fail("The second writer must await the first commit.")
+            assert not second.in_transaction
+        assert not connection.in_transaction
+        with write_transaction(second):
+            second_result = perform(
+                second, "change" if completion_first else "complete"
+            )
+        completed = first_result if completion_first else second_result
+        with write_transaction(second):
+            before = _snapshot(second)
+            changes = second.total_changes
+            assert dict(store.complete_evaluation(second, **completion)) == completed
+            assert _snapshot(second) == before
+            assert second.total_changes == changes
+        assert _snapshot(connection) == _snapshot(second)
+        assert second.execute("PRAGMA foreign_key_check").fetchall() == []
+        assert second.execute("PRAGMA integrity_check").fetchall() == [("ok",)]
+
+
+def test_evaluation_lifecycle_preserves_populated_claim_context(
+    connection, creation, completion
+):
+    question_id = str(uuid4())
+    with write_transaction(connection):
+        connection.execute(
+            """INSERT INTO claim_events (
+                event_id, claim_id, occurred_at, event_kind, evidence_version, details_json
+            ) VALUES (?, ?, ?, 'QUESTION_FIXTURE', 1, '{}')""",
+            (question_id, creation["claim_id"], INSTANT.isoformat()),
+        )
+        connection.execute(
+            """UPDATE claims SET status='NEED_INFO', reason_code='SEMANTIC_CLARIFICATION',
+                uncertain_item_corrections=1, reliable_item_corrections=1,
+                category_corrections=2, semantic_responses=1,
+                outstanding_question_event_id=? WHERE claim_id=?""",
+            (question_id, creation["claim_id"]),
+        )
+    claim = dict(get_claim(connection, creation["claim_id"]))
+    assert tuple(
+        claim[key]
+        for key in (
+            "uncertain_item_corrections",
+            "reliable_item_corrections",
+            "category_corrections",
+            "semantic_responses",
+        )
+    ) == (1, 1, 2, 1)
+    assert claim["status"] == "NEED_INFO"
+    assert claim["state_version"] == claim["current_evidence_version"] == 1
+    assert claim["outstanding_question_event_id"] == question_id
+    assert connection.execute(
+        "SELECT claim_id, evidence_version FROM claim_events WHERE event_id=?",
+        (question_id,),
+    ).fetchone() == (creation["claim_id"], 1)
+    allowance = _consumed(connection)
+    assert allowance > 0
+    assert connection.execute("PRAGMA foreign_key_check").fetchall() == []
+    assert connection.execute("PRAGMA integrity_check").fetchall() == [("ok",)]
+    creation = {**creation, "expected_status": "NEED_INFO", "question_kind": "J3"}
+    with write_transaction(connection):
+        before = _snapshot(connection)
+        created = dict(store.create_evaluation(connection, **creation))
+        after = _snapshot(connection)
+        assert all(
+            after[table] == before[table] for table in TABLES if table != "evaluations"
+        )
+        assert after["evaluations"][:-1] == before["evaluations"]
+        assert after["evaluations"][-1][0] == creation["evaluation_id"]
+        changes = connection.total_changes
+        assert dict(store.create_evaluation(connection, **creation)) == created
+        assert _snapshot(connection) == after
+        assert connection.total_changes == changes
+        completed = dict(store.complete_evaluation(connection, **completion))
+        assert completed == {
+            **created,
+            "completed_at": "2026-10-31T12:00:01.000000+00:00",
+            "response_json": completion["response_json"],
+            "error_json": None,
+            "write_disposition": "DIAGNOSTIC",
+        }
+        final = _snapshot(connection)
+        assert all(
+            final[table] == before[table] for table in TABLES if table != "evaluations"
+        )
+        assert final["evaluations"][:-1] == before["evaluations"]
+        changes = connection.total_changes
+        assert dict(store.complete_evaluation(connection, **completion)) == completed
+        assert _snapshot(connection) == final
+        assert connection.total_changes == changes
+        assert dict(get_claim(connection, creation["claim_id"])) == claim
+        assert _consumed(connection) == allowance
+    assert _snapshot(connection) == final
+    assert dict(get_claim(connection, creation["claim_id"])) == claim
+    assert _consumed(connection) == allowance
