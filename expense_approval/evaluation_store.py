@@ -1,4 +1,4 @@
-"""Guarded evaluation creation and opaque history reads; no result persistence."""
+"""Evidence-bound evaluation capture and replay; no claim-result application."""
 
 import json
 import sqlite3
@@ -21,7 +21,7 @@ _FAILURE_CODES = frozenset(
 
 
 class EvaluationConflict(ValueError):
-    """An evaluation ID already identifies another owner or creation request."""
+    """An evaluation ID identifies another owner, creation or completion request."""
 
 
 class EvaluationStateConflict(ValueError):
@@ -371,6 +371,147 @@ def create_evaluation(
         if connection.in_transaction:
             connection.execute("ROLLBACK TO SAVEPOINT evaluation_creation")
             connection.execute("RELEASE SAVEPOINT evaluation_creation")
+        raise
+    return persisted
+
+
+def complete_evaluation(
+    connection: sqlite3.Connection,
+    *,
+    evaluation_id: str,
+    claim_id: str,
+    completed_at: datetime,
+    response_json: str | None,
+    failure_code: str | None,
+) -> sqlite3.Row:
+    """Immutably capture one response or sanitized technical failure.
+
+    Use connect_database() within caller-owned write_transaction() (BEGIN
+    IMMEDIATE). A local savepoint isolates failures; returned writes remain
+    provisional until outer commit. Never change claims, events or allowance.
+
+    Exact replay returns the original completion/disposition before current-state
+    inspection. Reuse the original completion instant and exact response text or
+    failure code after a lost acknowledgment; do not generate a new timestamp.
+    Persistence idempotency provides no exactly-once remote execution guarantee.
+
+    STALE overrides diagnostic identity when the anchor changed. Current J1/J2
+    use NULL; current J3/J4 use DIAGNOSTIC. Never assign APPLIED. Capturing opaque
+    JSON certifies neither semantic validity nor inference/application eligibility.
+    """
+    _require_write_transaction(connection)
+    _validate_required_text(evaluation_id, "Evaluation ID")
+    _validate_required_text(claim_id, "Claim ID")
+    timestamp = _normalize_timestamp(completed_at, "Completion timestamp")
+    if response_json is not None:
+        _validate_json_object(response_json, "Response")
+    if failure_code is not None:
+        _validate_failure_code(failure_code)
+    if (response_json is None) == (failure_code is None):
+        raise ValueError("Exactly one response or failure code is required.")
+    if response_json is not None:
+        _validate_sqlite_json(connection, response_json, "Response")
+    error_json = (
+        json.dumps({"code": failure_code}, separators=(",", ":"))
+        if failure_code is not None
+        else None
+    )
+    existing = get_evaluation(connection, evaluation_id)
+    if existing is None:
+        raise LookupError("Evaluation does not exist.")
+    if existing["claim_id"] != claim_id:
+        raise EvaluationConflict("Evaluation ID belongs to another claim.")
+    started = _validate_stored_evaluation(existing)
+    if existing["completed_at"] is not None:
+        stored_failure = (
+            json.loads(existing["error_json"])["code"]
+            if existing["error_json"] is not None
+            else None
+        )
+        if (
+            _stored_timestamp(existing["completed_at"]) != timestamp
+            or existing["response_json"] != response_json
+            or stored_failure != failure_code
+        ):
+            raise EvaluationConflict("Evaluation already has a different completion.")
+        return existing
+
+    with closing(connection.cursor()) as cursor:
+        cursor.row_factory = sqlite3.Row
+        claim = cursor.execute(
+            """SELECT c.status, c.state_version, c.current_evidence_version,
+                      r.evidence_version AS accepted_evidence_version
+            FROM claims AS c LEFT JOIN claim_revisions AS r
+              ON r.claim_id = c.claim_id
+             AND r.evidence_version = c.current_evidence_version
+             AND r.disposition = 'ACCEPTED'
+            WHERE c.claim_id = ?""",
+            (claim_id,),
+        ).fetchone()
+    if claim is None:
+        raise LookupError("Claim does not exist.")
+    try:
+        _validate_expected_status(claim["status"])
+        _validate_positive_version(claim["state_version"], "Current state version")
+        _validate_positive_version(
+            claim["current_evidence_version"], "Current evidence version"
+        )
+        if claim["accepted_evidence_version"] is None:
+            raise ValueError
+    except (TypeError, ValueError):
+        raise MalformedEvaluationRecord(
+            "Current claim/evidence anchor is malformed."
+        ) from None
+    if timestamp < started:
+        raise ValueError("Completion timestamp must not precede the evaluation start.")
+    if (
+        existing["evidence_version"] != claim["current_evidence_version"]
+        or existing["expected_status"] != claim["status"]
+        or existing["expected_state_version"] != claim["state_version"]
+    ):
+        disposition = "STALE"
+    else:
+        disposition = (
+            "DIAGNOSTIC" if existing["question_kind"] in ("J3", "J4") else None
+        )
+    expected = dict(existing)
+    expected.update(
+        completed_at=timestamp,
+        response_json=response_json,
+        error_json=error_json,
+        write_disposition=disposition,
+    )
+
+    connection.execute("SAVEPOINT evaluation_completion")
+    try:
+        with closing(connection.cursor()) as cursor:
+            cursor.execute(
+                """UPDATE evaluations SET completed_at=?, response_json=?,
+                    error_json=?, write_disposition=?
+                WHERE evaluation_id=? AND claim_id=? AND completed_at IS NULL""",
+                (
+                    timestamp,
+                    response_json,
+                    error_json,
+                    disposition,
+                    evaluation_id,
+                    claim_id,
+                ),
+            )
+            if cursor.rowcount != 1:
+                raise RuntimeError(
+                    "Evaluation completion did not update one unfinished row."
+                )
+        persisted = get_evaluation(connection, evaluation_id)
+        if persisted is None or dict(persisted) != expected:
+            raise RuntimeError(
+                "Evaluation completion did not preserve the expected record."
+            )
+        connection.execute("RELEASE SAVEPOINT evaluation_completion")
+    except BaseException:
+        if connection.in_transaction:
+            connection.execute("ROLLBACK TO SAVEPOINT evaluation_completion")
+            connection.execute("RELEASE SAVEPOINT evaluation_completion")
         raise
     return persisted
 

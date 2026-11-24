@@ -1,4 +1,4 @@
-"""Evaluation creation/replay and reads; completed rows are direct-SQL fixtures."""
+"""Evaluation capture/replay, opaque reads and caller-owned transactions."""
 
 import sqlite3
 from datetime import date, datetime, timedelta, timezone, tzinfo
@@ -1112,4 +1112,596 @@ def test_competing_creation_writers_serialize(
                 ]
             )
             == 1
+        )
+
+
+@pytest.fixture
+def completion(creation):
+    return {
+        "evaluation_id": creation["evaluation_id"],
+        "claim_id": creation["claim_id"],
+        "completed_at": INSTANT + timedelta(seconds=1),
+        "response_json": ' { "opaque" : true } ',
+        "failure_code": None,
+    }
+
+
+@pytest.fixture
+def unfinished(connection, creation, completion):
+    with write_transaction(connection):
+        store.create_evaluation(connection, **creation)
+    return completion
+
+
+def test_response_completion_preserves_metadata_and_other_data(
+    connection, unfinished, database_path
+):
+    before = _snapshot(connection)
+    original = dict(store.get_evaluation(connection, unfinished["evaluation_id"]))
+    allowance = _consumed(connection)
+    with connect_database(database_path) as observer:
+        with write_transaction(connection):
+            row = store.complete_evaluation(connection, **unfinished)
+            assert isinstance(row, sqlite3.Row)
+            assert row["completed_at"] == "2026-10-31T12:00:01.000000+00:00"
+            assert row["response_json"] == unfinished["response_json"]
+            assert row["error_json"] is row["write_disposition"] is None
+            assert all(
+                row[key] == value
+                for key, value in original.items()
+                if key
+                not in (
+                    "completed_at",
+                    "response_json",
+                    "error_json",
+                    "write_disposition",
+                )
+            )
+            assert (
+                store.get_evaluation(observer, unfinished["evaluation_id"])[
+                    "completed_at"
+                ]
+                is None
+            )
+            after = _snapshot(connection)
+            assert all(
+                after[table] == before[table]
+                for table in TABLES
+                if table != "evaluations"
+            )
+            assert _consumed(connection) == allowance
+        assert dict(
+            store.get_evaluation(observer, unfinished["evaluation_id"])
+        ) == dict(row)
+
+
+@pytest.mark.parametrize(
+    "code",
+    [
+        "TIMEOUT",
+        "CONNECTION_ERROR",
+        "PROVIDER_ERROR",
+        "INVALID_RESPONSE",
+        "REMOTE_OUTCOME_UNKNOWN",
+    ],
+)
+def test_completion_sanitized_failure_codes(connection, unfinished, code):
+    with write_transaction(connection):
+        request = {**unfinished, "response_json": None, "failure_code": code}
+        row = store.complete_evaluation(connection, **request)
+        assert row["response_json"] is None
+        assert row["error_json"] == '{"code":"' + code + '"}'
+        changes = connection.total_changes
+        assert dict(store.complete_evaluation(connection, **request)) == dict(row)
+        assert connection.total_changes == changes
+
+
+@pytest.mark.parametrize("kind", ["J1", "J2", "J3", "J4"])
+@pytest.mark.parametrize("failed", [False, True])
+def test_current_completion_disposition(connection, creation, completion, kind, failed):
+    with write_transaction(connection):
+        store.create_evaluation(connection, **{**creation, "question_kind": kind})
+        if failed:
+            completion = {
+                **completion,
+                "response_json": None,
+                "failure_code": "TIMEOUT",
+            }
+        row = store.complete_evaluation(connection, **completion)
+        assert row["write_disposition"] == (
+            "DIAGNOSTIC" if kind in ("J3", "J4") else None
+        )
+
+
+@pytest.mark.parametrize(
+    "field,value,error",
+    [
+        ("evaluation_id", None, TypeError),
+        ("claim_id", " ", ValueError),
+        ("completed_at", INSTANT.replace(tzinfo=None), ValueError),
+        ("response_json", {}, TypeError),
+        ("response_json", '{"x":1,"x":2}', ValueError),
+        ("failure_code", "secret-provider-error", ValueError),
+        ("failure_code", {}, TypeError),
+    ],
+)
+def test_completion_argument_validation_before_sql(
+    connection, unfinished, field, value, error
+):
+    with write_transaction(connection):
+        statements = []
+        connection.set_trace_callback(statements.append)
+        try:
+            with pytest.raises(error) as caught:
+                store.complete_evaluation(connection, **{**unfinished, field: value})
+            assert "secret-provider-error" not in str(caught.value)
+            assert statements == []
+        finally:
+            connection.set_trace_callback(None)
+
+
+def test_completion_requires_connection_transaction_and_one_channel(
+    connection, unfinished
+):
+    with pytest.raises(TypeError, match="sqlite3.Connection"):
+        store.complete_evaluation(None, **unfinished)
+    with pytest.raises(ValueError, match="active caller-owned"):
+        store.complete_evaluation(connection, **unfinished)
+    with write_transaction(connection):
+        for response, failure in ((None, None), ("{}", "TIMEOUT")):
+            with pytest.raises(ValueError, match="Exactly one"):
+                store.complete_evaluation(
+                    connection,
+                    **{
+                        **unfinished,
+                        "response_json": response,
+                        "failure_code": failure,
+                    },
+                )
+        with pytest.raises(TypeError, match="Evaluation ID"):
+            store.complete_evaluation(
+                connection,
+                **{**unfinished, "evaluation_id": None, "completed_at": None},
+            )
+        with pytest.raises(TypeError):
+            store.complete_evaluation(
+                connection,
+                **{
+                    key: value
+                    for key, value in unfinished.items()
+                    if key != "failure_code"
+                },
+            )
+
+
+def test_completion_json_compatibility_precedes_lookup(connection, unfinished):
+    with write_transaction(connection):
+        statements = []
+        connection.set_trace_callback(statements.append)
+        try:
+            with pytest.raises(ValueError):
+                store.complete_evaluation(
+                    connection,
+                    **{
+                        **unfinished,
+                        "evaluation_id": "missing",
+                        "response_json": '{"x":' + "[" * 2000 + "0" + "]" * 2000 + "}",
+                    },
+                )
+            assert not any("FROM evaluations" in sql for sql in statements)
+        finally:
+            connection.set_trace_callback(None)
+
+
+def test_completion_lookup_owner_and_malformed_precedence(connection, unfinished):
+    with write_transaction(connection):
+        with pytest.raises(LookupError):
+            store.complete_evaluation(
+                connection, **{**unfinished, "evaluation_id": "missing"}
+            )
+        connection.execute(
+            "UPDATE evaluations SET response_json='{}' WHERE evaluation_id=?",
+            (unfinished["evaluation_id"],),
+        )
+        with pytest.raises(store.EvaluationConflict, match="another claim"):
+            store.complete_evaluation(
+                connection, **{**unfinished, "claim_id": "missing"}
+            )
+        with pytest.raises(store.MalformedEvaluationRecord):
+            store.complete_evaluation(connection, **unfinished)
+
+
+def test_completion_start_order_and_utc_replay(connection, unfinished):
+    with write_transaction(connection):
+        before = _snapshot(connection)
+        with pytest.raises(ValueError, match="precede"):
+            store.complete_evaluation(
+                connection,
+                **{**unfinished, "completed_at": INSTANT - timedelta(microseconds=1)},
+            )
+        assert _snapshot(connection) == before
+        request = {**unfinished, "completed_at": INSTANT}
+        row = store.complete_evaluation(connection, **request)
+        changes = connection.total_changes
+        assert dict(
+            store.complete_evaluation(
+                connection,
+                **{
+                    **request,
+                    "completed_at": INSTANT.astimezone(
+                        timezone(timedelta(hours=5, minutes=30))
+                    ),
+                },
+            )
+        ) == dict(row)
+        assert connection.total_changes == changes
+        with pytest.raises(store.EvaluationConflict):
+            store.complete_evaluation(
+                connection,
+                **{**request, "completed_at": INSTANT - timedelta(microseconds=1)},
+            )
+
+
+@pytest.mark.parametrize(
+    "action", ["correction", "cancellation", "state", "processing"]
+)
+@pytest.mark.parametrize("after_completion", [False, True])
+def test_completion_staleness_and_replay_after_claim_changes(
+    connection, creation, completion, action, after_completion
+):
+    with write_transaction(connection):
+        connection.execute(
+            "UPDATE claims SET status='NEED_INFO' WHERE claim_id=?",
+            (creation["claim_id"],),
+        )
+        store.create_evaluation(
+            connection,
+            **{**creation, "question_kind": "J3", "expected_status": "NEED_INFO"},
+        )
+        original = (
+            store.complete_evaluation(connection, **completion)
+            if after_completion
+            else None
+        )
+        common = dict(
+            claim_id=creation["claim_id"],
+            operation_id=str(uuid4()),
+            expected_status="NEED_INFO",
+            expected_evidence_version=1,
+            expected_state_version=1,
+            occurred_at=INSTANT,
+        )
+        if action == "correction":
+            result = correct_claim(
+                connection,
+                **common,
+                action_kind="ORDINARY_CORRECTION",
+                raw_input={
+                    "employee_id": "emp-1",
+                    "merchant_name": "merchant",
+                    "invoice_number": "two",
+                    "invoice_date": "2026-10-01",
+                    "invoice_item_name": "Revised running shoes",
+                    "invoice_item_amount": "100.00",
+                    "requested_reimbursement": "10.01",
+                    "reimbursement_category": "WELLNESS",
+                    "employee_justification": "For running",
+                },
+            )
+            assert result.outcome == "ACCEPTED"
+        elif action == "cancellation":
+            assert cancel_claim(connection, **common).outcome == "CANCELLED"
+        else:
+            connection.execute(
+                "UPDATE claims SET state_version=2, status=? WHERE claim_id=?",
+                (
+                    "PROCESSABLE" if action == "processing" else "NEED_INFO",
+                    creation["claim_id"],
+                ),
+            )
+        before = _snapshot(connection)
+        allowance = _consumed(connection)
+        changes = connection.total_changes
+        row = store.complete_evaluation(connection, **completion)
+        assert row["write_disposition"] == (
+            "DIAGNOSTIC" if after_completion else "STALE"
+        )
+        if after_completion:
+            assert dict(row) == dict(original)
+            assert _snapshot(connection) == before
+            assert connection.total_changes == changes
+        else:
+            after = _snapshot(connection)
+            assert all(
+                after[table] == before[table]
+                for table in TABLES
+                if table != "evaluations"
+            )
+        assert _consumed(connection) == allowance
+
+
+@pytest.mark.parametrize(
+    "change", ["response", "code", "channel", "failure-to-response", "timestamp"]
+)
+def test_conflicting_completion_replay(connection, unfinished, change):
+    with write_transaction(connection):
+        request = (
+            {**unfinished, "response_json": None, "failure_code": "TIMEOUT"}
+            if change in ("code", "failure-to-response")
+            else unfinished
+        )
+        store.complete_evaluation(connection, **request)
+        altered = {
+            "response": {"response_json": '{"opaque":true}'},
+            "code": {"failure_code": "PROVIDER_ERROR"},
+            "channel": {"response_json": None, "failure_code": "TIMEOUT"},
+            "failure-to-response": {"response_json": "{}", "failure_code": None},
+            "timestamp": {
+                "completed_at": request["completed_at"] + timedelta(microseconds=1)
+            },
+        }[change]
+        before = _snapshot(connection)
+        with pytest.raises(store.EvaluationConflict):
+            store.complete_evaluation(connection, **{**request, **altered})
+        assert _snapshot(connection) == before
+
+
+@pytest.mark.parametrize("failed", [False, True])
+def test_applied_historical_completion_replay(connection, unfinished, failed):
+    with write_transaction(connection):
+        connection.execute(
+            """UPDATE evaluations SET completed_at='2026-10-31T17:30:01+05:30',
+            response_json=?, error_json=?, write_disposition='APPLIED' WHERE evaluation_id=?""",
+            (
+                None if failed else unfinished["response_json"],
+                ' { "code" : "TIMEOUT" } ' if failed else None,
+                unfinished["evaluation_id"],
+            ),
+        )
+        connection.execute(
+            "UPDATE claims SET status='CANCELLED', state_version=2 WHERE claim_id=?",
+            (unfinished["claim_id"],),
+        )
+        changes = connection.total_changes
+        row = store.complete_evaluation(
+            connection,
+            **(
+                {**unfinished, "response_json": None, "failure_code": "TIMEOUT"}
+                if failed
+                else unfinished
+            ),
+        )
+        assert row["write_disposition"] == "APPLIED"
+        assert row["completed_at"] == "2026-10-31T17:30:01+05:30"
+        assert connection.total_changes == changes
+
+
+@pytest.mark.parametrize(
+    "assignments",
+    [
+        "completed_at='bad', response_json='{}'",
+        "completed_at='2026-10-31T12:00:01+00:00'",
+        "completed_at='2026-10-31T12:00:01+00:00', response_json='{}', error_json='{}'",
+        "completed_at='2026-10-31T12:00:01+00:00', error_json='{\"code\":\"UNKNOWN\"}'",
+    ],
+)
+def test_malformed_completed_record_before_replay_conflict(
+    connection, unfinished, assignments
+):
+    with write_transaction(connection):
+        connection.execute(
+            f"UPDATE evaluations SET {assignments} WHERE evaluation_id=?",
+            (unfinished["evaluation_id"],),
+        )
+        before = _snapshot(connection)
+        with pytest.raises(store.MalformedEvaluationRecord):
+            store.complete_evaluation(
+                connection, **{**unfinished, "response_json": '{"different":true}'}
+            )
+        assert _snapshot(connection) == before
+
+
+@pytest.mark.parametrize("failure", ["FAIL", "IGNORE", "readback", "ROLLBACK"])
+def test_completion_failure_atomicity(connection, unfinished, monkeypatch, failure):
+    before = _snapshot(connection)
+    original_get = store.get_evaluation
+    calls = 0
+
+    def failing_get(connection, evaluation_id):
+        nonlocal calls
+        calls += 1
+        if calls == 2:
+            raise sqlite3.OperationalError("forced completion readback failure")
+        return original_get(connection, evaluation_id)
+
+    if failure == "readback":
+        monkeypatch.setattr(store, "get_evaluation", failing_get)
+    else:
+        timing = "BEFORE" if failure == "IGNORE" else "AFTER"
+        connection.execute(f"""CREATE TEMP TRIGGER completion_failure {timing} UPDATE ON evaluations
+            WHEN OLD.evaluation_id='new-evaluation'
+            BEGIN SELECT RAISE({failure}{", 'forced completion failure'" if failure != "IGNORE" else ""}); END""")
+    error = (
+        RuntimeError
+        if failure == "IGNORE"
+        else sqlite3.OperationalError
+        if failure == "readback"
+        else sqlite3.IntegrityError
+    )
+    if failure == "ROLLBACK":
+        with pytest.raises(error, match="forced completion failure"):
+            with write_transaction(connection):
+                connection.execute(
+                    "UPDATE evaluations SET model_version='caller-work' WHERE evaluation_id='b'"
+                )
+                store.complete_evaluation(connection, **unfinished)
+        assert not connection.in_transaction
+        assert _snapshot(connection) == before
+    else:
+        with write_transaction(connection):
+            connection.execute(
+                "UPDATE evaluations SET model_version='caller-work' WHERE evaluation_id='b'"
+            )
+            caller_before = _snapshot(connection)
+            with pytest.raises(error):
+                store.complete_evaluation(connection, **unfinished)
+            assert connection.in_transaction
+            assert _snapshot(connection) == caller_before
+
+
+def test_completion_caller_savepoint_and_deferred_commit(connection, unfinished):
+    before = _snapshot(connection)
+    with write_transaction(connection):
+        connection.execute("SAVEPOINT caller_scope")
+        store.complete_evaluation(connection, **unfinished)
+        connection.execute("ROLLBACK TO caller_scope")
+        connection.execute("RELEASE caller_scope")
+        assert _snapshot(connection) == before
+    with pytest.raises(sqlite3.IntegrityError, match="FOREIGN KEY"):
+        with write_transaction(connection):
+            store.complete_evaluation(connection, **unfinished)
+            connection.execute(
+                "UPDATE claims SET status='NEED_INFO', outstanding_question_event_id='missing' WHERE claim_id=?",
+                (unfinished["claim_id"],),
+            )
+    assert not connection.in_transaction
+    assert _snapshot(connection) == before
+
+
+@pytest.mark.parametrize("commit_first", [False, True])
+@pytest.mark.parametrize("conflicting", [False, True])
+def test_competing_completion_writers(
+    connection, unfinished, database_path, commit_first, conflicting
+):
+    with connect_database(database_path) as second:
+        second.execute("PRAGMA busy_timeout=0")
+        connection.execute("BEGIN IMMEDIATE")
+        original = store.complete_evaluation(connection, **unfinished)
+        with pytest.raises(sqlite3.OperationalError, match="locked"):
+            with write_transaction(second):
+                pytest.fail("Second completion writer must wait.")
+        connection.execute("COMMIT" if commit_first else "ROLLBACK")
+        request = (
+            {**unfinished, "response_json": '{"other":true}'}
+            if conflicting
+            else unfinished
+        )
+        with write_transaction(second):
+            if commit_first and conflicting:
+                with pytest.raises(store.EvaluationConflict):
+                    store.complete_evaluation(second, **request)
+            else:
+                row = store.complete_evaluation(second, **request)
+                assert row["response_json"] == request["response_json"]
+                if commit_first:
+                    assert dict(row) == dict(original)
+
+
+def test_completion_immutability_and_settings(connection, unfinished):
+    def factory(cursor, row):
+        return tuple(row)
+
+    connection.row_factory = factory
+    caller_cursor = connection.cursor()
+    settings = (
+        connection.isolation_level,
+        connection.autocommit,
+        connection.text_factory,
+        connection.execute("PRAGMA foreign_keys").fetchone(),
+    )
+    try:
+        with write_transaction(connection):
+            row = store.complete_evaluation(connection, **unfinished)
+            assert isinstance(row, sqlite3.Row)
+            assert connection.row_factory is factory
+            assert caller_cursor.execute("SELECT 1").fetchone() == (1,)
+            assert (
+                connection.isolation_level,
+                connection.autocommit,
+                connection.text_factory,
+                connection.execute("PRAGMA foreign_keys").fetchone(),
+            ) == settings
+            for statement in (
+                "UPDATE evaluations SET completed_at=completed_at WHERE evaluation_id=?",
+                "DELETE FROM evaluations WHERE evaluation_id=?",
+                "INSERT OR REPLACE INTO evaluations SELECT * FROM evaluations WHERE evaluation_id=?",
+            ):
+                with pytest.raises(sqlite3.IntegrityError, match="immutable"):
+                    connection.execute(statement, (unfinished["evaluation_id"],))
+    finally:
+        caller_cursor.close()
+        connection.row_factory = None
+
+
+@pytest.mark.parametrize("dimension", ["evidence", "status", "state"])
+def test_each_anchor_dimension_makes_failure_stale(
+    connection, creation, completion, dimension
+):
+    with write_transaction(connection):
+        connection.execute(
+            "UPDATE claims SET status='NEED_INFO' WHERE claim_id=?",
+            (creation["claim_id"],),
+        )
+        store.create_evaluation(
+            connection,
+            **{**creation, "expected_status": "NEED_INFO", "question_kind": "J4"},
+        )
+        if dimension == "evidence":
+            connection.execute(
+                """INSERT INTO claim_revisions SELECT
+                'completion-v2', claim_id, 2, submitted_at, 'ORDINARY_CORRECTION',
+                disposition, raw_evidence_json, invoice_date, reimbursement_category,
+                invoice_item_amount, requested_reimbursement, validation_details_json
+                FROM claim_revisions WHERE claim_id=?""",
+                (creation["claim_id"],),
+            )
+            connection.execute(
+                "UPDATE claims SET current_evidence_version=2 WHERE claim_id=?",
+                (creation["claim_id"],),
+            )
+        elif dimension == "status":
+            connection.execute(
+                "UPDATE claims SET status='HUMAN_REVIEW' WHERE claim_id=?",
+                (creation["claim_id"],),
+            )
+        else:
+            connection.execute(
+                "UPDATE claims SET state_version=2 WHERE claim_id=?",
+                (creation["claim_id"],),
+            )
+        before = _snapshot(connection)
+        row = store.complete_evaluation(
+            connection,
+            **{
+                **completion,
+                "response_json": None,
+                "failure_code": "REMOTE_OUTCOME_UNKNOWN",
+            },
+        )
+        assert row["write_disposition"] == "STALE"
+        assert row["response_json"] is None
+        assert row["error_json"] == '{"code":"REMOTE_OUTCOME_UNKNOWN"}'
+        after = _snapshot(connection)
+        assert all(
+            after[table] == before[table] for table in TABLES if table != "evaluations"
+        )
+
+
+def test_completion_broken_current_evidence_is_not_staleness(connection, unfinished):
+    with write_transaction(connection):
+        connection.execute(
+            "UPDATE claims SET status='NEED_INFO', current_evidence_version=99 WHERE claim_id=?",
+            (unfinished["claim_id"],),
+        )
+        with pytest.raises(store.MalformedEvaluationRecord, match="anchor"):
+            store.complete_evaluation(connection, **unfinished)
+        assert (
+            store.get_evaluation(connection, unfinished["evaluation_id"])[
+                "completed_at"
+            ]
+            is None
+        )
+        connection.execute(
+            "UPDATE claims SET status=NULL, current_evidence_version=1 WHERE claim_id=?",
+            (unfinished["claim_id"],),
         )
