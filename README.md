@@ -693,6 +693,104 @@ no source, tests, schema, dependencies or historical artifacts changed. No stagi
 commit or push occurred. Documentation review and formal milestone closure remain
 pending independent approval.
 
+### Milestone 6 — Evidence-Bound Evaluation Persistence
+
+Slices 1–4 are implemented, independently reviewed and committed through
+`dfe426112974099ccf493152bfab47e3a6df0442`. Earlier deferrals and planning/review
+checkpoints remain historical records; this section describes the current
+evaluation-persistence contract. This Slice 5 README update awaits independent
+review and is not a committed Slice 5 or formal Milestone 6 closure.
+
+**Interfaces and creation.** `expense_approval/evaluation_store.py` provides
+`create_evaluation()`, `complete_evaluation()`, `get_evaluation()` and
+`list_claim_evaluations()`. Creation binds an attempt to the claim's current
+accepted evidence version, expected status (including NULL) and expected state
+version. Opaque creation metadata and input JSON are preserved and immutable
+through these public APIs. New rows are unfinished: `completed_at`,
+`response_json`, `error_json` and `write_disposition` are all NULL. New J1/J2
+attempts against `POLICY_RESTRICTION`, `CANCELLED` or `PROCESSABLE` are rejected.
+J3/J4 diagnostic storage does not establish inference eligibility or prerequisites.
+
+**Completion.** Supply exactly one result channel: a strict JSON-object response
+or a supported technical-failure code. JSON validation rejects duplicate keys and
+nonstandard numeric constants, requires UTF-8 encodability and SQLite
+compatibility, and preserves accepted text exactly. The five failure codes are
+`TIMEOUT`, `CONNECTION_ERROR`, `PROVIDER_ERROR`, `INVALID_RESPONSE` and
+`REMOTE_OUTCOME_UNKNOWN`. Generated `error_json` contains only the approved code,
+for example `{"code":"TIMEOUT"}`; arbitrary provider messages or exceptions are
+not accepted through this channel. Aware start/completion timestamps normalize to
+UTC with fixed microsecond precision. Completion cannot precede the stored start.
+One atomic update completes an unfinished row; completed records cannot be
+updated, deleted or replaced.
+
+| First completion condition | Stored disposition |
+| --- | --- |
+| Current anchor, J1/J2 | NULL |
+| Current anchor, J3/J4 | `DIAGNOSTIC` |
+| Changed evidence/status/state version | `STALE` |
+
+Staleness takes precedence over diagnostic identity, including after corrections
+or cancellation; the response or sanitized failure is still retained. NULL means
+this capture applied no claim outcome, not that the evaluation can never
+subsequently be referenced. These APIs never assign `APPLIED`; valid historical
+`APPLIED` records remain readable and replayable. Future claim application must
+be separately guarded and audited without updating completed evaluation rows.
+
+**Exact replay.** The globally unique `evaluation_id` is the persistence
+idempotency key. `evaluation_run_id` is correlation metadata, not a uniqueness
+key. Creation replay compares all immutable metadata, normalized start timestamp
+and exact input JSON text. Completion replay compares the result channel, exact
+response text or approved failure code, and normalized completion timestamp.
+After argument and stored-record validation, exact replay returns the existing row
+before current-state checks, even after completion or later claim changes. It
+performs no write and never recomputes the stored disposition. Conflicting reuse
+raises `EvaluationConflict`; stale new creation raises `EvaluationStateConflict`;
+malformed existing lifecycle records raise `MalformedEvaluationRecord`. Missing
+claim/evaluation write targets raise `LookupError`.
+
+Retain the original request, IDs, metadata, JSON and timestamps for reliable
+retry after lost acknowledgments. Evaluation replay includes normalized
+timestamps in its identity, unlike the earlier claim-change replay contract,
+which excludes its retry timestamp. Formatting changes to JSON conflict even
+when the parsed values would be equivalent.
+
+**Transactions and reads.** Supply a connection from `connect_database()` inside
+caller-owned `write_transaction()` (`BEGIN IMMEDIATE`) for evaluation writes.
+Active-transaction validation alone cannot prove the begin mode or foreign-key
+enforcement. Local savepoints isolate ordinary failures and preserve earlier
+caller work; the APIs do not begin, commit or roll back the outer transaction.
+Returned writes remain provisional until outer commit. SQLite transaction aborts
+and deferred commit failures can invalidate provisional writes; original failures
+propagate without cleanup against a transaction SQLite has already ended.
+
+Reads return stored historical rows without reinterpretation or repair.
+`get_evaluation()` returns `sqlite3.Row` or `None`;
+`list_claim_evaluations()` returns a list or `[]`, ordered by
+`started_at, evaluation_id`. `unfinished_only=True` filters
+`completed_at IS NULL`. Reads use cursor-local row factories, close only owned
+cursors, and preserve connection settings and caller transaction ownership.
+
+**Provenance and exclusions.** Input and response snapshots are opaque JSON.
+Validation guarantees syntax and SQLite compatibility, not semantic fidelity or
+correspondence to accepted evidence or actual model requests. Trusted callers
+must avoid storing secrets. Database persistence idempotency is not exactly-once
+remote model execution; no automatic retry/recovery workers exist.
+
+Milestone 6 does not implement Jev SDK/model calls, semantic interpretation or
+routing, financial enforcement, claim-result application, final processing, API
+or UI. Evaluation operations do not change claims, revisions, events, counters,
+question pointers or consumed allowance.
+
+**Reported verification baseline.** Before this README-only step, locked offline
+verification passed with Python 3.12.14: 238 evaluation-store pytest tests;
+1,476 full pytest tests plus 7 historical subtests; 26 historical unittest tests;
+Ruff lint/format; SQLite foreign-key/integrity assertions; and all 19 protected
+archive SHA-256 hashes. For this documentation audit, use the established
+process-local cache/temp settings above, run Ruff checks, substitute
+`pytest tests/test_evaluation_store.py -q` for the focused allowance-suite command,
+and run full pytest, historical unittest, archive and Git preservation checks.
+No source, tests, schema or dependencies are changed by this README addition.
+
 ### Repository inspection and authoritative design
 
 The authoritative working specification is present at
