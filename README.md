@@ -791,6 +791,112 @@ process-local cache/temp settings above, run Ruff checks, substitute
 and run full pytest, historical unittest, archive and Git preservation checks.
 No source, tests, schema or dependencies are changed by this README addition.
 
+### Milestone 7 — Evidence-Bound Semantic Request Construction
+
+Slices 1–2 are implemented, independently reviewed and committed through
+`92ecdcc3cec85414e2aed4277ff0b39499545b88`. This README-only update awaits
+independent review; formal Milestone 7 closure remains separately authorized.
+
+**Interfaces and semantic inputs.** `expense_approval/semantic_requests.py` provides
+`build_semantic_request(connection, *, claim_id, question_kind)`, returning a
+validated `ConstructedRequest` with an `EvidenceAnchor`. J1 classifies category
+identity using only `invoice_item_name` as semantic state; the selected category
+remains local comparison metadata and is retained in the snapshot. J2 assesses
+purpose alignment using `invoice_item_name`, `policy_category` and
+`employee_justification`, in that order, from the same accepted revision.
+Application-owned instructions, criteria and six category policies are fixed;
+employee text remains state data and cannot replace trusted configuration.
+The intended model is `typesafe/jev-1.14-20261014`; question names/revisions are
+`category` / `j1-category-v1` and `purpose_alignment` / `j2-purpose-v1`.
+
+**Evidence acquisition.** One parameterized SELECT reads the caller-visible
+current accepted revision and its claim/revision/evidence/status/state anchor.
+It distinguishes a missing claim from a malformed accepted-revision association.
+Construction owns and closes only its read cursor, uses a cursor-local row
+factory, requires standard `str` text decoding, and preserves caller connection
+settings, cursors, transactions and savepoints. It performs no database writes.
+
+Narrow extraction validates strict version-1 tagged evidence without reconstructing
+arbitrary Python values. The validated accepted category projection is
+authoritative; supported raw category strings must validate and agree with it.
+A well-formed `incomplete` category descriptor with reason `unsupported_type`
+permits using that projection. Its `python_type` is structurally validated,
+never imported, reconstructed or whitelisted. Missing, malformed or contradictory
+category evidence is not repaired. This exception cannot supply item or
+justification text. Malformed required evidence is rejected; well-formed incomplete
+required text, unsupported format versions and unpaired-surrogate required text
+are unsupported. Decoded employee text retains exact Unicode code points, whitespace,
+case, newlines and punctuation, without normalization or redaction.
+
+**Immutable requests and exact snapshots.** `EvidenceAnchor` and
+`ConstructedRequest` are frozen, slotted values. Builder, direct initialization
+and `dataclasses.replace()` share validation of immutable content and the exact
+judgment-specific definitions. `to_request_dict()` returns a fresh detached
+nested dictionary; mutating it cannot change the value or cached snapshot.
+`input_snapshot_json` returns the eagerly generated snapshot text. Valid
+replacement regenerates that cache and leaves the original value unchanged.
+Generated representations suppress field values; explicit access or caller
+logging can still disclose them.
+
+Snapshots use format `jev-evaluation-input`, version `1`, retaining the complete
+semantic request, selected category, question revision and evidence/state anchor.
+Serialization is exactly `json.dumps(snapshot, ensure_ascii=True, allow_nan=False,
+sort_keys=False, separators=(",", ":"))`. Fixed insertion order is:
+
+| Level | Order |
+| --- | --- |
+| Snapshot | `format`, `version`, `anchor`, `selected_category`, `question_kind`, `question_revision`, `request` |
+| Anchor | `claim_id`, `revision_id`, `evidence_version`, `status`, `state_version` |
+| Request | `model`, `state`, `questions` |
+| Choice | `type`, `instructions`, `criteria` |
+
+There is one Choice question. J1 state contains only the item name; its criteria
+order is WELLNESS, SMARTPHONE, BROADBAND, MOBILE_BILL, BUSINESS_HOTEL,
+BUSINESS_TRANSPORT, OTHER, INSUFFICIENT_INFORMATION, MIXED_ITEMS. J2 state order
+is given above; criteria order is SUPPORTED, UNRELATED, UNCLEAR, INCONSISTENT.
+The same visible anchor, required evidence and fixed definitions reproduce exact
+snapshot text. JSON escaping preserves decoded text.
+
+**Corrections and persistence.** Earlier constructed values and completed
+evaluations remain unchanged after correction. Relevant semantic changes alter
+request content; a provenance-only correction may preserve semantic request
+equality while changing the anchor and snapshot text. Fresh current material is
+compatible with existing evaluation persistence. New evaluation creation rejects
+stale anchors; exact historical replay retains Milestone 6 precedence before
+current-state guards. Replay requires the original metadata, normalized timestamp
+and exact JSON text; equivalent JSON with different formatting can conflict.
+The builder itself creates no evaluation.
+
+**Construction is not execution authorization.** Successful construction grants
+no admission, execution eligibility, reservation or processing authority. All five
+statuses and undecided `None` permit offline construction; new terminal J1/J2
+evaluation creation remains prohibited. J2 construction neither looks up J1
+history nor establishes that a reliable matching J1 judgment exists.
+
+Caller-visible evidence may be uncommitted or reflect an older transaction
+snapshot. Construction establishes neither committed durability nor future
+freshness. Projection authority assumes trusted existing persistence; incomplete
+capture cannot recover the original missing representation. Direct construction
+and replacement establish value validity, not database provenance. Local snapshot
+reproducibility does not establish SDK/provider wire-byte equality. Structural
+isolation does not establish model-level prompt-injection resistance, invoice
+verification or semantic accuracy. Employee text remains unredacted.
+
+**Deferred responsibilities.** Financial admission and allowance-enforcement
+orchestration; J1 execution prerequisites and result reuse; SDK/provider invocation;
+J3/J4 construction; response interpretation and confidence/margin gating;
+evaluation orchestration and production evaluation writes; claim-outcome
+application; retry/recovery and clarification orchestration; and FastAPI/UI
+integration remain deferred. Milestone 7 introduces no schema, dependency or
+configuration changes.
+
+**Fresh verification (2026-11-28).** Locked offline checks passed with Python
+3.12.14: 355 focused semantic-request pytest tests; 1,831 full pytest tests plus
+7 historical subtests; 26 historical unittest tests; Ruff lint and formatting
+(29 eligible files); existing SQLite foreign-key/integrity assertions in isolated
+fixtures; and all 19 protected archive SHA-256 hashes. Each verification command
+exited 0. No live model evaluation was performed.
+
 ### Repository inspection and authoritative design
 
 The authoritative working specification is present at
